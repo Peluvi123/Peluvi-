@@ -1,4 +1,12 @@
 .portal-body {
+  --bg: #f7f6fb;
+  --panel: #ffffff;
+  --panel-strong: #ffffff;
+  --line: #e5e1f0;
+  --text: #1c1330;
+  --muted: #6c6480;
+  --soft: #f1edfa;
+
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
@@ -74,6 +82,7 @@
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 32px;
+  box-shadow: 0 8px 30px rgba(50, 30, 90, 0.08);
 }
 
 .portal-login-card h1 {
@@ -98,7 +107,7 @@
 }
 
 .portal-field input {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--soft);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 11px 14px;
@@ -131,13 +140,13 @@
 }
 
 .portal-error {
-  color: #ff8fa3;
+  color: #d1264f;
   font-size: 13px;
   font-weight: 600;
 }
 
 .portal-success {
-  color: #8fffb0;
+  color: #1f9d55;
   font-size: 13px;
   font-weight: 600;
 }
@@ -168,8 +177,8 @@
 }
 
 .portal-tab.is-active {
-  color: var(--text);
-  background: var(--panel);
+  color: var(--purple);
+  background: var(--soft);
 }
 
 .portal-panel-head h2 {
@@ -205,6 +214,7 @@
   gap: 14px;
   align-items: center;
   flex-wrap: wrap;
+  box-shadow: 0 4px 16px rgba(50, 30, 90, 0.06);
 }
 
 .portal-card img {
@@ -235,7 +245,7 @@
 .portal-status {
   padding: 7px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--soft);
   border: 1px solid var(--line);
   color: var(--text);
   font-size: 13px;
@@ -254,6 +264,7 @@
   border-radius: 16px;
   padding: 16px;
   text-align: center;
+  box-shadow: 0 4px 16px rgba(50, 30, 90, 0.06);
 }
 
 .portal-patient-card img {
