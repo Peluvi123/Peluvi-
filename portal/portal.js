@@ -24,6 +24,8 @@ const dashboardSub = document.getElementById("dashboard-sub");
 
 const citasList = document.getElementById("citas-list");
 const citasEmpty = document.getElementById("citas-empty");
+const citasPendingSection = document.getElementById("citas-pending-section");
+const citasPendingList = document.getElementById("citas-pending-list");
 const pacientesList = document.getElementById("pacientes-list");
 const pacientesEmpty = document.getElementById("pacientes-empty");
 
@@ -321,35 +323,99 @@ calClearBtn.addEventListener("click", () => {
   renderCitas(filterAppointments());
 });
 
+function refreshCitasViews() {
+  renderCalendar();
+  renderCitas(filterAppointments());
+  renderPendingCitas();
+}
+
+function buildAppointmentCard(apt) {
+  const card = document.createElement("div");
+  card.className = "portal-card";
+  card.innerHTML = `
+    <img src="${apt.pet_image || ""}" alt="" onerror="this.style.visibility='hidden'" />
+    <div class="portal-card-body">
+      <strong>${apt.pet_name || "Mascota"} · ${apt.pet_breed || ""}</strong>
+      <span>${apt.service || ""} — ${apt.date || ""} ${apt.time || ""}</span>
+    </div>
+  `;
+
+  const actions = document.createElement("div");
+  actions.className = "portal-card-actions";
+
+  if (apt.status === "pending") {
+    const approveBtn = document.createElement("button");
+    approveBtn.type = "button";
+    approveBtn.className = "portal-approve-btn";
+    approveBtn.textContent = "Aprobar";
+    approveBtn.addEventListener("click", async () => {
+      await supabase.from("appointments").update({ status: "confirmed" }).eq("id", apt.id);
+      apt.status = "confirmed";
+      refreshCitasViews();
+    });
+    actions.appendChild(approveBtn);
+  }
+
+  const select = document.createElement("select");
+  select.className = "portal-status";
+  Object.entries(STATUS_LABELS).forEach(([value, label]) => {
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = label;
+    if (value === apt.status) opt.selected = true;
+    select.appendChild(opt);
+  });
+  select.addEventListener("change", async () => {
+    await supabase.from("appointments").update({ status: select.value }).eq("id", apt.id);
+    apt.status = select.value;
+    refreshCitasViews();
+  });
+  actions.appendChild(select);
+
+  const rescheduleToggle = document.createElement("button");
+  rescheduleToggle.type = "button";
+  rescheduleToggle.className = "portal-reschedule-toggle";
+  rescheduleToggle.textContent = "Reprogramar";
+  actions.appendChild(rescheduleToggle);
+
+  card.appendChild(actions);
+
+  const rescheduleForm = document.createElement("div");
+  rescheduleForm.className = "portal-reschedule-form";
+  rescheduleForm.hidden = true;
+  rescheduleForm.innerHTML = `
+    <input type="date" class="reschedule-date" value="${apt.date || ""}" />
+    <input type="text" class="reschedule-time" value="${apt.time || ""}" placeholder="Hora, ej. 10:00 AM" />
+    <button type="button" class="portal-reschedule-save">Guardar cambios</button>
+  `;
+  rescheduleToggle.addEventListener("click", () => {
+    rescheduleForm.hidden = !rescheduleForm.hidden;
+  });
+  rescheduleForm.querySelector(".portal-reschedule-save").addEventListener("click", async () => {
+    const newDate = rescheduleForm.querySelector(".reschedule-date").value;
+    const newTime = rescheduleForm.querySelector(".reschedule-time").value.trim();
+    if (!newDate || !newTime) return;
+    await supabase.from("appointments").update({ date: newDate, time: newTime }).eq("id", apt.id);
+    apt.date = newDate;
+    apt.time = newTime;
+    refreshCitasViews();
+  });
+  card.appendChild(rescheduleForm);
+
+  return card;
+}
+
 function renderCitas(appointments) {
   citasList.innerHTML = "";
   citasEmpty.hidden = appointments.length > 0;
+  appointments.forEach((apt) => citasList.appendChild(buildAppointmentCard(apt)));
+}
 
-  appointments.forEach((apt) => {
-    const card = document.createElement("div");
-    card.className = "portal-card";
-    card.innerHTML = `
-      <img src="${apt.pet_image || ""}" alt="" onerror="this.style.visibility='hidden'" />
-      <div class="portal-card-body">
-        <strong>${apt.pet_name || "Mascota"} · ${apt.pet_breed || ""}</strong>
-        <span>${apt.service || ""} — ${apt.date || ""} ${apt.time || ""}</span>
-      </div>
-    `;
-    const select = document.createElement("select");
-    select.className = "portal-status";
-    Object.entries(STATUS_LABELS).forEach(([value, label]) => {
-      const opt = document.createElement("option");
-      opt.value = value;
-      opt.textContent = label;
-      if (value === apt.status) opt.selected = true;
-      select.appendChild(opt);
-    });
-    select.addEventListener("change", async () => {
-      await supabase.from("appointments").update({ status: select.value }).eq("id", apt.id);
-    });
-    card.appendChild(select);
-    citasList.appendChild(card);
-  });
+function renderPendingCitas() {
+  const pending = allAppointments.filter((a) => a.status === "pending");
+  citasPendingSection.hidden = pending.length === 0;
+  citasPendingList.innerHTML = "";
+  pending.forEach((apt) => citasPendingList.appendChild(buildAppointmentCard(apt)));
 }
 
 function renderPacientes(appointments) {
@@ -656,6 +722,7 @@ async function loadTabData({ session }) {
   }
   renderCalendar();
   renderCitas(filterAppointments());
+  renderPendingCitas();
   renderPacientes(allAppointments);
 }
 
