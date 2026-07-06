@@ -715,13 +715,11 @@ function buildPrescriptionHTML(rx, apt) {
   const meds = (rx.medications || [])
     .map(
       (m) => `
-      <tr>
-        <td>${m.name || ""}</td>
-        <td>${m.dose || ""}</td>
-        <td>${m.frequency || ""}</td>
-        <td>${m.duration || ""}</td>
-        <td>${m.instructions || ""}</td>
-      </tr>`
+      <div class="med">
+        <div class="med-name">${m.name || ""}${m.dose ? ` — ${m.dose}` : ""}</div>
+        <div class="med-detail">${[m.frequency, m.duration].filter(Boolean).join(" · ")}</div>
+        ${m.instructions ? `<div class="med-instructions">${m.instructions}</div>` : ""}
+      </div>`
     )
     .join("");
   const date = rx.created_at ? new Date(rx.created_at).toLocaleDateString("es-CO") : "";
@@ -733,23 +731,37 @@ function buildPrescriptionHTML(rx, apt) {
       <meta charset="UTF-8" />
       <title>Orden médica — ${apt.pet_name || ""}</title>
       <style>
-        body { font-family: -apple-system, Arial, sans-serif; padding: 40px; color: #1c1330; }
-        h1 { margin: 0 0 2px; font-size: 22px; }
-        .muted { color: #6c6480; font-size: 13px; margin: 0 0 20px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 24px; font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-        th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e5e1f0; font-size: 13px; }
-        th { color: #6c6480; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px; }
-        .notes { margin-bottom: 40px; }
-        .notes h3 { font-size: 13px; margin-bottom: 6px; }
-        .sign { margin-top: 60px; }
-        .sign-line { border-top: 1px solid #1c1330; width: 260px; padding-top: 6px; font-size: 12px; color: #6c6480; }
-        .print-bar { margin-bottom: 24px; }
+        @page { size: 5.5in 8.5in; margin: 0.35in; }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; }
+        body {
+          font-family: -apple-system, Arial, sans-serif;
+          color: #1c1330;
+          width: 5.5in;
+          max-width: 100%;
+          margin: 0 auto;
+          padding: 24px;
+        }
+        h1 { margin: 0 0 2px; font-size: 18px; }
+        .muted { color: #6c6480; font-size: 11px; margin: 0 0 14px; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 12px; gap: 8px; flex-wrap: wrap; }
+        .section-label {
+          font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+          color: #6c6480; margin: 18px 0 6px; border-bottom: 1px solid #e5e1f0; padding-bottom: 4px;
+        }
+        .med { padding: 8px 0; border-bottom: 1px dashed #e5e1f0; font-size: 13px; }
+        .med-name { font-weight: 700; }
+        .med-detail { color: #6c6480; font-size: 11px; margin-top: 1px; }
+        .med-instructions { font-style: italic; font-size: 11px; margin-top: 2px; }
+        .free-text { font-size: 12px; white-space: pre-wrap; }
+        .sign { margin-top: 50px; }
+        .sign-line { border-top: 1px solid #1c1330; width: 220px; padding-top: 6px; font-size: 11px; color: #6c6480; }
+        .print-bar { margin-bottom: 20px; }
         .print-bar button {
           background: linear-gradient(135deg, #6d38ee, #9c56ff); border: none; color: #fff;
           font-weight: 700; font-size: 13px; padding: 8px 18px; border-radius: 999px; cursor: pointer;
         }
-        @media print { body { padding: 0; } .no-print { display: none; } }
+        @media print { .no-print { display: none; } }
       </style>
     </head>
     <body>
@@ -762,13 +774,13 @@ function buildPrescriptionHTML(rx, apt) {
         <span><strong>Paciente:</strong> ${apt.pet_name || ""} (${apt.pet_breed || ""})</span>
         <span><strong>Fecha:</strong> ${date}</span>
       </div>
-      <table>
-        <thead>
-          <tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th><th>Duración</th><th>Indicaciones</th></tr>
-        </thead>
-        <tbody>${meds}</tbody>
-      </table>
-      ${rx.notes ? `<div class="notes"><h3>Exámenes solicitados / notas</h3><p>${rx.notes}</p></div>` : ""}
+
+      <div class="section-label">Medicamentos</div>
+      ${meds}
+
+      ${rx.notes ? `<div class="section-label">Exámenes solicitados</div><p class="free-text">${rx.notes}</p>` : ""}
+      ${rx.recommendations ? `<div class="section-label">Recomendaciones</div><p class="free-text">${rx.recommendations}</p>` : ""}
+
       <div class="sign">
         <div class="sign-line">Firma del veterinario</div>
       </div>
@@ -808,7 +820,10 @@ function renderRxList(container, prescriptions, apt) {
       .join("");
     const date = rx.created_at ? new Date(rx.created_at).toLocaleDateString("es-CO") : "";
     const notesHtml = rx.notes ? `<div class="portal-rx-med"><span>🧪 ${rx.notes}</span></div>` : "";
-    card.innerHTML = `<span class="portal-rx-date">${date}</span>${meds}${notesHtml}`;
+    const recommendationsHtml = rx.recommendations
+      ? `<div class="portal-rx-med"><span>📋 ${rx.recommendations}</span></div>`
+      : "";
+    card.innerHTML = `<span class="portal-rx-date">${date}</span>${meds}${notesHtml}${recommendationsHtml}`;
 
     const actions = document.createElement("div");
     actions.className = "portal-rx-card-actions";
@@ -863,8 +878,14 @@ function createRxSection(apt) {
   const notesInput = document.createElement("textarea");
   notesInput.className = "rx-notes";
   notesInput.rows = 2;
-  notesInput.placeholder = "Exámenes solicitados / notas (opcional)";
+  notesInput.placeholder = "Exámenes solicitados (opcional)";
   form.appendChild(notesInput);
+
+  const recommendationsInput = document.createElement("textarea");
+  recommendationsInput.className = "rx-notes";
+  recommendationsInput.rows = 2;
+  recommendationsInput.placeholder = "Recomendaciones (reposo, dieta, cuidados en casa...)";
+  form.appendChild(recommendationsInput);
 
   const saveBtn = document.createElement("button");
   saveBtn.type = "button";
@@ -898,7 +919,13 @@ function createRxSection(apt) {
 
     const { data: inserted } = await supabase
       .from("prescriptions")
-      .insert({ appointment_id: apt.id, vet_id: currentVetId, medications, notes: notesInput.value.trim() || null })
+      .insert({
+        appointment_id: apt.id,
+        vet_id: currentVetId,
+        medications,
+        notes: notesInput.value.trim() || null,
+        recommendations: recommendationsInput.value.trim() || null,
+      })
       .select()
       .single();
 
@@ -908,6 +935,7 @@ function createRxSection(apt) {
       rows.innerHTML = "";
       createMedicationRow(rows);
       notesInput.value = "";
+      recommendationsInput.value = "";
       form.hidden = true;
     }
   });
