@@ -311,6 +311,80 @@ loginForm.addEventListener("submit", async (e) => {
   if (ctx) loadTabData(ctx);
 });
 
+const signupForm = document.getElementById("signup-form");
+const signupSubmit = document.getElementById("signup-submit");
+const signupError = document.getElementById("signup-error");
+const authToggle = document.getElementById("auth-toggle");
+const authTitle = document.getElementById("auth-title");
+const authSubtitle = document.getElementById("auth-subtitle");
+
+let showingSignup = false;
+authToggle.addEventListener("click", () => {
+  showingSignup = !showingSignup;
+  loginForm.hidden = showingSignup;
+  signupForm.hidden = !showingSignup;
+  authTitle.textContent = showingSignup ? "Crea tu cuenta de veterinaria" : "Portal de veterinarias";
+  authSubtitle.textContent = showingSignup
+    ? "Regístrate para empezar a gestionar tus citas en Peluvi."
+    : "Ingresa con la cuenta de tu clínica para gestionar tus citas.";
+  authToggle.textContent = showingSignup ? "¿Ya tienes cuenta? Ingresa aquí" : "¿Eres veterinaria? Crea tu cuenta";
+  loginError.hidden = true;
+  signupError.hidden = true;
+});
+
+signupForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  signupError.hidden = true;
+  signupSubmit.disabled = true;
+  signupSubmit.textContent = "Creando cuenta...";
+
+  const businessName = document.getElementById("signup-business-name").value.trim();
+  const email = document.getElementById("signup-email").value.trim();
+  const password = document.getElementById("signup-password").value;
+  const address = document.getElementById("signup-address").value.trim();
+  const phone = document.getElementById("signup-phone").value.trim();
+  const city = document.getElementById("signup-city").value.trim();
+
+  const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({ email, password });
+
+  if (signUpErr || !signUpData.session) {
+    signupError.textContent = signUpErr
+      ? signUpErr.message
+      : "No se pudo iniciar sesión automáticamente. Intenta ingresar manualmente.";
+    signupError.hidden = false;
+    signupSubmit.disabled = false;
+    signupSubmit.textContent = "Crear cuenta";
+    return;
+  }
+
+  const userId = signUpData.user.id;
+  const { error: profileErr } = await supabase.from("profiles").insert({
+    id: userId,
+    name: businessName,
+    role: "provider",
+    provider_type: "vet",
+    business_name: businessName,
+    address,
+    phone,
+    city,
+  });
+
+  if (profileErr) {
+    signupError.textContent = "Cuenta creada, pero hubo un error guardando tu perfil: " + profileErr.message;
+    signupError.hidden = false;
+    signupSubmit.disabled = false;
+    signupSubmit.textContent = "Crear cuenta";
+    return;
+  }
+
+  await supabase.from("vet_profiles").insert({ id: userId });
+
+  signupSubmit.disabled = false;
+  signupSubmit.textContent = "Crear cuenta";
+  const ctx = await requireProviderSession();
+  if (ctx) loadTabData(ctx);
+});
+
 logoutBtn.addEventListener("click", async () => {
   await supabase.auth.signOut();
   showLogin();

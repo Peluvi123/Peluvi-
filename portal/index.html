@@ -28,8 +28,8 @@
         <!-- Login -->
         <section class="portal-login" id="login-view">
           <div class="portal-login-card">
-            <h1>Portal de veterinarias</h1>
-            <p class="portal-muted">Ingresa con la cuenta de tu clínica para gestionar tus citas.</p>
+            <h1 id="auth-title">Portal de veterinarias</h1>
+            <p class="portal-muted" id="auth-subtitle">Ingresa con la cuenta de tu clínica para gestionar tus citas.</p>
             <form id="login-form">
               <label class="portal-field">
                 <span>Correo</span>
@@ -42,6 +42,37 @@
               <button type="submit" id="login-submit">Ingresar</button>
               <p class="portal-error" id="login-error" hidden></p>
             </form>
+
+            <form id="signup-form" hidden>
+              <label class="portal-field">
+                <span>Nombre del negocio</span>
+                <input type="text" id="signup-business-name" required />
+              </label>
+              <label class="portal-field">
+                <span>Correo</span>
+                <input type="email" id="signup-email" required autocomplete="username" />
+              </label>
+              <label class="portal-field">
+                <span>Contraseña</span>
+                <input type="password" id="signup-password" required minlength="6" autocomplete="new-password" />
+              </label>
+              <label class="portal-field">
+                <span>Dirección</span>
+                <input type="text" id="signup-address" />
+              </label>
+              <label class="portal-field">
+                <span>Teléfono</span>
+                <input type="text" id="signup-phone" />
+              </label>
+              <label class="portal-field">
+                <span>Ciudad</span>
+                <input type="text" id="signup-city" />
+              </label>
+              <button type="submit" id="signup-submit">Crear cuenta</button>
+              <p class="portal-error" id="signup-error" hidden></p>
+            </form>
+
+            <button type="button" class="portal-auth-toggle" id="auth-toggle">¿Eres veterinaria? Crea tu cuenta</button>
           </div>
         </section>
 
