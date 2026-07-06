@@ -714,7 +714,7 @@ function createRxSection(apt) {
 
   const head = document.createElement("div");
   head.className = "portal-visit-section-head";
-  head.innerHTML = `<span>💊 Recetas</span>`;
+  head.innerHTML = `<span><span class="portal-section-icon is-rx">💊</span> Recetas</span>`;
   section.appendChild(head);
 
   const listEl = document.createElement("div");
@@ -789,7 +789,12 @@ function renderExamList(container, exams) {
   exams.forEach((exam) => {
     const item = document.createElement("div");
     item.className = "portal-exam-item";
-    item.innerHTML = `<span>📄 ${exam.file_name}</span><button type="button" class="portal-exam-view">Ver</button>`;
+    const isImage = /\.(png|jpe?g|webp)$/i.test(exam.file_name);
+    item.innerHTML = `
+      <span class="portal-exam-item-icon">${isImage ? "🖼️" : "📄"}</span>
+      <span class="portal-exam-name">${exam.file_name}</span>
+      <button type="button" class="portal-exam-view">Ver</button>
+    `;
     const viewBtn = item.querySelector(".portal-exam-view");
     viewBtn.addEventListener("click", async () => {
       viewBtn.textContent = "Cargando...";
@@ -807,7 +812,7 @@ function createExamSection(apt) {
 
   const head = document.createElement("div");
   head.className = "portal-visit-section-head";
-  head.innerHTML = `<span>🧪 Exámenes</span>`;
+  head.innerHTML = `<span><span class="portal-section-icon is-exam">🧪</span> Exámenes</span>`;
   section.appendChild(head);
 
   const listEl = document.createElement("div");
@@ -908,7 +913,8 @@ async function showPatientDetail(key, petInfo) {
         <span class="portal-status-pill" style="--pill-color:${STATUS_COLORS[apt.status] || "#8f53ff"}">${STATUS_LABELS[apt.status] || apt.status}</span>
       </div>
       <span class="portal-visit-date">${apt.date || ""} ${apt.time || ""}${apt.doctor_name ? ` · Atendido por ${apt.doctor_name}` : ""}</span>
-      <textarea placeholder="Notas clínicas de esta visita (diagnóstico, tratamiento, indicaciones)...">${apt.notes || ""}</textarea>
+      <span class="portal-visit-notes-label">Notas clínicas</span>
+      <textarea placeholder="Diagnóstico, tratamiento, indicaciones...">${apt.notes || ""}</textarea>
       <button type="button" class="portal-visit-save">Guardar nota</button>
       <span class="portal-success" hidden>Guardado ✓</span>
     `;
