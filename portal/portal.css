@@ -301,6 +301,57 @@
   color: var(--muted);
 }
 
+.portal-vaccine-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 14px rgba(50, 30, 90, 0.05);
+}
+
+.portal-vaccine-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ddd6fe, #c4b5fd44);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.portal-vaccine-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.portal-vaccine-body strong {
+  display: block;
+  font-size: 13.5px;
+}
+
+.portal-vaccine-body span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.portal-vaccine-due {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--due-color);
+  background: color-mix(in srgb, var(--due-color) 14%, transparent);
+}
+
 .portal-photo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));

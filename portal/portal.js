@@ -1056,21 +1056,38 @@ const STATUS_COLORS = {
   cancelled: "#e11d48",
 };
 
+function vaccineDueStatus(nextDueDate) {
+  if (!nextDueDate) return null;
+  const today = new Date().toISOString().split("T")[0];
+  const daysUntil = (new Date(nextDueDate) - new Date(today)) / 86400000;
+  if (daysUntil < 0) return { label: `Vencida · ${nextDueDate}`, color: "#e11d48" };
+  if (daysUntil <= 30) return { label: `Próxima: ${nextDueDate}`, color: "#f59e0b" };
+  return { label: `Próxima: ${nextDueDate}`, color: "#16a34a" };
+}
+
 function renderVaccineList(container, vaccines) {
   container.innerHTML = "";
   if (vaccines.length === 0) {
     container.innerHTML = `<div class="portal-empty">Aún no hay vacunas registradas.</div>`;
     return;
   }
-  vaccines.forEach((v) => {
-    const item = document.createElement("div");
-    item.className = "portal-rx-card";
-    item.innerHTML = `
-      <span class="portal-rx-date">${v.date_given || ""}${v.next_due_date ? ` · Próxima: ${v.next_due_date}` : ""}</span>
-      <div class="portal-rx-med"><strong>${v.vaccine_name || ""}</strong>${v.notes ? `<span>${v.notes}</span>` : ""}</div>
-    `;
-    container.appendChild(item);
-  });
+  vaccines
+    .slice()
+    .sort((a, b) => (a.date_given < b.date_given ? 1 : -1))
+    .forEach((v) => {
+      const item = document.createElement("div");
+      item.className = "portal-vaccine-card";
+      const due = vaccineDueStatus(v.next_due_date);
+      item.innerHTML = `
+        <span class="portal-vaccine-icon">💉</span>
+        <div class="portal-vaccine-body">
+          <strong>${v.vaccine_name || ""}</strong>
+          <span>${v.date_given ? `Aplicada: ${v.date_given}` : ""}${v.notes ? ` · ${v.notes}` : ""}</span>
+        </div>
+        ${due ? `<span class="portal-vaccine-due" style="--due-color:${due.color}">${due.label}</span>` : ""}
+      `;
+      container.appendChild(item);
+    });
 }
 
 async function showPatientDetail(key, petInfo) {
