@@ -709,12 +709,14 @@ function createMedicationRow(rowsContainer) {
   const row = document.createElement("div");
   row.className = "portal-rx-row";
   row.innerHTML = `
-    <input type="text" placeholder="Medicamento" class="rx-name" />
-    <input type="text" placeholder="Dosis" class="rx-dose" />
-    <input type="text" placeholder="Frecuencia" class="rx-frequency" />
-    <input type="text" placeholder="Duración" class="rx-duration" />
-    <input type="text" placeholder="Indicaciones" class="rx-instructions" />
-    <button type="button" class="portal-rx-remove-line" aria-label="Quitar">✕</button>
+    <div class="portal-rx-row-top">
+      <input type="text" placeholder="Medicamento" class="rx-name" />
+      <input type="text" placeholder="Dosis" class="rx-dose" />
+      <input type="text" placeholder="Frecuencia" class="rx-frequency" />
+      <input type="text" placeholder="Duración" class="rx-duration" />
+      <button type="button" class="portal-rx-remove-line" aria-label="Quitar">✕</button>
+    </div>
+    <input type="text" placeholder="Indicaciones (ej. con comida, aplicar en la mañana...)" class="rx-instructions" />
   `;
   row.querySelector(".portal-rx-remove-line").addEventListener("click", () => {
     if (rowsContainer.children.length > 1) row.remove();

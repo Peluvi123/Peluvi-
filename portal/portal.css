@@ -1225,8 +1225,16 @@
 }
 
 .portal-rx-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.portal-rx-row-top {
   display: grid;
-  grid-template-columns: 1.3fr 0.8fr 0.9fr 0.8fr 1.2fr auto;
+  grid-template-columns: 1.4fr 0.9fr 1fr 0.9fr auto;
   gap: 6px;
 }
 
@@ -1239,6 +1247,7 @@
   font-family: inherit;
   color: var(--text);
   min-width: 0;
+  width: 100%;
 }
 
 .portal-rx-remove-line {
@@ -1347,7 +1356,7 @@
   .portal-tabs {
     overflow-x: auto;
   }
-  .portal-rx-row {
+  .portal-rx-row-top {
     grid-template-columns: 1fr 1fr;
   }
 }
