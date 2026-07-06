@@ -1,0 +1,48 @@
+Last login: Wed Jul  1 08:18:56 on ttys000
+pc-udc1@Mac-mini-de-PC-UDC1 ~ % cd /Users/pc-udc1/Documents/webpeluvi
+nano .env
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  UW PICO 5.09                       File: .env                       Modified  
+
+OPENAI_API_KEY=tu_key_nueva
+OPENAI_MODEL=gpt-4.1-mini
+$nASx0guu4YzUzCqoA
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+^G Get Help  ^O WriteOut  ^R Read File ^Y Prev Pg   ^K Cut Text  ^C Cur Pos   
+^X Exit      ^J Justify   ^W Where is  ^V Next Pg   ^U UnCut Text^T To Spell  

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Peluvi | Bienestar para mascotas</title>
+    <meta
+      name="description"
+      content="Peluvi conecta familias, mascotas y negocios con adopciones, veterinarias, peluquerías, tiendas y cuidadores."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=20260702-1116" />
+  </head>
+  <body>
+    <section class="hero-shell" id="inicio">
+      <video
+        class="hero-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="assets/peluvi-hero-dark.png"
+        aria-hidden="true"
+      >
+        <source src="assets/peluvi-hero-video.mp4" type="video/mp4" />
+      </video>
+      <header class="site-header">
+        <a class="brand" href="#inicio" aria-label="Peluvi inicio">
+          <img class="brand-logo" src="assets/peluvi-logo.png" alt="" />
+          <span>Peluvi</span>
+        </a>
+        <nav class="nav-links" aria-label="Principal">
+          <a class="active" href="#inicio">Inicio</a>
+          <a href="#servicios">Servicios</a>
+          <a href="#mapa">Mapa</a>
+          <a href="#blog">Blog</a>
+          <a href="#empresas">Para empresas</a>
+          <a href="#nosotros">Nosotros</a>
+        </nav>
+        <a class="header-cta" href="#descarga">Descargar app <span>↓</span></a>
+      </header>
+
+      <main class="hero-content">
+        <div class="hero-copy">
+          <p class="pill">💜 Todo para tu mascota, en un solo lugar</p>
+          <h1>Tu mascota se merece lo <span>mejor, siempre</span></h1>
+          <p class="hero-text">
+            Adopta, cuida, consiente y protege a tu mejor amigo con Peluvi.
+            Servicios, expertos y productos pensados para su bienestar.
+          </p>
+
+          <form class="hero-search" id="mapa">
+            <label class="sr-only" for="buscar">Buscar servicios</label>
+            <input id="buscar" type="search" placeholder="¿Qué necesitas hoy?" />
+            <button type="submit">Buscar</button>
+          </form>
+
+          <div class="quick-services" id="servicios" aria-label="Servicios principales">
+            <a class="adoption-trigger" href="#adopcion" aria-controls="adoption-panel">
+              <span class="service-icon image-icon"><img src="assets/icon-heart.png" alt="" /></span>
+              Adopción
+            </a>
+            <a class="vet-trigger" href="#veterinarias" aria-controls="vet-panel">
+              <span class="service-icon image-icon"><img src="assets/icon-vet-crop.png" alt="" /></span>
+              Veterinarias
+            </a>
+            <a class="grooming-trigger" href="#peluquerias" aria-controls="grooming-panel">
+              <span class="service-icon image-icon"><img src="assets/icon-grooming-tight.png" alt="" /></span>
+              Peluquerías
+            </a>
+            <a class="store-trigger" href="#tiendas" aria-controls="store-panel">
+              <span class="service-icon image-icon"><img src="assets/icon-food-tight.png" alt="" /></span>
+              Tiendas
+            </a>
+            <a class="caregivers-trigger" href="#cuidadores" aria-controls="caregivers-panel">
+              <span class="service-icon image-icon"><img src="assets/icon-walkers-crop.png" alt="" /></span>
+              Cuidadores
+            </a>
+            <a class="sos-trigger" href="#sos" aria-controls="sos-panel">
+              <span class="service-icon image-icon"><img src="assets/icon-map-tight.png" alt="" /></span>
+              SOS
+            </a>
+          </div>
+        </div>
+
+        <aside class="business-card" id="empresas">
+          <div class="shop-visual" aria-hidden="true">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="50" cy="70" rx="23" ry="18" fill="#ffffff" />
+              <ellipse cx="24" cy="42" rx="11" ry="13.5" fill="#ffffff" />
+              <ellipse cx="76" cy="42" rx="11" ry="13.5" fill="#ffffff" />
+              <ellipse cx="38" cy="20" rx="10" ry="12.5" fill="#ffffff" />
+              <ellipse cx="62" cy="20" rx="10" ry="12.5" fill="#ffffff" />
+            </svg>
+          </div>
+          <div>
+            <h2>¿Tienes un negocio para mascotas?</h2>
+            <p>Haz parte del directorio premium para veterinarias, tiendas, fundaciones y cuidadores.</p>
+          </div>
+          <a href="#descarga">Quiero aparecer en Peluvi <span>→</span></a>
+        </aside>
+
+      </main>
+    </section>
+
+    <section class="adoption-panel" id="adoption-panel" aria-label="Adopción Peluvi" hidden>
+      <div class="adoption-surface">
+        <header class="adoption-header">
+          <a class="adoption-brand" href="#inicio">
+            <img src="assets/icon-heart.png" alt="" />
+            <span>Peluvi</span>
+          </a>
+          <nav aria-label="Adopción">
+            <a class="active" href="#adopcion">Adoptar</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#blog">Comunidad</a>
+            <a href="#nosotros">Nosotros</a>
+          </nav>
+          <button class="adoption-close" type="button" aria-label="Cerrar adopción">Cerrar</button>
+        </header>
+
+        <div class="adoption-layout">
+          <div class="adoption-copy">
+            <p class="adoption-pill">Adopción con amor</p>
+            <h2>Haz match con tu mascota <span>ideal</span></h2>
+            <p>
+              Desliza entre peluditos que esperan una segunda oportunidad.
+              Si sientes esa conexión, guarda el favorito y empieza una historia bonita.
+            </p>
+            <button class="adoption-main-cta" type="button">Explorar mascotas</button>
+          </div>
+
+          <div class="pet-stage" aria-label="Tarjetas de mascotas para adoptar">
+            <article class="pet-card pet-card-left">
+              <img src="assets/pet-luna-golden-selfie.png" alt="Luna, perrita golden en adopción" />
+              <div>
+                <h3>Luna <span>♀</span></h3>
+                <p>2 años · Hembra</p>
+                <small>Medellín</small>
+              </div>
+              <button type="button" aria-label="Pasar a Luna">×</button>
+            </article>
+
+            <article class="pet-card pet-card-main">
+              <img src="assets/pet-milo-cat-selfie.png" alt="Milo, gato atigrado en adopción" />
+              <span class="pet-like">♥</span>
+              <div>
+                <h3>Milo <span>♂</span></h3>
+                <p>3 meses · Macho</p>
+                <small>Bogotá</small>
+              </div>
+              <button type="button" aria-label="Dar like a Milo">♥</button>
+            </article>
+
+            <article class="pet-card pet-card-right">
+              <img src="assets/pet-simon-hamster-selfie.png" alt="Simon, gato blanco y negro en adopción" />
+              <div>
+                <h3>Simon <span>♂</span></h3>
+                <p>1 año · Macho</p>
+                <small>Cali</small>
+              </div>
+              <button type="button" aria-label="Pasar a Simon">×</button>
+            </article>
+
+            <img class="swipe-paw" src="assets/adoption-paw.png" alt="" aria-hidden="true" />
+            <span class="swipe-heart" aria-hidden="true">♡</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="vet-panel" id="vet-panel" aria-label="Veterinarias Peluvi" hidden>
+      <div class="vet-surface">
+        <header class="vet-header">
+          <a class="vet-brand" href="#inicio">
+            <img src="assets/icon-vet-crop.png" alt="" />
+            <span>Peluvi</span>
+          </a>
+          <nav aria-label="Veterinarias">
+            <a class="active" href="#veterinarias">Veterinarias</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#mapa">Mapa</a>
+            <a href="#nosotros">Nosotros</a>
+          </nav>
+          <button class="vet-close" type="button" aria-label="Cerrar veterinarias">Cerrar</button>
+        </header>
+
+        <div class="vet-layout">
+          <div class="vet-copy">
+            <div class="vet-icon-card" aria-hidden="true">
+              <img src="assets/icon-vet-crop.png" alt="" />
+            </div>
+            <p class="vet-pill">Nuevo módulo</p>
+            <h2>Veterinarias</h2>
+            <p class="vet-text">
+              Encuentra las mejores veterinarias, agenda citas y cuida la salud
+              de tu mascota, <strong>todo en un solo lugar.</strong>
+            </p>
+            <div class="vet-actions" aria-label="Funciones de veterinarias">
+              <article role="button" tabindex="0" data-vet-detail="search">
+                <span>⌕</span>
+                <h3>Busca veterinarias</h3>
+                <p>Encuentra clínicas cercanas y ve calificaciones.</p>
+              </article>
+              <article role="button" tabindex="0" data-vet-detail="schedule">
+                <span>▦</span>
+                <h3>Agenda citas</h3>
+                <p>Reserva en pocos pasos de forma fácil y rápida.</p>
+              </article>
+              <article role="button" tabindex="0" data-vet-detail="services">
+                <span>✚</span>
+                <h3>Servicios y doctores</h3>
+                <p>Consulta servicios y conoce sus especialistas.</p>
+              </article>
+              <article role="button" tabindex="0" data-vet-detail="trust">
+                <span>✚</span>
+                <h3>Atención confiable</h3>
+                <p>Clínicas verificadas para cuidar lo que más quieres.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div class="vet-detail-modal" hidden>
+          <div class="vet-detail-card" role="dialog" aria-modal="true" aria-labelledby="vet-detail-title">
+            <button class="vet-detail-close" type="button" aria-label="Cerrar detalle">×</button>
+            <span class="vet-detail-icon">⌕</span>
+            <h3 id="vet-detail-title">Busca veterinarias</h3>
+            <p>Encuentra clínicas cercanas, revisa calificaciones y elige la mejor opción para tu mascota.</p>
+            <ul>
+              <li>Búsqueda por ubicación.</li>
+              <li>Filtros por servicio y disponibilidad.</li>
+              <li>Perfiles con fotos, horarios y opiniones.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grooming-panel" id="grooming-panel" aria-label="Peluquerías Peluvi" hidden>
+      <div class="grooming-surface">
+        <header class="grooming-header">
+          <a class="grooming-brand" href="#inicio">
+            <img src="assets/icon-grooming-tight.png" alt="" />
+            <span>Peluvi</span>
+          </a>
+          <nav aria-label="Peluquerías">
+            <a class="active" href="#peluquerias">Peluquerías</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#mapa">Mapa</a>
+            <a href="#nosotros">Nosotros</a>
+          </nav>
+          <button class="grooming-close" type="button" aria-label="Cerrar peluquerías">Cerrar</button>
+        </header>
+
+        <div class="grooming-layout">
+          <div class="grooming-copy">
+            <div class="grooming-icon-card" aria-hidden="true">
+              <img src="assets/icon-grooming-tight.png" alt="" />
+            </div>
+            <p class="grooming-pill">Nuevo módulo</p>
+            <h2>Peluquerías</h2>
+            <p class="grooming-text">
+              Agenda baños, cortes, spa y mucho más para <strong>tu mejor amigo.</strong>
+            </p>
+            <div class="grooming-actions" aria-label="Funciones de peluquerias">
+              <article role="button" tabindex="0" data-grooming-detail="schedule">
+                <span>▦</span>
+                <h3>Agenda citas</h3>
+                <p>Reserva baños y cortes en pocos pasos.</p>
+              </article>
+              <article role="button" tabindex="0" data-grooming-detail="certified">
+                <span>✿</span>
+                <h3>Groomers certificados</h3>
+                <p>Profesionales con experiencia y buen trato.</p>
+              </article>
+              <article role="button" tabindex="0" data-grooming-detail="special">
+                <span>♡</span>
+                <h3>Servicios especializados</h3>
+                <p>Spa, deslanado, uñas y cuidado del pelaje.</p>
+              </article>
+              <article role="button" tabindex="0" data-grooming-detail="tracking">
+                <span>✓</span>
+                <h3>Seguimiento de citas</h3>
+                <p>Recordatorios y detalles de cada visita.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div class="grooming-detail-modal" hidden>
+          <div class="grooming-detail-card" role="dialog" aria-modal="true" aria-labelledby="grooming-detail-title">
+            <button class="grooming-detail-close" type="button" aria-label="Cerrar detalle">×</button>
+            <span class="grooming-detail-icon">▦</span>
+            <h3 id="grooming-detail-title">Agenda citas</h3>
+            <p>Reserva baños, cortes y spa según disponibilidad del groomer o peluquería.</p>
+            <ul>
+              <li>Fechas y horarios disponibles.</li>
+              <li>Servicios por tamaño y tipo de pelaje.</li>
+              <li>Confirmación rápida desde Peluvi.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="store-panel" id="store-panel" aria-label="Tiendas Peluvi" hidden>
+      <div class="store-surface">
+        <header class="store-header">
+          <a class="store-brand" href="#inicio">
+            <img src="assets/icon-food-tight.png" alt="" />
+            <span>Peluvi</span>
+          </a>
+          <nav aria-label="Tiendas">
+            <a class="active" href="#tiendas">Tiendas</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#mapa">Mapa</a>
+            <a href="#nosotros">Nosotros</a>
+          </nav>
+          <button class="store-close" type="button" aria-label="Cerrar tiendas">Cerrar</button>
+        </header>
+
+        <div class="store-layout">
+          <div class="store-copy">
+            <div class="store-icon-card" aria-hidden="true">
+              <img src="assets/icon-food-tight.png" alt="" />
+            </div>
+            <p class="store-pill">Nuevo módulo</p>
+            <h2>Tiendas</h2>
+            <p class="store-text">
+              Conecta con tiendas aliadas y encuentra lo que tu mascota necesita.
+              <strong>Todo más cerca, sin complicarte.</strong>
+            </p>
+            <div class="store-actions" aria-label="Funciones de tiendas">
+              <article role="button" tabindex="0" data-store-detail="products">
+                <span>▣</span>
+                <h3>Catálogo aliado</h3>
+                <p>Alimentos, juguetes y accesorios de tiendas cercanas.</p>
+              </article>
+              <article role="button" tabindex="0" data-store-detail="offers">
+                <span>%</span>
+                <h3>Novedades y promos</h3>
+                <p>Información publicada por tiendas aliadas.</p>
+              </article>
+              <article role="button" tabindex="0" data-store-detail="delivery">
+                <span>▱</span>
+                <h3>Contacto directo</h3>
+                <p>Pregunta disponibilidad y coordina con la tienda.</p>
+              </article>
+              <article role="button" tabindex="0" data-store-detail="secure">
+                <span>✓</span>
+                <h3>Aliados verificados</h3>
+                <p>Perfiles claros para elegir con confianza.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div class="store-detail-modal" hidden>
+          <div class="store-detail-card" role="dialog" aria-modal="true" aria-labelledby="store-detail-title">
+            <button class="store-detail-close" type="button" aria-label="Cerrar detalle">×</button>
+            <span class="store-detail-icon">▣</span>
+            <h3 id="store-detail-title">Catálogo aliado</h3>
+            <p>Explora alimentos, juguetes y accesorios publicados por tiendas aliadas de Peluvi.</p>
+            <ul>
+              <li>Información organizada por tipo de mascota.</li>
+              <li>Datos claros para comparar opciones.</li>
+              <li>Contacto con la tienda responsable.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="caregivers-panel" id="caregivers-panel" aria-label="Cuidadores Peluvi" hidden>
+      <div class="caregivers-surface">
+        <header class="caregivers-header">
+          <a class="caregivers-brand" href="#inicio">
+            <img src="assets/icon-walkers-crop.png" alt="" />
+            <span>Peluvi</span>
+          </a>
+          <nav aria-label="Cuidadores">
+            <a class="active" href="#cuidadores">Cuidadores</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#mapa">Mapa</a>
+            <a href="#nosotros">Nosotros</a>
+          </nav>
+          <button class="caregivers-close" type="button" aria-label="Cerrar cuidadores">Cerrar</button>
+        </header>
+
+        <div class="caregivers-layout">
+          <div class="caregivers-copy">
+            <div class="caregivers-icon-card" aria-hidden="true">
+              <img src="assets/icon-walkers-crop.png" alt="" />
+            </div>
+            <p class="caregivers-pill">Nuevo módulo</p>
+            <h2>Cuidadores</h2>
+            <p class="caregivers-text">
+              Encuentra <strong>cuidadores verificados</strong> para paseos,
+              visitas a domicilio o estancias mientras tú no estás.
+            </p>
+            <div class="caregivers-actions" aria-label="Funciones de cuidadores">
+              <article role="button" tabindex="0" data-caregivers-detail="verified">
+                <span>✓</span>
+                <h3>Cuidadores verificados</h3>
+                <p>Perfiles claros para contactar con confianza.</p>
+              </article>
+              <article role="button" tabindex="0" data-caregivers-detail="walks">
+                <span>⌁</span>
+                <h3>Paseos programados</h3>
+                <p>Coordina rutinas y horarios para tu mascota.</p>
+              </article>
+              <article role="button" tabindex="0" data-caregivers-detail="home">
+                <span>⌂</span>
+                <h3>Cuidado en casa</h3>
+                <p>Opciones para visitas o estancias temporales.</p>
+              </article>
+              <article role="button" tabindex="0" data-caregivers-detail="tracking">
+                <span>⌖</span>
+                <h3>Seguimiento en tiempo real</h3>
+                <p>Actualizaciones durante el servicio.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div class="caregivers-detail-modal" hidden>
+          <div class="caregivers-detail-card" role="dialog" aria-modal="true" aria-labelledby="caregivers-detail-title">
+            <button class="caregivers-detail-close" type="button" aria-label="Cerrar detalle">×</button>
+            <span class="caregivers-detail-icon">✓</span>
+            <h3 id="caregivers-detail-title">Cuidadores verificados</h3>
+            <p>Conecta con personas y negocios aliados que ofrecen cuidado para mascotas.</p>
+            <ul>
+              <li>Perfiles con información clara.</li>
+              <li>Contacto directo para coordinar el servicio.</li>
+              <li>Opciones pensadas para la tranquilidad del dueño.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sos-panel" id="sos-panel" aria-label="SOS Mascotas Peluvi" hidden>
+      <div class="sos-surface">
+        <header class="sos-header">
+          <a class="sos-brand" href="#inicio">
+            <img src="assets/icon-map-tight.png" alt="" />
+            <span>Peluvi</span>
+          </a>
+          <nav aria-label="SOS Mascotas">
+            <a class="active" href="#sos">SOS</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#mapa">Mapa</a>
+            <a href="#nosotros">Nosotros</a>
+          </nav>
+          <button class="sos-close" type="button" aria-label="Cerrar SOS">Cerrar</button>
+        </header>
+
+        <div class="sos-layout">
+          <div class="sos-copy">
+            <div class="sos-icon-card" aria-hidden="true">
+              <img src="assets/icon-map-tight.png" alt="" />
+            </div>
+            <p class="sos-pill">Nuevo módulo</p>
+            <h2><span>SOS</span> Mascotas</h2>
+            <p class="sos-text">
+              Activa una alerta comunitaria y ayuda a reunir a las
+              <strong>mascotas perdidas</strong> con su familia.
+            </p>
+            <div class="sos-actions" aria-label="Funciones de SOS mascotas">
+              <article role="button" tabindex="0" data-sos-detail="report">
+                <span>▤</span>
+                <div>
+                  <h3>Reporta una mascota</h3>
+                  <p>Publica foto, última ubicación y descripción.</p>
+                </div>
+              </article>
+              <article role="button" tabindex="0" data-sos-detail="map">
+                <span>⌖</span>
+                <div>
+                  <h3>Mapa en tiempo real</h3>
+                  <p>Consulta reportes cercanos en tu zona.</p>
+                </div>
+              </article>
+              <article role="button" tabindex="0" data-sos-detail="alerts">
+                <span>!</span>
+                <div>
+                  <h3>Alertas a la comunidad</h3>
+                  <p>Los usuarios cercanos reciben una notificación.</p>
+                </div>
+              </article>
+              <article role="button" tabindex="0" data-sos-detail="community">
+                <span>♡</span>
+                <div>
+                  <h3>Más posibilidades de encontrarla</h3>
+                  <p>Cada reporte conecta a la comunidad.</p>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div class="sos-detail-modal" hidden>
+          <div class="sos-detail-card" role="dialog" aria-modal="true" aria-labelledby="sos-detail-title">
+            <button class="sos-detail-close" type="button" aria-label="Cerrar detalle">×</button>
+            <span class="sos-detail-icon">▤</span>
+            <h3 id="sos-detail-title">Reporta una mascota</h3>
+            <p>Crea una alerta con los datos básicos para que la comunidad pueda ayudar más rápido.</p>
+            <ul>
+              <li>Foto, descripción y última ubicación conocida.</li>
+              <li>Datos de contacto para recibir información.</li>
+              <li>Publicación visible para usuarios cercanos.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chat-widget" aria-label="Chat de Peluvi IA">
+      <button class="chat-toggle" type="button" aria-expanded="false" aria-controls="peluvi-chat">
+        <span>IA</span>
+        <strong class="sr-only">Pregúntale a Peluvi</strong>
+      </button>
+      <div class="chat-panel" id="peluvi-chat" hidden>
+        <div class="chat-header">
+          <div>
+            <p>Peluvi IA</p>
+            <strong>Asistente para mascotas</strong>
+          </div>
+          <button class="chat-close" type="button" aria-label="Cerrar chat">×</button>
+        </div>
+        <div class="chat-messages" aria-live="polite">
+          <div class="chat-message bot">
+            Hola, soy Peluvi IA. Puedo ayudarte con adopciones, veterinarias, peluquerías, SOS, tienda, favoritos o cómo funcionaría tu perfil en la app.
+          </div>
+        </div>
+        <form class="chat-form">
+          <label class="sr-only" for="chat-input">Mensaje para Peluvi IA</label>
+          <input id="chat-input" type="text" placeholder="Ej: quiero adoptar un perro..." autocomplete="off" />
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
+    </section>
+
+    <script src="script.js?v=20260702-1116"></script>
+  </body>
+</html>
