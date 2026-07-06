@@ -214,6 +214,7 @@ const clinicPhotoInput = document.getElementById("clinic-photo-input");
 
 let currentDoctors = [];
 let currentImages = [];
+let currentProfile = null;
 
 async function persistVetProfile(patch) {
   await supabase.from("vet_profiles").upsert({ id: currentVetId, ...patch });
@@ -270,6 +271,7 @@ async function requireProviderSession() {
     .maybeSingle();
 
   showDashboard(profile);
+  currentProfile = profile;
   fillClinicForm(profile, vetProfile);
   currentDoctors = vetProfile?.doctors ?? [];
   currentImages = vetProfile?.images ?? [];
@@ -629,6 +631,10 @@ function renderPendingCitas() {
   pending.forEach((apt) => citasPendingList.appendChild(buildAppointmentCard(apt)));
 }
 
+const pacientesSearch = document.getElementById("pacientes-search");
+const pacientesNoResults = document.getElementById("pacientes-no-results");
+let allPatients = [];
+
 function renderPacientes(appointments) {
   const byPet = new Map();
   appointments.forEach((apt) => {
@@ -640,9 +646,14 @@ function renderPacientes(appointments) {
     byPet.get(key).visits += 1;
   });
 
-  const patients = Array.from(byPet.values());
+  allPatients = Array.from(byPet.values());
+  pacientesEmpty.hidden = allPatients.length > 0;
+  renderPatientCards(allPatients);
+}
+
+function renderPatientCards(patients) {
   pacientesList.innerHTML = "";
-  pacientesEmpty.hidden = patients.length > 0;
+  pacientesNoResults.hidden = patients.length > 0 || allPatients.length === 0;
 
   patients.forEach((p) => {
     const card = document.createElement("div");
@@ -657,6 +668,18 @@ function renderPacientes(appointments) {
     pacientesList.appendChild(card);
   });
 }
+
+pacientesSearch.addEventListener("input", () => {
+  const q = pacientesSearch.value.trim().toLowerCase();
+  if (!q) {
+    renderPatientCards(allPatients);
+    return;
+  }
+  const filtered = allPatients.filter(
+    (p) => (p.pet_name || "").toLowerCase().includes(q) || (p.pet_breed || "").toLowerCase().includes(q)
+  );
+  renderPatientCards(filtered);
+});
 
 const pacientesGridView = document.getElementById("pacientes-grid-view");
 const patientDetailView = document.getElementById("patient-detail-view");
@@ -688,7 +711,71 @@ function createMedicationRow(rowsContainer) {
   return row;
 }
 
-function renderRxList(container, prescriptions) {
+function printPrescription(rx, apt) {
+  const meds = (rx.medications || [])
+    .map(
+      (m) => `
+      <tr>
+        <td>${m.name || ""}</td>
+        <td>${m.dose || ""}</td>
+        <td>${m.frequency || ""}</td>
+        <td>${m.duration || ""}</td>
+        <td>${m.instructions || ""}</td>
+      </tr>`
+    )
+    .join("");
+  const date = rx.created_at ? new Date(rx.created_at).toLocaleDateString("es-CO") : "";
+
+  const html = `
+    <!doctype html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Orden médica — ${apt.pet_name || ""}</title>
+      <style>
+        body { font-family: -apple-system, Arial, sans-serif; padding: 40px; color: #1c1330; }
+        h1 { margin: 0 0 2px; font-size: 22px; }
+        .muted { color: #6c6480; font-size: 13px; margin: 0 0 20px; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 24px; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e5e1f0; font-size: 13px; }
+        th { color: #6c6480; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px; }
+        .notes { margin-bottom: 40px; }
+        .notes h3 { font-size: 13px; margin-bottom: 6px; }
+        .sign { margin-top: 60px; }
+        .sign-line { border-top: 1px solid #1c1330; width: 260px; padding-top: 6px; font-size: 12px; color: #6c6480; }
+        @media print { body { padding: 0; } }
+      </style>
+    </head>
+    <body>
+      <h1>${currentProfile?.business_name || currentProfile?.name || ""}</h1>
+      <p class="muted">${currentProfile?.address || ""}${currentProfile?.phone ? " · " + currentProfile.phone : ""}</p>
+      <div class="row">
+        <span><strong>Paciente:</strong> ${apt.pet_name || ""} (${apt.pet_breed || ""})</span>
+        <span><strong>Fecha:</strong> ${date}</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th><th>Duración</th><th>Indicaciones</th></tr>
+        </thead>
+        <tbody>${meds}</tbody>
+      </table>
+      ${rx.notes ? `<div class="notes"><h3>Exámenes solicitados / notas</h3><p>${rx.notes}</p></div>` : ""}
+      <div class="sign">
+        <div class="sign-line">Firma del veterinario</div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const win = window.open("", "_blank");
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  win.print();
+}
+
+function renderRxList(container, prescriptions, apt) {
   container.innerHTML = "";
   prescriptions.forEach((rx) => {
     const card = document.createElement("div");
@@ -703,7 +790,14 @@ function renderRxList(container, prescriptions) {
       )
       .join("");
     const date = rx.created_at ? new Date(rx.created_at).toLocaleDateString("es-CO") : "";
-    card.innerHTML = `<span class="portal-rx-date">${date}</span>${meds}`;
+    const notesHtml = rx.notes ? `<div class="portal-rx-med"><span>🧪 ${rx.notes}</span></div>` : "";
+    card.innerHTML = `<span class="portal-rx-date">${date}</span>${meds}${notesHtml}`;
+    const printBtn = document.createElement("button");
+    printBtn.type = "button";
+    printBtn.className = "portal-rx-print";
+    printBtn.textContent = "🖨️ Imprimir orden";
+    printBtn.addEventListener("click", () => printPrescription(rx, apt));
+    card.appendChild(printBtn);
     container.appendChild(card);
   });
 }
@@ -735,6 +829,12 @@ function createRxSection(apt) {
   addLineBtn.textContent = "+ Medicamento";
   addLineBtn.addEventListener("click", () => createMedicationRow(rows));
   form.appendChild(addLineBtn);
+
+  const notesInput = document.createElement("textarea");
+  notesInput.className = "rx-notes";
+  notesInput.rows = 2;
+  notesInput.placeholder = "Exámenes solicitados / notas (opcional)";
+  form.appendChild(notesInput);
 
   const saveBtn = document.createElement("button");
   saveBtn.type = "button";
@@ -768,15 +868,16 @@ function createRxSection(apt) {
 
     const { data: inserted } = await supabase
       .from("prescriptions")
-      .insert({ appointment_id: apt.id, vet_id: currentVetId, medications })
+      .insert({ appointment_id: apt.id, vet_id: currentVetId, medications, notes: notesInput.value.trim() || null })
       .select()
       .single();
 
     if (inserted) {
       rxState.unshift(inserted);
-      renderRxList(listEl, rxState);
+      renderRxList(listEl, rxState, apt);
       rows.innerHTML = "";
       createMedicationRow(rows);
+      notesInput.value = "";
       form.hidden = true;
     }
   });
@@ -930,7 +1031,7 @@ async function showPatientDetail(key, petInfo) {
 
     const { section: rxSection, listEl: rxListEl, rxState } = createRxSection(apt);
     rxState.push(...(rxByApt.get(apt.id) || []));
-    renderRxList(rxListEl, rxState);
+    renderRxList(rxListEl, rxState, apt);
     visit.appendChild(rxSection);
 
     const { section: examSection, listEl: examListEl, examState } = createExamSection(apt);
