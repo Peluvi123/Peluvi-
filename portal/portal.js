@@ -83,6 +83,29 @@ const doctorsEmpty = document.getElementById("clinica-doctors-empty");
 const imagesList = document.getElementById("clinica-images-list");
 const imagesEmpty = document.getElementById("clinica-images-empty");
 
+const doctorAddToggle = document.getElementById("doctor-add-toggle");
+const doctorAddForm = document.getElementById("doctor-add-form");
+const doctorNameInput = document.getElementById("doctor-name");
+const doctorSpecialtyInput = document.getElementById("doctor-specialty");
+const doctorAvailableInput = document.getElementById("doctor-available");
+const doctorPhotoInput = document.getElementById("doctor-photo-input");
+const doctorSaveBtn = document.getElementById("doctor-save-btn");
+const clinicPhotoInput = document.getElementById("clinic-photo-input");
+
+let currentDoctors = [];
+let currentImages = [];
+
+async function persistVetProfile(patch) {
+  await supabase.from("vet_profiles").upsert({ id: currentVetId, ...patch });
+}
+
+async function uploadClinicMedia(file) {
+  const path = `${currentVetId}/${Date.now()}_${file.name}`;
+  const { error } = await supabase.storage.from("clinic-media").upload(path, file, { contentType: file.type });
+  if (error) return null;
+  return supabase.storage.from("clinic-media").getPublicUrl(path).data.publicUrl;
+}
+
 function showLogin(message) {
   loginView.hidden = false;
   dashboardView.hidden = true;
@@ -128,8 +151,10 @@ async function requireProviderSession() {
 
   showDashboard(profile);
   fillClinicForm(profile, vetProfile);
-  renderDoctors(vetProfile?.doctors ?? []);
-  renderClinicImages(vetProfile?.images ?? []);
+  currentDoctors = vetProfile?.doctors ?? [];
+  currentImages = vetProfile?.images ?? [];
+  renderDoctors();
+  renderClinicImages();
   return { session, profile, vetProfile };
 }
 
@@ -183,13 +208,14 @@ function fillClinicForm(profile, vetProfile) {
   clinicaFields.emergency.checked = !!vetProfile?.emergency;
 }
 
-function renderDoctors(doctors) {
+function renderDoctors() {
   doctorsList.innerHTML = "";
-  doctorsEmpty.hidden = doctors.length > 0;
-  doctors.forEach((doc) => {
+  doctorsEmpty.hidden = currentDoctors.length > 0;
+  currentDoctors.forEach((doc, index) => {
     const card = document.createElement("div");
     card.className = "portal-doctor-card";
     card.innerHTML = `
+      <button type="button" class="portal-remove-x" aria-label="Quitar">✕</button>
       <img src="${doc.photo || ""}" alt="" onerror="this.style.visibility='hidden'" />
       <strong>${doc.name || ""}</strong>
       <span>${doc.specialty || ""}</span>
@@ -197,20 +223,82 @@ function renderDoctors(doctors) {
         ${doc.available ? "Disponible" : "No disponible"}
       </span>
     `;
+    card.querySelector(".portal-remove-x").addEventListener("click", async () => {
+      currentDoctors.splice(index, 1);
+      await persistVetProfile({ doctors: currentDoctors });
+      renderDoctors();
+    });
     doctorsList.appendChild(card);
   });
 }
 
-function renderClinicImages(images) {
+function renderClinicImages() {
   imagesList.innerHTML = "";
-  imagesEmpty.hidden = images.length > 0;
-  images.forEach((url) => {
-    const img = document.createElement("img");
-    img.src = url;
-    img.alt = "";
-    imagesList.appendChild(img);
+  imagesEmpty.hidden = currentImages.length > 0;
+  currentImages.forEach((url, index) => {
+    const item = document.createElement("div");
+    item.className = "portal-photo-item";
+    item.innerHTML = `
+      <button type="button" class="portal-remove-x" aria-label="Quitar">✕</button>
+      <img src="${url}" alt="" />
+    `;
+    item.querySelector(".portal-remove-x").addEventListener("click", async () => {
+      currentImages.splice(index, 1);
+      await persistVetProfile({ images: currentImages });
+      renderClinicImages();
+    });
+    imagesList.appendChild(item);
   });
 }
+
+doctorAddToggle.addEventListener("click", () => {
+  doctorAddForm.hidden = !doctorAddForm.hidden;
+});
+
+doctorSaveBtn.addEventListener("click", async () => {
+  const name = doctorNameInput.value.trim();
+  const specialty = doctorSpecialtyInput.value.trim();
+  if (!name) return;
+
+  doctorSaveBtn.disabled = true;
+  doctorSaveBtn.textContent = "Guardando...";
+
+  let photo = "";
+  const file = doctorPhotoInput.files[0];
+  if (file) {
+    photo = (await uploadClinicMedia(file)) || "";
+  }
+
+  currentDoctors.push({
+    id: `doc_${Date.now()}`,
+    name,
+    specialty,
+    photo,
+    available: doctorAvailableInput.checked,
+  });
+  await persistVetProfile({ doctors: currentDoctors });
+  renderDoctors();
+
+  doctorNameInput.value = "";
+  doctorSpecialtyInput.value = "";
+  doctorAvailableInput.checked = true;
+  doctorPhotoInput.value = "";
+  doctorAddForm.hidden = true;
+  doctorSaveBtn.disabled = false;
+  doctorSaveBtn.textContent = "Guardar doctor";
+});
+
+clinicPhotoInput.addEventListener("change", async () => {
+  const file = clinicPhotoInput.files[0];
+  if (!file) return;
+  const url = await uploadClinicMedia(file);
+  if (url) {
+    currentImages.push(url);
+    await persistVetProfile({ images: currentImages });
+    renderClinicImages();
+  }
+  clinicPhotoInput.value = "";
+});
 
 clinicaForm.addEventListener("submit", async (e) => {
   e.preventDefault();

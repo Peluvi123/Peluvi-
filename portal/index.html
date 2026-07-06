@@ -166,15 +166,42 @@
 
               <aside class="portal-clinica-side">
                 <div class="portal-side-block">
-                  <h3>Equipo médico</h3>
-                  <p class="portal-muted">Doctores registrados en tu perfil.</p>
+                  <div class="portal-side-block-head">
+                    <div>
+                      <h3>Equipo médico</h3>
+                      <p class="portal-muted">Doctores registrados en tu perfil.</p>
+                    </div>
+                    <button type="button" class="portal-visit-toggle" id="doctor-add-toggle">+ Agregar</button>
+                  </div>
                   <div id="clinica-doctors-empty" class="portal-empty" hidden>Aún no tienes doctores registrados.</div>
                   <div id="clinica-doctors-list" class="portal-grid"></div>
+
+                  <div class="portal-add-form" id="doctor-add-form" hidden>
+                    <input type="text" id="doctor-name" placeholder="Nombre completo" />
+                    <input type="text" id="doctor-specialty" placeholder="Especialidad" />
+                    <label class="portal-checkbox">
+                      <input type="checkbox" id="doctor-available" checked />
+                      <span>Disponible</span>
+                    </label>
+                    <label class="portal-file-btn">
+                      Foto del doctor
+                      <input type="file" id="doctor-photo-input" accept="image/png,image/jpeg,image/webp" hidden />
+                    </label>
+                    <button type="button" class="portal-rx-save" id="doctor-save-btn">Guardar doctor</button>
+                  </div>
                 </div>
 
                 <div class="portal-side-block">
-                  <h3>Fotos de la clínica</h3>
-                  <p class="portal-muted">Imágenes visibles en tu perfil público.</p>
+                  <div class="portal-side-block-head">
+                    <div>
+                      <h3>Fotos de la clínica</h3>
+                      <p class="portal-muted">Imágenes visibles en tu perfil público.</p>
+                    </div>
+                    <label class="portal-file-btn">
+                      Subir foto
+                      <input type="file" id="clinic-photo-input" accept="image/png,image/jpeg,image/webp" hidden />
+                    </label>
+                  </div>
                   <div id="clinica-images-empty" class="portal-empty" hidden>Aún no tienes fotos registradas.</div>
                   <div id="clinica-images-list" class="portal-photo-grid"></div>
                 </div>

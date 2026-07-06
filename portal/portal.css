@@ -684,6 +684,55 @@
   margin-bottom: 12px;
 }
 
+.portal-side-block-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.portal-add-form {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.portal-add-form input[type="text"] {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.portal-doctor-card {
+  position: relative;
+}
+
+.portal-remove-x {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(20, 10, 40, 0.55);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.portal-photo-item {
+  position: relative;
+}
+
 .portal-side-block .portal-grid,
 .portal-side-block .portal-photo-grid {
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
