@@ -1218,28 +1218,42 @@ async function showPatientDetail(key, petInfo) {
 
   function renderIdCard() {
     const rows = [
-      ["Especie", record.species],
-      ["Raza", record.breed || petInfo.pet_breed],
-      ["Sexo", GENDER_LABELS[record.gender]],
-      ["Nacimiento", record.born],
-      ["Peso", record.weight],
-      ["Color", record.color],
-      ["Chip", record.chip],
-      ["Tipo de sangre", record.blood_type],
-      ["Alergias", (record.allergies || []).join(", ")],
-    ].filter(([, value]) => value);
+      ["🐾", "Especie", record.species],
+      ["🏷️", "Raza", record.breed || petInfo.pet_breed],
+      ["⚧", "Sexo", GENDER_LABELS[record.gender]],
+      ["🎂", "Nacimiento", record.born],
+      ["⚖️", "Peso", record.weight],
+      ["🎨", "Color", record.color],
+      ["🔖", "Chip", record.chip],
+      ["🩸", "Tipo de sangre", record.blood_type],
+      ["⚠️", "Alergias", (record.allergies || []).join(", ")],
+    ];
 
     const badges = [
-      record.sterilized ? `<span class="portal-id-badge">✓ Esterilizado</span>` : "",
-      record.dewormed ? `<span class="portal-id-badge">✓ Desparasitado</span>` : "",
+      `<span class="portal-id-badge ${record.sterilized ? "is-yes" : "is-no"}">${record.sterilized ? "✓" : "✕"} Esterilizado</span>`,
+      `<span class="portal-id-badge ${record.dewormed ? "is-yes" : "is-no"}">${record.dewormed ? "✓" : "✕"} Desparasitado</span>`,
     ].join("");
 
-    idCardEl.innerHTML =
-      rows.length === 0 && !badges
-        ? `<div class="portal-empty">Sin datos registrados aún. Ve a "Datos del paciente" para completarlos.</div>`
-        : `
-      ${rows.map(([label, value]) => `<div class="portal-id-card-row"><span>${label}</span><strong>${value}</strong></div>`).join("")}
-      ${badges ? `<div class="portal-id-card-badges">${badges}</div>` : ""}
+    idCardEl.innerHTML = `
+      <div class="portal-id-card-header">
+        <img src="${petInfo.pet_image || ""}" alt="" onerror="this.style.visibility='hidden'" />
+        <div>
+          <strong>${petInfo.pet_name || "Mascota"}</strong>
+          <span>Carnet de identificación</span>
+        </div>
+      </div>
+      <div class="portal-id-card-grid">
+        ${rows
+          .map(
+            ([icon, label, value]) => `
+          <div class="portal-id-card-cell">
+            <span class="portal-id-card-label">${icon} ${label}</span>
+            <strong>${value || "—"}</strong>
+          </div>`
+          )
+          .join("")}
+      </div>
+      <div class="portal-id-card-badges">${badges}</div>
     `;
   }
   renderIdCard();
