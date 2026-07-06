@@ -1187,6 +1187,18 @@ async function showPatientDetail(key, petInfo) {
       </div>
     </div>
 
+    <div class="portal-timeline-filters">
+      <input type="search" id="visit-search" class="portal-search-input" placeholder="Buscar por servicio o nota..." />
+      <select id="visit-status-filter">
+        <option value="">Todos los estados</option>
+        <option value="pending">Pendiente</option>
+        <option value="confirmed">Confirmada</option>
+        <option value="in_progress">En curso</option>
+        <option value="completed">Completada</option>
+        <option value="cancelled">Cancelada</option>
+      </select>
+    </div>
+    <div id="timeline-no-results" class="portal-empty" hidden>Ninguna visita coincide con el filtro.</div>
     <div class="portal-timeline" id="patient-timeline"></div>
   `;
 
@@ -1346,8 +1358,32 @@ async function showPatientDetail(key, petInfo) {
   });
 
   const timeline = patientDetailBody.querySelector("#patient-timeline");
+  const timelineNoResults = patientDetailBody.querySelector("#timeline-no-results");
+  const visitSearch = patientDetailBody.querySelector("#visit-search");
+  const visitStatusFilter = patientDetailBody.querySelector("#visit-status-filter");
 
-  visits.forEach((apt) => {
+  function renderTimeline(list) {
+    timeline.innerHTML = "";
+    timelineNoResults.hidden = list.length > 0;
+    list.forEach((apt) => renderTimelineItem(apt));
+  }
+
+  function applyTimelineFilter() {
+    const q = visitSearch.value.trim().toLowerCase();
+    const statusFilter = visitStatusFilter.value;
+    const filtered = visits.filter((apt) => {
+      const matchesQ =
+        !q || (apt.service || "").toLowerCase().includes(q) || (apt.notes || "").toLowerCase().includes(q);
+      const matchesStatus = !statusFilter || apt.status === statusFilter;
+      return matchesQ && matchesStatus;
+    });
+    renderTimeline(filtered);
+  }
+
+  visitSearch.addEventListener("input", applyTimelineFilter);
+  visitStatusFilter.addEventListener("change", applyTimelineFilter);
+
+  function renderTimelineItem(apt) {
     const item = document.createElement("div");
     item.className = "portal-timeline-item";
 
@@ -1418,7 +1454,9 @@ async function showPatientDetail(key, petInfo) {
 
     item.appendChild(visit);
     timeline.appendChild(item);
-  });
+  }
+
+  renderTimeline(visits);
 
   pacientesGridView.hidden = true;
   patientDetailView.hidden = false;
