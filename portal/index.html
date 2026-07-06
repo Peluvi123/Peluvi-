@@ -136,15 +136,15 @@
                     <input type="text" id="clinica-city" />
                   </label>
                 </div>
-                <div class="portal-field-row">
-                  <label class="portal-field">
-                    <span>WhatsApp</span>
-                    <input type="text" id="clinica-whatsapp" placeholder="+57..." />
-                  </label>
-                  <label class="portal-field">
-                    <span>Horario</span>
-                    <input type="text" id="clinica-schedule" placeholder="Lun-Sáb 7am-8pm | Dom 8am-4pm" />
-                  </label>
+                <label class="portal-field">
+                  <span>WhatsApp</span>
+                  <input type="text" id="clinica-whatsapp" placeholder="+57..." />
+                </label>
+
+                <div class="portal-field">
+                  <span>Horario</span>
+                  <div id="schedule-blocks"></div>
+                  <button type="button" class="portal-visit-toggle" id="schedule-add-block">+ Agregar horario</button>
                 </div>
                 <div class="portal-field">
                   <span>Servicios</span>

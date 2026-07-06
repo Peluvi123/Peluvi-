@@ -209,6 +209,55 @@
   cursor: pointer;
 }
 
+.portal-schedule-block {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.portal-schedule-days {
+  margin-bottom: 10px;
+}
+
+.portal-schedule-days .portal-tag {
+  padding: 5px 11px;
+  font-size: 12px;
+}
+
+.portal-schedule-times {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.portal-schedule-times input[type="time"] {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.portal-schedule-times span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.portal-schedule-remove {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .portal-doctor-card {
   background: var(--panel);
   border: 1px solid var(--line);

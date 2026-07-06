@@ -72,10 +72,82 @@ const clinicaFields = {
   phone: document.getElementById("clinica-phone"),
   city: document.getElementById("clinica-city"),
   whatsapp: document.getElementById("clinica-whatsapp"),
-  schedule: document.getElementById("clinica-schedule"),
   description: document.getElementById("clinica-description"),
   emergency: document.getElementById("clinica-emergency"),
 };
+
+const DAY_OPTIONS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const scheduleBlocksContainer = document.getElementById("schedule-blocks");
+const scheduleAddBlockBtn = document.getElementById("schedule-add-block");
+
+function createScheduleBlock(initial) {
+  const block = document.createElement("div");
+  block.className = "portal-schedule-block";
+
+  const daysWrap = document.createElement("div");
+  daysWrap.className = "portal-tag-picker portal-schedule-days";
+  const selectedDays = new Set(initial?.days || []);
+  DAY_OPTIONS.forEach((day) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "portal-tag" + (selectedDays.has(day) ? " is-selected" : "");
+    chip.textContent = day;
+    chip.dataset.day = day;
+    chip.addEventListener("click", () => {
+      chip.classList.toggle("is-selected");
+    });
+    daysWrap.appendChild(chip);
+  });
+  block.appendChild(daysWrap);
+
+  const timesWrap = document.createElement("div");
+  timesWrap.className = "portal-schedule-times";
+  timesWrap.innerHTML = `
+    <input type="time" class="schedule-open" value="${initial?.open || "08:00"}" />
+    <span>a</span>
+    <input type="time" class="schedule-close" value="${initial?.close || "18:00"}" />
+    <button type="button" class="portal-schedule-remove">✕ Quitar horario</button>
+  `;
+  timesWrap.querySelector(".portal-schedule-remove").addEventListener("click", () => block.remove());
+  block.appendChild(timesWrap);
+
+  scheduleBlocksContainer.appendChild(block);
+  return block;
+}
+
+function renderScheduleBlocks(blocks) {
+  scheduleBlocksContainer.innerHTML = "";
+  if (!blocks || blocks.length === 0) {
+    createScheduleBlock(null);
+    return;
+  }
+  blocks.forEach((b) => createScheduleBlock(b));
+}
+
+scheduleAddBlockBtn.addEventListener("click", () => createScheduleBlock(null));
+
+function formatTime12h(hhmm) {
+  const [h, m] = (hhmm || "00:00").split(":").map(Number);
+  const period = h >= 12 ? "pm" : "am";
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${hour12}:${String(m).padStart(2, "0")}${period}`;
+}
+
+function getScheduleBlocksData() {
+  return Array.from(scheduleBlocksContainer.querySelectorAll(".portal-schedule-block"))
+    .map((block) => ({
+      days: Array.from(block.querySelectorAll(".portal-tag.is-selected")).map((c) => c.dataset.day),
+      open: block.querySelector(".schedule-open").value,
+      close: block.querySelector(".schedule-close").value,
+    }))
+    .filter((b) => b.days.length > 0);
+}
+
+function buildScheduleSummary(blocks) {
+  return blocks
+    .map((b) => `${b.days.join("/")} ${formatTime12h(b.open)}-${formatTime12h(b.close)}`)
+    .join(" | ");
+}
 
 const SERVICE_OPTIONS = [
   "Consulta general", "Vacunación", "Cirugía", "Cirugía menor", "Urgencias 24h",
@@ -247,7 +319,10 @@ function fillClinicForm(profile, vetProfile) {
   clinicaFields.phone.value = profile.phone || "";
   clinicaFields.city.value = profile.city || "";
   clinicaFields.whatsapp.value = vetProfile?.whatsapp || "";
-  clinicaFields.schedule.value = vetProfile?.schedule || "";
+  const validBlocks = (vetProfile?.schedule_details || []).filter(
+    (b) => Array.isArray(b.days) && b.open && b.close
+  );
+  renderScheduleBlocks(validBlocks);
   selectedServices = new Set(vetProfile?.services || []);
   renderServicesPicker();
   clinicaFields.description.value = vetProfile?.description || "";
@@ -362,10 +437,12 @@ clinicaForm.addEventListener("submit", async (e) => {
     })
     .eq("id", session.user.id);
 
+  const scheduleBlocksData = getScheduleBlocksData();
   await supabase.from("vet_profiles").upsert({
     id: session.user.id,
     whatsapp: clinicaFields.whatsapp.value.trim(),
-    schedule: clinicaFields.schedule.value.trim(),
+    schedule: buildScheduleSummary(scheduleBlocksData),
+    schedule_details: scheduleBlocksData,
     services: Array.from(selectedServices),
     description: clinicaFields.description.value.trim(),
     emergency: clinicaFields.emergency.checked,
