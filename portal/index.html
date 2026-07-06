@@ -63,6 +63,20 @@
               <h2>Citas</h2>
               <p class="portal-muted">Todas las citas agendadas contigo.</p>
             </div>
+
+            <div class="portal-calendar">
+              <div class="portal-calendar-head">
+                <button type="button" id="cal-prev" aria-label="Mes anterior">‹</button>
+                <strong id="cal-month-label"></strong>
+                <button type="button" id="cal-next" aria-label="Mes siguiente">›</button>
+              </div>
+              <div class="portal-calendar-weekdays">
+                <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
+              </div>
+              <div class="portal-calendar-grid" id="cal-grid"></div>
+              <button type="button" id="cal-clear" class="portal-cal-clear" hidden>Ver todas las fechas</button>
+            </div>
+
             <div id="citas-empty" class="portal-empty" hidden>Aún no tienes citas agendadas.</div>
             <div id="citas-list" class="portal-list"></div>
           </div>

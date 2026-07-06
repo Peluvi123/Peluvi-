@@ -27,6 +27,30 @@ const citasEmpty = document.getElementById("citas-empty");
 const pacientesList = document.getElementById("pacientes-list");
 const pacientesEmpty = document.getElementById("pacientes-empty");
 
+const calGrid = document.getElementById("cal-grid");
+const calMonthLabel = document.getElementById("cal-month-label");
+const calPrevBtn = document.getElementById("cal-prev");
+const calNextBtn = document.getElementById("cal-next");
+const calClearBtn = document.getElementById("cal-clear");
+
+const MONTH_NAMES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+const WEEKDAY_START = 0; // domingo
+
+let allAppointments = [];
+let calendarViewDate = new Date();
+let selectedDateFilter = null;
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+function toDateKey(year, month, day) {
+  return `${year}-${pad2(month + 1)}-${pad2(day)}`;
+}
+
 const clinicaForm = document.getElementById("clinica-form");
 const clinicaSuccess = document.getElementById("clinica-success");
 const clinicaFields = {
@@ -143,6 +167,74 @@ clinicaForm.addEventListener("submit", async (e) => {
   dashboardGreeting.textContent = `Hola, ${clinicaFields.business_name.value.trim()}`;
 });
 
+function renderCalendar() {
+  const year = calendarViewDate.getFullYear();
+  const month = calendarViewDate.getMonth();
+  calMonthLabel.textContent = `${MONTH_NAMES[month]} ${year}`;
+
+  const datesWithApt = new Set(allAppointments.map((a) => a.date).filter(Boolean));
+
+  const firstDayOfMonth = new Date(year, month, 1);
+  const startOffset = (firstDayOfMonth.getDay() - WEEKDAY_START + 7) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+  calGrid.innerHTML = "";
+
+  const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+  for (let i = 0; i < totalCells; i++) {
+    const dayNum = i - startOffset + 1;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "portal-cal-day";
+
+    let cellKey = null;
+    if (dayNum < 1) {
+      btn.textContent = daysInPrevMonth + dayNum;
+      btn.classList.add("is-outside");
+      btn.disabled = true;
+    } else if (dayNum > daysInMonth) {
+      btn.textContent = dayNum - daysInMonth;
+      btn.classList.add("is-outside");
+      btn.disabled = true;
+    } else {
+      btn.textContent = dayNum;
+      cellKey = toDateKey(year, month, dayNum);
+      if (datesWithApt.has(cellKey)) btn.classList.add("has-apt");
+      if (cellKey === selectedDateFilter) btn.classList.add("is-selected");
+      btn.addEventListener("click", () => {
+        selectedDateFilter = selectedDateFilter === cellKey ? null : cellKey;
+        renderCalendar();
+        renderCitas(filterAppointments());
+      });
+    }
+    calGrid.appendChild(btn);
+  }
+
+  calClearBtn.hidden = !selectedDateFilter;
+}
+
+function filterAppointments() {
+  if (!selectedDateFilter) return allAppointments;
+  return allAppointments.filter((a) => a.date === selectedDateFilter);
+}
+
+calPrevBtn.addEventListener("click", () => {
+  calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() - 1, 1);
+  renderCalendar();
+});
+
+calNextBtn.addEventListener("click", () => {
+  calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() + 1, 1);
+  renderCalendar();
+});
+
+calClearBtn.addEventListener("click", () => {
+  selectedDateFilter = null;
+  renderCalendar();
+  renderCitas(filterAppointments());
+});
+
 function renderCitas(appointments) {
   citasList.innerHTML = "";
   citasEmpty.hidden = appointments.length > 0;
@@ -209,9 +301,15 @@ async function loadTabData({ session }) {
     .eq("vet_id", session.user.id)
     .order("date", { ascending: true });
 
-  const appointments = data || [];
-  renderCitas(appointments);
-  renderPacientes(appointments);
+  allAppointments = data || [];
+  selectedDateFilter = null;
+  if (allAppointments[0]?.date) {
+    const [y, m] = allAppointments[0].date.split("-").map(Number);
+    calendarViewDate = new Date(y, m - 1, 1);
+  }
+  renderCalendar();
+  renderCitas(filterAppointments());
+  renderPacientes(allAppointments);
 }
 
 (async function init() {
