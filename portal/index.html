@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal de veterinarias | Peluvi</title>
+    <meta name="robots" content="noindex" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="portal.css?v=1" />
+  </head>
+  <body class="portal-body">
+    <div class="portal-shell">
+      <header class="portal-header">
+        <a class="portal-brand" href="/">
+          <img src="../assets/peluvi-logo.png" alt="" />
+          <span>Peluvi <em>veterinarias</em></span>
+        </a>
+        <button class="portal-logout" id="logout-btn" hidden>Salir</button>
+      </header>
+
+      <main class="portal-main">
+        <!-- Login -->
+        <section class="portal-login" id="login-view">
+          <div class="portal-login-card">
+            <h1>Portal de veterinarias</h1>
+            <p class="portal-muted">Ingresa con la cuenta de tu clínica para gestionar tus citas.</p>
+            <form id="login-form">
+              <label class="portal-field">
+                <span>Correo</span>
+                <input type="email" id="login-email" required autocomplete="username" />
+              </label>
+              <label class="portal-field">
+                <span>Contraseña</span>
+                <input type="password" id="login-password" required autocomplete="current-password" />
+              </label>
+              <button type="submit" id="login-submit">Ingresar</button>
+              <p class="portal-error" id="login-error" hidden></p>
+            </form>
+          </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section class="portal-dashboard" id="dashboard-view" hidden>
+          <div class="portal-welcome">
+            <h1 id="dashboard-greeting">Hola</h1>
+            <p class="portal-muted" id="dashboard-sub"></p>
+          </div>
+
+          <nav class="portal-tabs" role="tablist">
+            <button class="portal-tab is-active" data-tab="citas" type="button">Citas</button>
+            <button class="portal-tab" data-tab="pacientes" type="button">Pacientes</button>
+            <button class="portal-tab" data-tab="clinica" type="button">Clínica</button>
+          </nav>
+
+          <div class="portal-panel" data-panel="citas">
+            <div class="portal-panel-head">
+              <h2>Citas</h2>
+              <p class="portal-muted">Todas las citas agendadas contigo.</p>
+            </div>
+            <div id="citas-empty" class="portal-empty" hidden>Aún no tienes citas agendadas.</div>
+            <div id="citas-list" class="portal-list"></div>
+          </div>
+
+          <div class="portal-panel" data-panel="pacientes" hidden>
+            <div class="portal-panel-head">
+              <h2>Pacientes</h2>
+              <p class="portal-muted">Mascotas que han agendado contigo.</p>
+            </div>
+            <div id="pacientes-empty" class="portal-empty" hidden>Aún no tienes pacientes registrados.</div>
+            <div id="pacientes-list" class="portal-grid"></div>
+          </div>
+
+          <div class="portal-panel" data-panel="clinica" hidden>
+            <div class="portal-panel-head">
+              <h2>Clínica</h2>
+              <p class="portal-muted">Información visible en tu perfil público.</p>
+            </div>
+            <form id="clinica-form" class="portal-clinic-form">
+              <label class="portal-field">
+                <span>Nombre del negocio</span>
+                <input type="text" id="clinica-business-name" />
+              </label>
+              <label class="portal-field">
+                <span>Dirección</span>
+                <input type="text" id="clinica-address" />
+              </label>
+              <label class="portal-field">
+                <span>Teléfono</span>
+                <input type="text" id="clinica-phone" />
+              </label>
+              <label class="portal-field">
+                <span>Ciudad</span>
+                <input type="text" id="clinica-city" />
+              </label>
+              <button type="submit" id="clinica-save">Guardar cambios</button>
+              <p class="portal-success" id="clinica-success" hidden>Guardado ✓</p>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="portal.js?v=1"></script>
+  </body>
+</html>

@@ -117,7 +117,11 @@ async function serveStatic(pathname, response, request) {
     return;
   }
 
-  const finalPath = existsSync(filePath) ? filePath : join(root, "index.html");
+  let resolvedPath = filePath;
+  if (existsSync(resolvedPath) && statSync(resolvedPath).isDirectory()) {
+    resolvedPath = join(resolvedPath, "index.html");
+  }
+  const finalPath = existsSync(resolvedPath) ? resolvedPath : join(root, "index.html");
   const ext = extname(finalPath);
   const contentType = mimeTypes[ext] || "application/octet-stream";
 
