@@ -745,8 +745,8 @@ function buildPrescriptionHTML(rx, apt) {
       <meta charset="UTF-8" />
       <title>Orden médica — ${apt.pet_name || ""}</title>
       <style>
-        @page { size: 5.5in 8.5in; margin: 0.35in; }
-        * { box-sizing: border-box; }
+        @page { size: 5.5in 8.5in; margin: 0; }
+        * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         html, body { margin: 0; }
         body {
           font-family: -apple-system, Arial, sans-serif;
@@ -754,23 +754,36 @@ function buildPrescriptionHTML(rx, apt) {
           width: 5.5in;
           max-width: 100%;
           margin: 0 auto;
-          padding: 24px;
         }
-        h1 { margin: 0 0 2px; font-size: 18px; }
-        .muted { color: #6c6480; font-size: 11px; margin: 0 0 14px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 12px; gap: 8px; flex-wrap: wrap; }
+        .content { padding: 24px; }
+        .header-band {
+          background: linear-gradient(135deg, #6d38ee, #9c56ff);
+          color: #fff;
+          padding: 22px 24px;
+        }
+        .header-band h1 { margin: 0 0 2px; font-size: 18px; }
+        .header-band p { margin: 0; font-size: 11px; color: rgba(255, 255, 255, 0.85); }
+        .row { display: flex; justify-content: space-between; margin: 18px 0 16px; font-size: 12px; gap: 8px; flex-wrap: wrap; }
+        .row strong { color: #6d38ee; }
         .section-label {
-          font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
-          color: #6c6480; margin: 18px 0 6px; border-bottom: 1px solid #e5e1f0; padding-bottom: 4px;
+          font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+          color: #6d38ee; margin: 18px 0 8px; padding-bottom: 5px; border-bottom: 2px solid #6d38ee;
+          display: inline-block;
         }
-        .med { padding: 8px 0; border-bottom: 1px dashed #e5e1f0; font-size: 13px; }
-        .med-name { font-weight: 700; }
+        .med {
+          padding: 8px 10px; margin-bottom: 6px; font-size: 13px;
+          background: #f5f1fd; border-left: 3px solid #6d38ee; border-radius: 0 8px 8px 0;
+        }
+        .med-name { font-weight: 700; color: #1c1330; }
         .med-detail { color: #6c6480; font-size: 11px; margin-top: 1px; }
-        .med-instructions { font-style: italic; font-size: 11px; margin-top: 2px; }
-        .free-text { font-size: 12px; white-space: pre-wrap; }
+        .med-instructions { font-style: italic; font-size: 11px; margin-top: 2px; color: #6d38ee; }
+        .free-text-box {
+          font-size: 12px; white-space: pre-wrap; background: #f5f1fd;
+          border-radius: 8px; padding: 10px 12px; border-left: 3px solid #9c56ff;
+        }
         .sign { margin-top: 50px; }
-        .sign-line { border-top: 1px solid #1c1330; width: 220px; padding-top: 6px; font-size: 11px; color: #6c6480; }
-        .print-bar { margin-bottom: 20px; }
+        .sign-line { border-top: 2px solid #6d38ee; width: 220px; padding-top: 6px; font-size: 11px; color: #6c6480; }
+        .print-bar { padding: 16px 24px 0; }
         .print-bar button {
           background: linear-gradient(135deg, #6d38ee, #9c56ff); border: none; color: #fff;
           font-weight: 700; font-size: 13px; padding: 8px 18px; border-radius: 999px; cursor: pointer;
@@ -782,21 +795,25 @@ function buildPrescriptionHTML(rx, apt) {
       <div class="print-bar no-print">
         <button onclick="window.print()">🖨️ Imprimir</button>
       </div>
-      <h1>${currentProfile?.business_name || currentProfile?.name || ""}</h1>
-      <p class="muted">${currentProfile?.address || ""}${currentProfile?.phone ? " · " + currentProfile.phone : ""}</p>
-      <div class="row">
-        <span><strong>Paciente:</strong> ${apt.pet_name || ""} (${apt.pet_breed || ""})</span>
-        <span><strong>Fecha:</strong> ${date}</span>
+      <div class="header-band">
+        <h1>${currentProfile?.business_name || currentProfile?.name || ""}</h1>
+        <p>${currentProfile?.address || ""}${currentProfile?.phone ? " · " + currentProfile.phone : ""}</p>
       </div>
+      <div class="content">
+        <div class="row">
+          <span><strong>Paciente:</strong> ${apt.pet_name || ""} (${apt.pet_breed || ""})</span>
+          <span><strong>Fecha:</strong> ${date}</span>
+        </div>
 
-      <div class="section-label">Medicamentos</div>
-      ${meds}
+        <div class="section-label">Medicamentos</div>
+        ${meds}
 
-      ${rx.notes ? `<div class="section-label">Exámenes solicitados</div><p class="free-text">${rx.notes}</p>` : ""}
-      ${rx.recommendations ? `<div class="section-label">Recomendaciones</div><p class="free-text">${rx.recommendations}</p>` : ""}
+        ${rx.notes ? `<div class="section-label">Exámenes solicitados</div><div class="free-text-box">${rx.notes}</div>` : ""}
+        ${rx.recommendations ? `<div class="section-label">Recomendaciones</div><div class="free-text-box">${rx.recommendations}</div>` : ""}
 
-      <div class="sign">
-        <div class="sign-line">Firma del veterinario</div>
+        <div class="sign">
+          <div class="sign-line">Firma del veterinario</div>
+        </div>
       </div>
     </body>
     </html>
