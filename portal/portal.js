@@ -711,7 +711,7 @@ function createMedicationRow(rowsContainer) {
   return row;
 }
 
-function printPrescription(rx, apt) {
+function buildPrescriptionHTML(rx, apt) {
   const meds = (rx.medications || [])
     .map(
       (m) => `
@@ -726,7 +726,7 @@ function printPrescription(rx, apt) {
     .join("");
   const date = rx.created_at ? new Date(rx.created_at).toLocaleDateString("es-CO") : "";
 
-  const html = `
+  return `
     <!doctype html>
     <html lang="es">
     <head>
@@ -744,10 +744,18 @@ function printPrescription(rx, apt) {
         .notes h3 { font-size: 13px; margin-bottom: 6px; }
         .sign { margin-top: 60px; }
         .sign-line { border-top: 1px solid #1c1330; width: 260px; padding-top: 6px; font-size: 12px; color: #6c6480; }
-        @media print { body { padding: 0; } }
+        .print-bar { margin-bottom: 24px; }
+        .print-bar button {
+          background: linear-gradient(135deg, #6d38ee, #9c56ff); border: none; color: #fff;
+          font-weight: 700; font-size: 13px; padding: 8px 18px; border-radius: 999px; cursor: pointer;
+        }
+        @media print { body { padding: 0; } .no-print { display: none; } }
       </style>
     </head>
     <body>
+      <div class="print-bar no-print">
+        <button onclick="window.print()">🖨️ Imprimir</button>
+      </div>
       <h1>${currentProfile?.business_name || currentProfile?.name || ""}</h1>
       <p class="muted">${currentProfile?.address || ""}${currentProfile?.phone ? " · " + currentProfile.phone : ""}</p>
       <div class="row">
@@ -767,9 +775,18 @@ function printPrescription(rx, apt) {
     </body>
     </html>
   `;
+}
 
+function previewPrescription(rx, apt) {
   const win = window.open("", "_blank");
-  win.document.write(html);
+  win.document.write(buildPrescriptionHTML(rx, apt));
+  win.document.close();
+  win.focus();
+}
+
+function printPrescription(rx, apt) {
+  const win = window.open("", "_blank");
+  win.document.write(buildPrescriptionHTML(rx, apt));
   win.document.close();
   win.focus();
   win.print();
@@ -792,12 +809,25 @@ function renderRxList(container, prescriptions, apt) {
     const date = rx.created_at ? new Date(rx.created_at).toLocaleDateString("es-CO") : "";
     const notesHtml = rx.notes ? `<div class="portal-rx-med"><span>🧪 ${rx.notes}</span></div>` : "";
     card.innerHTML = `<span class="portal-rx-date">${date}</span>${meds}${notesHtml}`;
+
+    const actions = document.createElement("div");
+    actions.className = "portal-rx-card-actions";
+
+    const previewBtn = document.createElement("button");
+    previewBtn.type = "button";
+    previewBtn.className = "portal-rx-print";
+    previewBtn.textContent = "👁️ Previsualizar";
+    previewBtn.addEventListener("click", () => previewPrescription(rx, apt));
+    actions.appendChild(previewBtn);
+
     const printBtn = document.createElement("button");
     printBtn.type = "button";
     printBtn.className = "portal-rx-print";
     printBtn.textContent = "🖨️ Imprimir orden";
     printBtn.addEventListener("click", () => printPrescription(rx, apt));
-    card.appendChild(printBtn);
+    actions.appendChild(printBtn);
+
+    card.appendChild(actions);
     container.appendChild(card);
   });
 }

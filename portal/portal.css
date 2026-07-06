@@ -412,6 +412,12 @@
   border-color: var(--purple-bright);
 }
 
+.portal-rx-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .portal-rx-print {
   background: none;
   border: 1px solid var(--line);
@@ -421,7 +427,6 @@
   font-size: 11px;
   padding: 4px 11px;
   cursor: pointer;
-  margin-top: 8px;
 }
 
 .portal-rx-print:hover {
