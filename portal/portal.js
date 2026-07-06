@@ -58,7 +58,17 @@ const clinicaFields = {
   address: document.getElementById("clinica-address"),
   phone: document.getElementById("clinica-phone"),
   city: document.getElementById("clinica-city"),
+  whatsapp: document.getElementById("clinica-whatsapp"),
+  schedule: document.getElementById("clinica-schedule"),
+  services: document.getElementById("clinica-services"),
+  description: document.getElementById("clinica-description"),
+  emergency: document.getElementById("clinica-emergency"),
 };
+
+const doctorsList = document.getElementById("clinica-doctors-list");
+const doctorsEmpty = document.getElementById("clinica-doctors-empty");
+const imagesList = document.getElementById("clinica-images-list");
+const imagesEmpty = document.getElementById("clinica-images-empty");
 
 function showLogin(message) {
   loginView.hidden = false;
@@ -97,9 +107,17 @@ async function requireProviderSession() {
     return null;
   }
 
+  const { data: vetProfile } = await supabase
+    .from("vet_profiles")
+    .select("*")
+    .eq("id", session.user.id)
+    .maybeSingle();
+
   showDashboard(profile);
-  fillClinicForm(profile);
-  return { session, profile };
+  fillClinicForm(profile, vetProfile);
+  renderDoctors(vetProfile?.doctors ?? []);
+  renderClinicImages(vetProfile?.images ?? []);
+  return { session, profile, vetProfile };
 }
 
 loginForm.addEventListener("submit", async (e) => {
@@ -140,11 +158,45 @@ document.querySelectorAll(".portal-tab").forEach((btn) => {
   });
 });
 
-function fillClinicForm(profile) {
+function fillClinicForm(profile, vetProfile) {
   clinicaFields.business_name.value = profile.business_name || "";
   clinicaFields.address.value = profile.address || "";
   clinicaFields.phone.value = profile.phone || "";
   clinicaFields.city.value = profile.city || "";
+  clinicaFields.whatsapp.value = vetProfile?.whatsapp || "";
+  clinicaFields.schedule.value = vetProfile?.schedule || "";
+  clinicaFields.services.value = (vetProfile?.services || []).join(", ");
+  clinicaFields.description.value = vetProfile?.description || "";
+  clinicaFields.emergency.checked = !!vetProfile?.emergency;
+}
+
+function renderDoctors(doctors) {
+  doctorsList.innerHTML = "";
+  doctorsEmpty.hidden = doctors.length > 0;
+  doctors.forEach((doc) => {
+    const card = document.createElement("div");
+    card.className = "portal-doctor-card";
+    card.innerHTML = `
+      <img src="${doc.photo || ""}" alt="" onerror="this.style.visibility='hidden'" />
+      <strong>${doc.name || ""}</strong>
+      <span>${doc.specialty || ""}</span>
+      <span class="portal-doctor-badge ${doc.available ? "is-available" : "is-unavailable"}">
+        ${doc.available ? "Disponible" : "No disponible"}
+      </span>
+    `;
+    doctorsList.appendChild(card);
+  });
+}
+
+function renderClinicImages(images) {
+  imagesList.innerHTML = "";
+  imagesEmpty.hidden = images.length > 0;
+  images.forEach((url) => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = "";
+    imagesList.appendChild(img);
+  });
 }
 
 clinicaForm.addEventListener("submit", async (e) => {
@@ -162,6 +214,18 @@ clinicaForm.addEventListener("submit", async (e) => {
       city: clinicaFields.city.value.trim(),
     })
     .eq("id", session.user.id);
+
+  await supabase.from("vet_profiles").upsert({
+    id: session.user.id,
+    whatsapp: clinicaFields.whatsapp.value.trim(),
+    schedule: clinicaFields.schedule.value.trim(),
+    services: clinicaFields.services.value
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
+    description: clinicaFields.description.value.trim(),
+    emergency: clinicaFields.emergency.checked,
+  });
 
   clinicaSuccess.hidden = false;
   dashboardGreeting.textContent = `Hola, ${clinicaFields.business_name.value.trim()}`;

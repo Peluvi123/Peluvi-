@@ -112,9 +112,43 @@
                 <span>Ciudad</span>
                 <input type="text" id="clinica-city" />
               </label>
+              <label class="portal-field">
+                <span>WhatsApp</span>
+                <input type="text" id="clinica-whatsapp" placeholder="+57..." />
+              </label>
+              <label class="portal-field">
+                <span>Horario</span>
+                <input type="text" id="clinica-schedule" placeholder="Lun-Sáb 7am-8pm | Dom 8am-4pm" />
+              </label>
+              <label class="portal-field">
+                <span>Servicios (separados por coma)</span>
+                <input type="text" id="clinica-services" placeholder="Consulta general, Vacunación, Cirugía..." />
+              </label>
+              <label class="portal-field">
+                <span>Descripción</span>
+                <textarea id="clinica-description" rows="4" placeholder="Cuéntale a los dueños de mascotas sobre tu clínica..."></textarea>
+              </label>
+              <label class="portal-checkbox">
+                <input type="checkbox" id="clinica-emergency" />
+                <span>Atendemos urgencias 24h</span>
+              </label>
               <button type="submit" id="clinica-save">Guardar cambios</button>
               <p class="portal-success" id="clinica-success" hidden>Guardado ✓</p>
             </form>
+
+            <div class="portal-panel-head" style="margin-top: 32px">
+              <h2>Equipo médico</h2>
+              <p class="portal-muted">Doctores registrados en tu perfil.</p>
+            </div>
+            <div id="clinica-doctors-empty" class="portal-empty" hidden>Aún no tienes doctores registrados.</div>
+            <div id="clinica-doctors-list" class="portal-grid"></div>
+
+            <div class="portal-panel-head" style="margin-top: 32px">
+              <h2>Fotos de la clínica</h2>
+              <p class="portal-muted">Imágenes visibles en tu perfil público.</p>
+            </div>
+            <div id="clinica-images-empty" class="portal-empty" hidden>Aún no tienes fotos registradas.</div>
+            <div id="clinica-images-list" class="portal-photo-grid"></div>
           </div>
         </section>
       </main>
