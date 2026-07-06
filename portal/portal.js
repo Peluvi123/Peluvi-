@@ -552,6 +552,7 @@ function refreshCitasViews() {
   renderCalendar();
   renderCitas(filterAppointments());
   renderPendingCitas();
+  renderDashboard();
 }
 
 function buildAppointmentCard(apt) {
@@ -1441,6 +1442,37 @@ async function loadTabData({ session }) {
   renderCitas(filterAppointments());
   renderPendingCitas();
   renderPacientes(allAppointments);
+  renderDashboard();
+}
+
+const statToday = document.getElementById("stat-today");
+const statPending = document.getElementById("stat-pending");
+const statPatients = document.getElementById("stat-patients");
+const statMonth = document.getElementById("stat-month");
+const todayDateLabel = document.getElementById("today-date-label");
+const todayEmpty = document.getElementById("today-empty");
+const todayList = document.getElementById("today-list");
+
+function renderDashboard() {
+  const now = new Date();
+  const todayKey = toDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+  const monthPrefix = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}`;
+
+  const todaysAppointments = allAppointments.filter((a) => a.date === todayKey);
+  const pendingCount = allAppointments.filter((a) => a.status === "pending").length;
+  const monthCount = allAppointments.filter((a) => (a.date || "").startsWith(monthPrefix)).length;
+  const patientKeys = new Set(allAppointments.map((a) => a.pet_id || a.pet_name).filter(Boolean));
+
+  statToday.textContent = todaysAppointments.length;
+  statPending.textContent = pendingCount;
+  statPatients.textContent = patientKeys.size;
+  statMonth.textContent = monthCount;
+
+  todayDateLabel.textContent = now.toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" });
+
+  todayList.innerHTML = "";
+  todayEmpty.hidden = todaysAppointments.length > 0;
+  todaysAppointments.forEach((apt) => todayList.appendChild(buildAppointmentCard(apt)));
 }
 
 (async function init() {

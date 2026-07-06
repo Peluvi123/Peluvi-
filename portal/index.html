@@ -53,12 +53,41 @@
           </div>
 
           <nav class="portal-tabs" role="tablist">
-            <button class="portal-tab is-active" data-tab="citas" type="button">Citas</button>
+            <button class="portal-tab is-active" data-tab="inicio" type="button">Inicio</button>
+            <button class="portal-tab" data-tab="citas" type="button">Citas</button>
             <button class="portal-tab" data-tab="pacientes" type="button">Pacientes</button>
             <button class="portal-tab" data-tab="clinica" type="button">Clínica</button>
           </nav>
 
-          <div class="portal-panel" data-panel="citas">
+          <div class="portal-panel" data-panel="inicio">
+            <div class="portal-stats-row">
+              <div class="portal-stat-card">
+                <span id="stat-today">0</span>
+                <p>Citas hoy</p>
+              </div>
+              <div class="portal-stat-card is-accent">
+                <span id="stat-pending">0</span>
+                <p>Por aprobar</p>
+              </div>
+              <div class="portal-stat-card">
+                <span id="stat-patients">0</span>
+                <p>Pacientes</p>
+              </div>
+              <div class="portal-stat-card">
+                <span id="stat-month">0</span>
+                <p>Citas este mes</p>
+              </div>
+            </div>
+
+            <div class="portal-panel-head" style="margin-top: 28px">
+              <h2>Agenda de hoy</h2>
+              <p class="portal-muted" id="today-date-label"></p>
+            </div>
+            <div id="today-empty" class="portal-empty" hidden>No tienes citas agendadas para hoy.</div>
+            <div id="today-list" class="portal-list"></div>
+          </div>
+
+          <div class="portal-panel" data-panel="citas" hidden>
             <div class="portal-panel-head">
               <h2>Citas</h2>
               <p class="portal-muted">Todas las citas agendadas contigo.</p>
