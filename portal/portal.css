@@ -645,6 +645,27 @@
   cursor: pointer;
 }
 
+.portal-proposal-banner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 176, 32, 0.12), rgba(255, 136, 32, 0.1));
+  border: 1px solid rgba(255, 176, 32, 0.3);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.portal-proposal-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .portal-reschedule-form {
   width: 100%;
   display: flex;

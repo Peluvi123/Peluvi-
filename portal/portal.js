@@ -675,18 +675,50 @@ function buildAppointmentCard(apt) {
   const rescheduleToggle = document.createElement("button");
   rescheduleToggle.type = "button";
   rescheduleToggle.className = "portal-reschedule-toggle";
-  rescheduleToggle.textContent = "Reprogramar";
+  rescheduleToggle.textContent = apt.reschedule_status === "pending" ? "Proponer otra hora" : "Reprogramar";
   actions.appendChild(rescheduleToggle);
 
   card.appendChild(actions);
+
+  // Banner de propuesta de reprogramación pendiente
+  if (apt.reschedule_status === "pending") {
+    const banner = document.createElement("div");
+    banner.className = "portal-proposal-banner";
+    if (apt.proposed_by === "client") {
+      banner.innerHTML = `
+        <span>🔄 El cliente propone: <strong>${apt.proposed_date || ""} ${apt.proposed_time || ""}</strong></span>
+        <div class="portal-proposal-actions">
+          <button type="button" class="portal-approve-btn portal-proposal-accept">Aceptar propuesta del cliente</button>
+        </div>
+      `;
+      banner.querySelector(".portal-proposal-accept").addEventListener("click", async () => {
+        const newDate = apt.proposed_date;
+        const newTime = apt.proposed_time;
+        await supabase.from("appointments").update({
+          date: newDate, time: newTime,
+          proposed_date: null, proposed_time: null, proposed_by: null, reschedule_status: null,
+        }).eq("id", apt.id);
+        apt.date = newDate;
+        apt.time = newTime;
+        apt.proposed_date = null;
+        apt.proposed_time = null;
+        apt.proposed_by = null;
+        apt.reschedule_status = null;
+        refreshCitasViews();
+      });
+    } else {
+      banner.innerHTML = `<span>⏳ Esperando que el cliente confirme: <strong>${apt.proposed_date || ""} ${apt.proposed_time || ""}</strong></span>`;
+    }
+    card.appendChild(banner);
+  }
 
   const rescheduleForm = document.createElement("div");
   rescheduleForm.className = "portal-reschedule-form";
   rescheduleForm.hidden = true;
   rescheduleForm.innerHTML = `
-    <input type="date" class="reschedule-date" value="${apt.date || ""}" />
-    <input type="text" class="reschedule-time" value="${apt.time || ""}" placeholder="Hora, ej. 10:00 AM" />
-    <button type="button" class="portal-reschedule-save">Guardar cambios</button>
+    <input type="date" class="reschedule-date" value="${apt.proposed_date || apt.date || ""}" />
+    <input type="text" class="reschedule-time" value="${apt.proposed_time || apt.time || ""}" placeholder="Hora, ej. 10:00 AM" />
+    <button type="button" class="portal-reschedule-save">Enviar propuesta</button>
   `;
   rescheduleToggle.addEventListener("click", () => {
     rescheduleForm.hidden = !rescheduleForm.hidden;
@@ -695,18 +727,20 @@ function buildAppointmentCard(apt) {
     const newDate = rescheduleForm.querySelector(".reschedule-date").value;
     const newTime = rescheduleForm.querySelector(".reschedule-time").value.trim();
     if (!newDate || !newTime) return;
-    const previousDate = apt.date;
-    const previousTime = apt.time;
-    await supabase.from("appointments").update({ date: newDate, time: newTime }).eq("id", apt.id);
-    apt.date = newDate;
-    apt.time = newTime;
+    await supabase.from("appointments").update({
+      proposed_date: newDate, proposed_time: newTime, proposed_by: "vet", reschedule_status: "pending",
+    }).eq("id", apt.id);
+    apt.proposed_date = newDate;
+    apt.proposed_time = newTime;
+    apt.proposed_by = "vet";
+    apt.reschedule_status = "pending";
 
-    if (apt.user_id && (newDate !== previousDate || newTime !== previousTime)) {
+    if (apt.user_id) {
       await supabase.from("notifications").insert({
         user_id: apt.user_id,
-        type: "reminder_day",
-        title: "📅 Tu cita fue reprogramada",
-        body: `Tu cita para ${apt.pet_name || "tu mascota"} en ${apt.vet_name || "la clínica"} fue movida a ${newDate} a las ${newTime}. Por favor confírmanos si te funciona.`,
+        type: "reschedule_proposed",
+        title: "🔄 Tu veterinario propone una nueva fecha",
+        body: `Tu veterinaria propone mover la cita de ${apt.pet_name || "tu mascota"} en ${apt.vet_name || "la clínica"} a ${newDate} a las ${newTime}. Ingresa a la app para aceptar, rechazar o proponer otra hora.`,
         appointment_id: apt.id,
       });
     }
