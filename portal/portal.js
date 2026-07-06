@@ -77,54 +77,39 @@ const clinicaFields = {
 };
 
 const DAY_OPTIONS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-const scheduleBlocksContainer = document.getElementById("schedule-blocks");
-const scheduleAddBlockBtn = document.getElementById("schedule-add-block");
+const scheduleDaysList = document.getElementById("schedule-days-list");
 
-function createScheduleBlock(initial) {
-  const block = document.createElement("div");
-  block.className = "portal-schedule-block";
+function renderScheduleDays(dayEntries) {
+  const byDay = new Map((dayEntries || []).map((e) => [e.day, e]));
+  scheduleDaysList.innerHTML = "";
 
-  const daysWrap = document.createElement("div");
-  daysWrap.className = "portal-tag-picker portal-schedule-days";
-  const selectedDays = new Set(initial?.days || []);
   DAY_OPTIONS.forEach((day) => {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "portal-tag" + (selectedDays.has(day) ? " is-selected" : "");
-    chip.textContent = day;
-    chip.dataset.day = day;
-    chip.addEventListener("click", () => {
-      chip.classList.toggle("is-selected");
+    const existing = byDay.get(day);
+    const row = document.createElement("div");
+    row.className = "portal-schedule-day-row";
+    row.dataset.day = day;
+    row.innerHTML = `
+      <label class="portal-checkbox portal-schedule-day-toggle">
+        <input type="checkbox" class="schedule-day-open" ${existing ? "checked" : ""} />
+        <span>${day}</span>
+      </label>
+      <div class="portal-schedule-day-times" ${existing ? "" : "hidden"}>
+        <input type="time" class="schedule-open" value="${existing?.open || "08:00"}" />
+        <span>a</span>
+        <input type="time" class="schedule-close" value="${existing?.close || "18:00"}" />
+      </div>
+      <span class="portal-muted portal-schedule-closed-label" ${existing ? "hidden" : ""}>Cerrado</span>
+    `;
+    const checkbox = row.querySelector(".schedule-day-open");
+    const timesWrap = row.querySelector(".portal-schedule-day-times");
+    const closedLabel = row.querySelector(".portal-schedule-closed-label");
+    checkbox.addEventListener("change", () => {
+      timesWrap.hidden = !checkbox.checked;
+      closedLabel.hidden = checkbox.checked;
     });
-    daysWrap.appendChild(chip);
+    scheduleDaysList.appendChild(row);
   });
-  block.appendChild(daysWrap);
-
-  const timesWrap = document.createElement("div");
-  timesWrap.className = "portal-schedule-times";
-  timesWrap.innerHTML = `
-    <input type="time" class="schedule-open" value="${initial?.open || "08:00"}" />
-    <span>a</span>
-    <input type="time" class="schedule-close" value="${initial?.close || "18:00"}" />
-    <button type="button" class="portal-schedule-remove">✕ Quitar horario</button>
-  `;
-  timesWrap.querySelector(".portal-schedule-remove").addEventListener("click", () => block.remove());
-  block.appendChild(timesWrap);
-
-  scheduleBlocksContainer.appendChild(block);
-  return block;
 }
-
-function renderScheduleBlocks(blocks) {
-  scheduleBlocksContainer.innerHTML = "";
-  if (!blocks || blocks.length === 0) {
-    createScheduleBlock(null);
-    return;
-  }
-  blocks.forEach((b) => createScheduleBlock(b));
-}
-
-scheduleAddBlockBtn.addEventListener("click", () => createScheduleBlock(null));
 
 function formatTime12h(hhmm) {
   const [h, m] = (hhmm || "00:00").split(":").map(Number);
@@ -133,19 +118,37 @@ function formatTime12h(hhmm) {
   return `${hour12}:${String(m).padStart(2, "0")}${period}`;
 }
 
-function getScheduleBlocksData() {
-  return Array.from(scheduleBlocksContainer.querySelectorAll(".portal-schedule-block"))
-    .map((block) => ({
-      days: Array.from(block.querySelectorAll(".portal-tag.is-selected")).map((c) => c.dataset.day),
-      open: block.querySelector(".schedule-open").value,
-      close: block.querySelector(".schedule-close").value,
-    }))
-    .filter((b) => b.days.length > 0);
+function getScheduleData() {
+  return Array.from(scheduleDaysList.querySelectorAll(".portal-schedule-day-row"))
+    .filter((row) => row.querySelector(".schedule-day-open").checked)
+    .map((row) => ({
+      day: row.dataset.day,
+      open: row.querySelector(".schedule-open").value,
+      close: row.querySelector(".schedule-close").value,
+    }));
 }
 
-function buildScheduleSummary(blocks) {
-  return blocks
-    .map((b) => `${b.days.join("/")} ${formatTime12h(b.open)}-${formatTime12h(b.close)}`)
+function buildScheduleSummary(dayEntries) {
+  const groups = [];
+  dayEntries.forEach((entry) => {
+    const last = groups[groups.length - 1];
+    const isConsecutive =
+      last &&
+      last.open === entry.open &&
+      last.close === entry.close &&
+      DAY_OPTIONS.indexOf(entry.day) === DAY_OPTIONS.indexOf(last.days[last.days.length - 1]) + 1;
+    if (isConsecutive) {
+      last.days.push(entry.day);
+    } else {
+      groups.push({ days: [entry.day], open: entry.open, close: entry.close });
+    }
+  });
+
+  return groups
+    .map((g) => {
+      const label = g.days.length > 1 ? `${g.days[0]}-${g.days[g.days.length - 1]}` : g.days[0];
+      return `${label} ${formatTime12h(g.open)}-${formatTime12h(g.close)}`;
+    })
     .join(" | ");
 }
 
@@ -319,10 +322,10 @@ function fillClinicForm(profile, vetProfile) {
   clinicaFields.phone.value = profile.phone || "";
   clinicaFields.city.value = profile.city || "";
   clinicaFields.whatsapp.value = vetProfile?.whatsapp || "";
-  const validBlocks = (vetProfile?.schedule_details || []).filter(
-    (b) => Array.isArray(b.days) && b.open && b.close
+  const validDayEntries = (vetProfile?.schedule_details || []).filter(
+    (e) => typeof e.day === "string" && e.open && e.close
   );
-  renderScheduleBlocks(validBlocks);
+  renderScheduleDays(validDayEntries);
   selectedServices = new Set(vetProfile?.services || []);
   renderServicesPicker();
   clinicaFields.description.value = vetProfile?.description || "";
@@ -437,12 +440,12 @@ clinicaForm.addEventListener("submit", async (e) => {
     })
     .eq("id", session.user.id);
 
-  const scheduleBlocksData = getScheduleBlocksData();
+  const scheduleData = getScheduleData();
   await supabase.from("vet_profiles").upsert({
     id: session.user.id,
     whatsapp: clinicaFields.whatsapp.value.trim(),
-    schedule: buildScheduleSummary(scheduleBlocksData),
-    schedule_details: scheduleBlocksData,
+    schedule: buildScheduleSummary(scheduleData),
+    schedule_details: scheduleData,
     services: Array.from(selectedServices),
     description: clinicaFields.description.value.trim(),
     emergency: clinicaFields.emergency.checked,
