@@ -64,21 +64,25 @@
               <p class="portal-muted">Todas las citas agendadas contigo.</p>
             </div>
 
-            <div class="portal-calendar">
-              <div class="portal-calendar-head">
-                <button type="button" id="cal-prev" aria-label="Mes anterior">‹</button>
-                <strong id="cal-month-label"></strong>
-                <button type="button" id="cal-next" aria-label="Mes siguiente">›</button>
+            <div class="portal-citas-layout">
+              <div class="portal-calendar">
+                <div class="portal-calendar-head">
+                  <button type="button" id="cal-prev" aria-label="Mes anterior">‹</button>
+                  <strong id="cal-month-label"></strong>
+                  <button type="button" id="cal-next" aria-label="Mes siguiente">›</button>
+                </div>
+                <div class="portal-calendar-weekdays">
+                  <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
+                </div>
+                <div class="portal-calendar-grid" id="cal-grid"></div>
+                <button type="button" id="cal-clear" class="portal-cal-clear" hidden>Ver todas las fechas</button>
               </div>
-              <div class="portal-calendar-weekdays">
-                <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
-              </div>
-              <div class="portal-calendar-grid" id="cal-grid"></div>
-              <button type="button" id="cal-clear" class="portal-cal-clear" hidden>Ver todas las fechas</button>
-            </div>
 
-            <div id="citas-empty" class="portal-empty" hidden>Aún no tienes citas agendadas.</div>
-            <div id="citas-list" class="portal-list"></div>
+              <div class="portal-citas-main">
+                <div id="citas-empty" class="portal-empty" hidden>Aún no tienes citas agendadas.</div>
+                <div id="citas-list" class="portal-list"></div>
+              </div>
+            </div>
           </div>
 
           <div class="portal-panel" data-panel="pacientes" hidden>
@@ -95,60 +99,73 @@
               <h2>Clínica</h2>
               <p class="portal-muted">Información visible en tu perfil público.</p>
             </div>
-            <form id="clinica-form" class="portal-clinic-form">
-              <label class="portal-field">
-                <span>Nombre del negocio</span>
-                <input type="text" id="clinica-business-name" />
-              </label>
-              <label class="portal-field">
-                <span>Dirección</span>
-                <input type="text" id="clinica-address" />
-              </label>
-              <label class="portal-field">
-                <span>Teléfono</span>
-                <input type="text" id="clinica-phone" />
-              </label>
-              <label class="portal-field">
-                <span>Ciudad</span>
-                <input type="text" id="clinica-city" />
-              </label>
-              <label class="portal-field">
-                <span>WhatsApp</span>
-                <input type="text" id="clinica-whatsapp" placeholder="+57..." />
-              </label>
-              <label class="portal-field">
-                <span>Horario</span>
-                <input type="text" id="clinica-schedule" placeholder="Lun-Sáb 7am-8pm | Dom 8am-4pm" />
-              </label>
-              <label class="portal-field">
-                <span>Servicios (separados por coma)</span>
-                <input type="text" id="clinica-services" placeholder="Consulta general, Vacunación, Cirugía..." />
-              </label>
-              <label class="portal-field">
-                <span>Descripción</span>
-                <textarea id="clinica-description" rows="4" placeholder="Cuéntale a los dueños de mascotas sobre tu clínica..."></textarea>
-              </label>
-              <label class="portal-checkbox">
-                <input type="checkbox" id="clinica-emergency" />
-                <span>Atendemos urgencias 24h</span>
-              </label>
-              <button type="submit" id="clinica-save">Guardar cambios</button>
-              <p class="portal-success" id="clinica-success" hidden>Guardado ✓</p>
-            </form>
 
-            <div class="portal-panel-head" style="margin-top: 32px">
-              <h2>Equipo médico</h2>
-              <p class="portal-muted">Doctores registrados en tu perfil.</p>
-            </div>
-            <div id="clinica-doctors-empty" class="portal-empty" hidden>Aún no tienes doctores registrados.</div>
-            <div id="clinica-doctors-list" class="portal-grid"></div>
+            <div class="portal-clinica-layout">
+              <form id="clinica-form" class="portal-clinic-form">
+                <div class="portal-field-row">
+                  <label class="portal-field">
+                    <span>Nombre del negocio</span>
+                    <input type="text" id="clinica-business-name" />
+                  </label>
+                  <label class="portal-field">
+                    <span>Dirección</span>
+                    <input type="text" id="clinica-address" />
+                  </label>
+                </div>
+                <div class="portal-field-row">
+                  <label class="portal-field">
+                    <span>Teléfono</span>
+                    <input type="text" id="clinica-phone" />
+                  </label>
+                  <label class="portal-field">
+                    <span>Ciudad</span>
+                    <input type="text" id="clinica-city" />
+                  </label>
+                </div>
+                <div class="portal-field-row">
+                  <label class="portal-field">
+                    <span>WhatsApp</span>
+                    <input type="text" id="clinica-whatsapp" placeholder="+57..." />
+                  </label>
+                  <label class="portal-field">
+                    <span>Horario</span>
+                    <input type="text" id="clinica-schedule" placeholder="Lun-Sáb 7am-8pm | Dom 8am-4pm" />
+                  </label>
+                </div>
+                <label class="portal-field">
+                  <span>Servicios (separados por coma)</span>
+                  <input type="text" id="clinica-services" placeholder="Consulta general, Vacunación, Cirugía..." />
+                </label>
+                <label class="portal-field">
+                  <span>Descripción</span>
+                  <textarea id="clinica-description" rows="4" placeholder="Cuéntale a los dueños de mascotas sobre tu clínica..."></textarea>
+                </label>
+                <label class="portal-checkbox">
+                  <input type="checkbox" id="clinica-emergency" />
+                  <span>Atendemos urgencias 24h</span>
+                </label>
+                <div class="portal-field-row portal-field-row-actions">
+                  <button type="submit" id="clinica-save">Guardar cambios</button>
+                  <p class="portal-success" id="clinica-success" hidden>Guardado ✓</p>
+                </div>
+              </form>
 
-            <div class="portal-panel-head" style="margin-top: 32px">
-              <h2>Fotos de la clínica</h2>
-              <p class="portal-muted">Imágenes visibles en tu perfil público.</p>
+              <aside class="portal-clinica-side">
+                <div class="portal-side-block">
+                  <h3>Equipo médico</h3>
+                  <p class="portal-muted">Doctores registrados en tu perfil.</p>
+                  <div id="clinica-doctors-empty" class="portal-empty" hidden>Aún no tienes doctores registrados.</div>
+                  <div id="clinica-doctors-list" class="portal-grid"></div>
+                </div>
+
+                <div class="portal-side-block">
+                  <h3>Fotos de la clínica</h3>
+                  <p class="portal-muted">Imágenes visibles en tu perfil público.</p>
+                  <div id="clinica-images-empty" class="portal-empty" hidden>Aún no tienes fotos registradas.</div>
+                  <div id="clinica-images-list" class="portal-photo-grid"></div>
+                </div>
+              </aside>
             </div>
-            <div id="clinica-images-empty" class="portal-empty" hidden>Aún no tienes fotos registradas.</div>
-            <div id="clinica-images-list" class="portal-photo-grid"></div>
           </div>
         </section>
       </main>

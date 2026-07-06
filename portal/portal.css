@@ -18,7 +18,7 @@
 }
 
 .portal-shell {
-  max-width: 960px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 24px 20px 80px;
 }
@@ -283,15 +283,34 @@
   border-radius: 16px;
 }
 
+.portal-citas-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.portal-citas-main {
+  min-width: 0;
+}
+
 .portal-calendar {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 24px;
   padding: 6px;
-  margin-bottom: 24px;
-  max-width: 360px;
   box-shadow: 0 12px 32px rgba(80, 40, 160, 0.1);
   overflow: hidden;
+}
+
+@media (max-width: 860px) {
+  .portal-citas-layout {
+    grid-template-columns: 1fr;
+  }
+  .portal-calendar {
+    max-width: 360px;
+    margin: 0 auto 20px;
+  }
 }
 
 .portal-calendar-head {
@@ -534,11 +553,70 @@
   margin-top: 3px;
 }
 
+.portal-clinica-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 32px;
+  align-items: start;
+}
+
 .portal-clinic-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  max-width: 420px;
+  gap: 16px;
+  min-width: 0;
+}
+
+.portal-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.portal-field-row-actions {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.portal-clinica-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.portal-side-block {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 4px 16px rgba(50, 30, 90, 0.06);
+}
+
+.portal-side-block h3 {
+  margin: 0 0 2px;
+  font-size: 15px;
+}
+
+.portal-side-block .portal-muted {
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.portal-side-block .portal-grid,
+.portal-side-block .portal-photo-grid {
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .portal-clinica-layout {
+    grid-template-columns: 1fr;
+  }
+  .portal-field-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .portal-patient-card {
