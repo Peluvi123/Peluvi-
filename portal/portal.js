@@ -365,8 +365,66 @@ function renderPacientes(appointments) {
       <span>${p.pet_breed || ""}</span>
       <span>${p.visits} cita${p.visits > 1 ? "s" : ""}</span>
     `;
+    card.addEventListener("click", () => openPatientModal(p.pet_id || p.pet_name, p));
     pacientesList.appendChild(card);
   });
+}
+
+const patientModal = document.getElementById("patient-modal");
+const patientModalBody = document.getElementById("patient-modal-body");
+const patientModalClose = document.getElementById("patient-modal-close");
+
+function closePatientModal() {
+  patientModal.hidden = true;
+}
+
+patientModalClose.addEventListener("click", closePatientModal);
+patientModal.addEventListener("click", (e) => {
+  if (e.target === patientModal) closePatientModal();
+});
+
+function openPatientModal(key, petInfo) {
+  const visits = allAppointments
+    .filter((a) => (a.pet_id || a.pet_name) === key)
+    .slice()
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  patientModalBody.innerHTML = `
+    <div class="portal-patient-header">
+      <img src="${petInfo.pet_image || ""}" alt="" onerror="this.style.visibility='hidden'" />
+      <div>
+        <h3>${petInfo.pet_name || "Mascota"}</h3>
+        <span>${petInfo.pet_breed || ""} · Historial clínico</span>
+      </div>
+    </div>
+  `;
+
+  visits.forEach((apt) => {
+    const visit = document.createElement("div");
+    visit.className = "portal-visit";
+    visit.innerHTML = `
+      <div class="portal-visit-head">
+        <strong>${apt.service || "Consulta"}</strong>
+        <span>${apt.date || ""} ${apt.time || ""} · ${STATUS_LABELS[apt.status] || apt.status}</span>
+      </div>
+      <span>${apt.doctor_name ? `Atendido por ${apt.doctor_name}` : ""}</span>
+      <textarea placeholder="Notas clínicas de esta visita (diagnóstico, tratamiento, indicaciones)...">${apt.notes || ""}</textarea>
+      <button type="button" class="portal-visit-save">Guardar nota</button>
+      <span class="portal-success" hidden>Guardado ✓</span>
+    `;
+    const textarea = visit.querySelector("textarea");
+    const saveBtn = visit.querySelector(".portal-visit-save");
+    const savedLabel = visit.querySelector(".portal-success");
+    saveBtn.addEventListener("click", async () => {
+      await supabase.from("appointments").update({ notes: textarea.value.trim() }).eq("id", apt.id);
+      apt.notes = textarea.value.trim();
+      savedLabel.hidden = false;
+      setTimeout(() => (savedLabel.hidden = true), 2000);
+    });
+    patientModalBody.appendChild(visit);
+  });
+
+  patientModal.hidden = false;
 }
 
 async function loadTabData({ session }) {
