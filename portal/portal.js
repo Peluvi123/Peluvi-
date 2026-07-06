@@ -695,9 +695,22 @@ function buildAppointmentCard(apt) {
     const newDate = rescheduleForm.querySelector(".reschedule-date").value;
     const newTime = rescheduleForm.querySelector(".reschedule-time").value.trim();
     if (!newDate || !newTime) return;
+    const previousDate = apt.date;
+    const previousTime = apt.time;
     await supabase.from("appointments").update({ date: newDate, time: newTime }).eq("id", apt.id);
     apt.date = newDate;
     apt.time = newTime;
+
+    if (apt.user_id && (newDate !== previousDate || newTime !== previousTime)) {
+      await supabase.from("notifications").insert({
+        user_id: apt.user_id,
+        type: "reminder_day",
+        title: "📅 Tu cita fue reprogramada",
+        body: `Tu cita para ${apt.pet_name || "tu mascota"} en ${apt.vet_name || "la clínica"} fue movida a ${newDate} a las ${newTime}. Por favor confírmanos si te funciona.`,
+        appointment_id: apt.id,
+      });
+    }
+
     refreshCitasViews();
   });
   card.appendChild(rescheduleForm);
