@@ -172,7 +172,12 @@ function renderCalendar() {
   const month = calendarViewDate.getMonth();
   calMonthLabel.textContent = `${MONTH_NAMES[month]} ${year}`;
 
-  const datesWithApt = new Set(allAppointments.map((a) => a.date).filter(Boolean));
+  const todayKey = toDateKey(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  const aptCountByDate = new Map();
+  allAppointments.forEach((a) => {
+    if (!a.date) return;
+    aptCountByDate.set(a.date, (aptCountByDate.get(a.date) || 0) + 1);
+  });
 
   const firstDayOfMonth = new Date(year, month, 1);
   const startOffset = (firstDayOfMonth.getDay() - WEEKDAY_START + 7) % 7;
@@ -184,6 +189,8 @@ function renderCalendar() {
   const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
   for (let i = 0; i < totalCells; i++) {
     const dayNum = i - startOffset + 1;
+    const cell = document.createElement("div");
+    cell.className = "portal-cal-cell";
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "portal-cal-day";
@@ -200,15 +207,19 @@ function renderCalendar() {
     } else {
       btn.textContent = dayNum;
       cellKey = toDateKey(year, month, dayNum);
-      if (datesWithApt.has(cellKey)) btn.classList.add("has-apt");
+      const count = aptCountByDate.get(cellKey) || 0;
+      if (count > 0) btn.classList.add("has-apt");
+      if (cellKey === todayKey) btn.classList.add("is-today");
       if (cellKey === selectedDateFilter) btn.classList.add("is-selected");
+      if (count > 0) btn.dataset.count = count > 9 ? "9+" : String(count);
       btn.addEventListener("click", () => {
         selectedDateFilter = selectedDateFilter === cellKey ? null : cellKey;
         renderCalendar();
         renderCitas(filterAppointments());
       });
     }
-    calGrid.appendChild(btn);
+    cell.appendChild(btn);
+    calGrid.appendChild(cell);
   }
 
   calClearBtn.hidden = !selectedDateFilter;
