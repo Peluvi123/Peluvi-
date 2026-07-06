@@ -73,10 +73,55 @@ const clinicaFields = {
   city: document.getElementById("clinica-city"),
   whatsapp: document.getElementById("clinica-whatsapp"),
   schedule: document.getElementById("clinica-schedule"),
-  services: document.getElementById("clinica-services"),
   description: document.getElementById("clinica-description"),
   emergency: document.getElementById("clinica-emergency"),
 };
+
+const SERVICE_OPTIONS = [
+  "Consulta general", "Vacunación", "Cirugía", "Cirugía menor", "Urgencias 24h",
+  "Radiología", "Laboratorio", "Odontología", "Dermatología", "Desparasitación",
+  "Peluquería", "Ecografía", "Ultrasonido", "Medicina interna", "Oncología",
+  "Cardiología", "Neurología", "Ortopedia", "Oftalmología", "Reproducción",
+];
+
+const servicesPicker = document.getElementById("clinica-services-picker");
+const serviceCustomInput = document.getElementById("clinica-service-custom");
+const serviceAddBtn = document.getElementById("clinica-service-add-btn");
+
+let selectedServices = new Set();
+
+function renderServicesPicker() {
+  const allTags = Array.from(new Set([...SERVICE_OPTIONS, ...selectedServices]));
+  servicesPicker.innerHTML = "";
+  allTags.forEach((tag) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "portal-tag" + (selectedServices.has(tag) ? " is-selected" : "");
+    chip.textContent = tag;
+    chip.addEventListener("click", () => {
+      if (selectedServices.has(tag)) selectedServices.delete(tag);
+      else selectedServices.add(tag);
+      renderServicesPicker();
+    });
+    servicesPicker.appendChild(chip);
+  });
+}
+
+function addCustomService() {
+  const value = serviceCustomInput.value.trim();
+  if (!value) return;
+  selectedServices.add(value);
+  serviceCustomInput.value = "";
+  renderServicesPicker();
+}
+
+serviceAddBtn.addEventListener("click", addCustomService);
+serviceCustomInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    addCustomService();
+  }
+});
 
 const doctorsList = document.getElementById("clinica-doctors-list");
 const doctorsEmpty = document.getElementById("clinica-doctors-empty");
@@ -203,7 +248,8 @@ function fillClinicForm(profile, vetProfile) {
   clinicaFields.city.value = profile.city || "";
   clinicaFields.whatsapp.value = vetProfile?.whatsapp || "";
   clinicaFields.schedule.value = vetProfile?.schedule || "";
-  clinicaFields.services.value = (vetProfile?.services || []).join(", ");
+  selectedServices = new Set(vetProfile?.services || []);
+  renderServicesPicker();
   clinicaFields.description.value = vetProfile?.description || "";
   clinicaFields.emergency.checked = !!vetProfile?.emergency;
 }
@@ -320,10 +366,7 @@ clinicaForm.addEventListener("submit", async (e) => {
     id: session.user.id,
     whatsapp: clinicaFields.whatsapp.value.trim(),
     schedule: clinicaFields.schedule.value.trim(),
-    services: clinicaFields.services.value
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean),
+    services: Array.from(selectedServices),
     description: clinicaFields.description.value.trim(),
     emergency: clinicaFields.emergency.checked,
   });
