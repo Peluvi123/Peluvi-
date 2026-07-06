@@ -5,6 +5,10 @@
   font-family: "Inter", sans-serif;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .portal-shell {
   max-width: 960px;
   margin: 0 auto;
