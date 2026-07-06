@@ -893,6 +893,72 @@
   gap: 10px;
 }
 
+.portal-subtabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.portal-subtab {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 12.5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.portal-subtab.is-active {
+  color: var(--purple);
+  border-bottom-color: var(--purple);
+}
+
+.portal-id-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-id-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--line);
+  font-size: 13px;
+  gap: 12px;
+}
+
+.portal-id-card-row span {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.portal-id-card-row strong {
+  text-align: right;
+}
+
+.portal-id-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.portal-id-badge {
+  background: #e4f9ec;
+  color: #1f9d55;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 11px;
+  border-radius: 999px;
+}
+
 .portal-add-form {
   margin-top: 12px;
   padding-top: 12px;

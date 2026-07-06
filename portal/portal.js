@@ -1120,13 +1120,36 @@ async function showPatientDetail(key, petInfo) {
     </div>
 
     <div class="portal-side-block" style="margin-bottom: 24px">
-      <div class="portal-side-block-head">
-        <h3>Datos del paciente</h3>
-        <button type="button" class="portal-visit-toggle" id="record-toggle">Editar ficha</button>
-      </div>
-      <p class="portal-muted" id="record-summary"></p>
+      <nav class="portal-subtabs">
+        <button type="button" class="portal-subtab is-active" data-subtab="carnet">Carnet de la mascota</button>
+        <button type="button" class="portal-subtab" data-subtab="vacunas">Carnet de vacunas</button>
+        <button type="button" class="portal-subtab" data-subtab="datos">Datos del paciente</button>
+      </nav>
 
-      <div id="record-form" hidden>
+      <div class="portal-subpanel" data-subpanel="carnet">
+        <div class="portal-id-card" id="pet-id-card"></div>
+      </div>
+
+      <div class="portal-subpanel" data-subpanel="vacunas" hidden>
+        <div class="portal-side-block-head">
+          <h3>Carnet de vacunas</h3>
+          <button type="button" class="portal-visit-toggle" id="vaccine-add-toggle">+ Agregar vacuna</button>
+        </div>
+        <div id="vaccine-list" class="portal-rx-list"></div>
+        <div id="vaccine-form" class="portal-rx-form" hidden>
+          <div class="portal-field-row">
+            <label class="portal-field"><span>Vacuna</span><input type="text" id="vaccine-name" placeholder="Ej. Rabia" /></label>
+            <label class="portal-field"><span>Fecha aplicada</span><input type="date" id="vaccine-date-given" /></label>
+          </div>
+          <div class="portal-field-row">
+            <label class="portal-field"><span>Próxima dosis</span><input type="date" id="vaccine-next-due" /></label>
+            <label class="portal-field"><span>Notas</span><input type="text" id="vaccine-notes" placeholder="Opcional" /></label>
+          </div>
+          <button type="button" class="portal-rx-save" id="vaccine-save-btn">Guardar vacuna</button>
+        </div>
+      </div>
+
+      <div class="portal-subpanel" data-subpanel="datos" hidden>
         <div class="portal-field-row">
           <label class="portal-field"><span>Especie</span><input type="text" id="record-species" placeholder="Perro, gato..." /></label>
           <label class="portal-field"><span>Raza</span><input type="text" id="record-breed" /></label>
@@ -1159,32 +1182,22 @@ async function showPatientDetail(key, petInfo) {
         <button type="button" class="portal-rx-save" id="record-save-btn" style="margin-top: 10px">Guardar ficha</button>
         <span class="portal-success" id="record-success" hidden>Guardado ✓</span>
       </div>
-
-      <div class="portal-side-block-head" style="margin-top: 20px">
-        <h3>Carnet de vacunas</h3>
-        <button type="button" class="portal-visit-toggle" id="vaccine-add-toggle">+ Agregar vacuna</button>
-      </div>
-      <div id="vaccine-list" class="portal-rx-list"></div>
-      <div id="vaccine-form" class="portal-rx-form" hidden>
-        <div class="portal-field-row">
-          <label class="portal-field"><span>Vacuna</span><input type="text" id="vaccine-name" placeholder="Ej. Rabia" /></label>
-          <label class="portal-field"><span>Fecha aplicada</span><input type="date" id="vaccine-date-given" /></label>
-        </div>
-        <div class="portal-field-row">
-          <label class="portal-field"><span>Próxima dosis</span><input type="date" id="vaccine-next-due" /></label>
-          <label class="portal-field"><span>Notas</span><input type="text" id="vaccine-notes" placeholder="Opcional" /></label>
-        </div>
-        <button type="button" class="portal-rx-save" id="vaccine-save-btn">Guardar vacuna</button>
-      </div>
     </div>
 
     <div class="portal-timeline" id="patient-timeline"></div>
   `;
 
+  // Sub-pestañas: Carnet / Vacunas / Datos
+  patientDetailBody.querySelectorAll(".portal-subtab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      patientDetailBody.querySelectorAll(".portal-subtab").forEach((b) => b.classList.remove("is-active"));
+      patientDetailBody.querySelectorAll(".portal-subpanel").forEach((p) => (p.hidden = true));
+      btn.classList.add("is-active");
+      patientDetailBody.querySelector(`.portal-subpanel[data-subpanel="${btn.dataset.subtab}"]`).hidden = false;
+    });
+  });
+
   // Ficha del paciente
-  const recordToggle = patientDetailBody.querySelector("#record-toggle");
-  const recordForm = patientDetailBody.querySelector("#record-form");
-  const recordSummary = patientDetailBody.querySelector("#record-summary");
   const recordFields = {
     species: patientDetailBody.querySelector("#record-species"),
     breed: patientDetailBody.querySelector("#record-breed"),
@@ -1200,10 +1213,37 @@ async function showPatientDetail(key, petInfo) {
     dewormed: patientDetailBody.querySelector("#record-dewormed"),
   };
 
-  function fillRecordSummary() {
-    const parts = [record?.species, record?.breed, record?.weight].filter(Boolean);
-    recordSummary.textContent = parts.length > 0 ? parts.join(" · ") : "Sin datos registrados aún";
+  const GENDER_LABELS = { male: "Macho", female: "Hembra" };
+  const idCardEl = patientDetailBody.querySelector("#pet-id-card");
+
+  function renderIdCard() {
+    const rows = [
+      ["Especie", record.species],
+      ["Raza", record.breed || petInfo.pet_breed],
+      ["Sexo", GENDER_LABELS[record.gender]],
+      ["Nacimiento", record.born],
+      ["Peso", record.weight],
+      ["Color", record.color],
+      ["Chip", record.chip],
+      ["Tipo de sangre", record.blood_type],
+      ["Alergias", (record.allergies || []).join(", ")],
+    ].filter(([, value]) => value);
+
+    const badges = [
+      record.sterilized ? `<span class="portal-id-badge">✓ Esterilizado</span>` : "",
+      record.dewormed ? `<span class="portal-id-badge">✓ Desparasitado</span>` : "",
+    ].join("");
+
+    idCardEl.innerHTML =
+      rows.length === 0 && !badges
+        ? `<div class="portal-empty">Sin datos registrados aún. Ve a "Datos del paciente" para completarlos.</div>`
+        : `
+      ${rows.map(([label, value]) => `<div class="portal-id-card-row"><span>${label}</span><strong>${value}</strong></div>`).join("")}
+      ${badges ? `<div class="portal-id-card-badges">${badges}</div>` : ""}
+    `;
   }
+  renderIdCard();
+
   recordFields.species.value = record?.species || "";
   recordFields.breed.value = record?.breed || petInfo.pet_breed || "";
   recordFields.gender.value = record?.gender || "";
@@ -1216,12 +1256,6 @@ async function showPatientDetail(key, petInfo) {
   recordFields.notes.value = record?.notes || "";
   recordFields.sterilized.checked = !!record?.sterilized;
   recordFields.dewormed.checked = !!record?.dewormed;
-  fillRecordSummary();
-
-  recordToggle.addEventListener("click", () => {
-    recordForm.hidden = !recordForm.hidden;
-    recordToggle.textContent = recordForm.hidden ? "Editar ficha" : "Ocultar";
-  });
 
   patientDetailBody.querySelector("#record-save-btn").addEventListener("click", async () => {
     const patch = {
@@ -1247,10 +1281,8 @@ async function showPatientDetail(key, petInfo) {
       .select()
       .single();
     if (saved) {
-      record.species = saved.species;
-      record.breed = saved.breed;
-      record.weight = saved.weight;
-      fillRecordSummary();
+      Object.assign(record, saved);
+      renderIdCard();
     }
     const successLabel = patientDetailBody.querySelector("#record-success");
     successLabel.hidden = false;
