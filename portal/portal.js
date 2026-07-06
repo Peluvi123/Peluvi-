@@ -442,23 +442,22 @@ function renderPacientes(appointments) {
       <span>${p.pet_breed || ""}</span>
       <span>${p.visits} cita${p.visits > 1 ? "s" : ""}</span>
     `;
-    card.addEventListener("click", () => openPatientModal(p.pet_id || p.pet_name, p));
+    card.addEventListener("click", () => showPatientDetail(p.pet_id || p.pet_name, p));
     pacientesList.appendChild(card);
   });
 }
 
-const patientModal = document.getElementById("patient-modal");
-const patientModalBody = document.getElementById("patient-modal-body");
-const patientModalClose = document.getElementById("patient-modal-close");
+const pacientesGridView = document.getElementById("pacientes-grid-view");
+const patientDetailView = document.getElementById("patient-detail-view");
+const patientDetailBack = document.getElementById("patient-detail-back");
+const patientDetailBody = document.getElementById("patient-detail-body");
 
-function closePatientModal() {
-  patientModal.hidden = true;
+function closePatientDetail() {
+  patientDetailView.hidden = true;
+  pacientesGridView.hidden = false;
 }
 
-patientModalClose.addEventListener("click", closePatientModal);
-patientModal.addEventListener("click", (e) => {
-  if (e.target === patientModal) closePatientModal();
-});
+patientDetailBack.addEventListener("click", closePatientDetail);
 
 function createMedicationRow(rowsContainer) {
   const row = document.createElement("div");
@@ -643,7 +642,15 @@ function createExamSection(apt) {
   return { section, listEl, examState };
 }
 
-async function openPatientModal(key, petInfo) {
+const STATUS_COLORS = {
+  pending: "#f59e0b",
+  confirmed: "#7c3aed",
+  in_progress: "#2563eb",
+  completed: "#16a34a",
+  cancelled: "#e11d48",
+};
+
+async function showPatientDetail(key, petInfo) {
   const visits = allAppointments
     .filter((a) => (a.pet_id || a.pet_name) === key)
     .slice()
@@ -657,25 +664,39 @@ async function openPatientModal(key, petInfo) {
   const rxByApt = groupBy(rxData || [], "appointment_id");
   const examByApt = groupBy(examData || [], "appointment_id");
 
-  patientModalBody.innerHTML = `
-    <div class="portal-patient-header">
-      <img src="${petInfo.pet_image || ""}" alt="" onerror="this.style.visibility='hidden'" />
-      <div>
-        <h3>${petInfo.pet_name || "Mascota"}</h3>
-        <span>${petInfo.pet_breed || ""} · Historial clínico</span>
+  patientDetailBody.innerHTML = `
+    <div class="portal-patient-hero">
+      <div class="portal-patient-hero-photo">
+        <img src="${petInfo.pet_image || ""}" alt="" onerror="this.style.visibility='hidden'" />
+      </div>
+      <div class="portal-patient-hero-info">
+        <h2>${petInfo.pet_name || "Mascota"}</h2>
+        <p>${petInfo.pet_breed || ""}</p>
+        <span class="portal-patient-hero-stat">${visits.length} visita${visits.length === 1 ? "" : "s"}</span>
       </div>
     </div>
+    <div class="portal-timeline" id="patient-timeline"></div>
   `;
 
+  const timeline = patientDetailBody.querySelector("#patient-timeline");
+
   visits.forEach((apt) => {
+    const item = document.createElement("div");
+    item.className = "portal-timeline-item";
+
+    const dot = document.createElement("div");
+    dot.className = "portal-timeline-dot";
+    dot.style.setProperty("--dot-color", STATUS_COLORS[apt.status] || "#8f53ff");
+    item.appendChild(dot);
+
     const visit = document.createElement("div");
-    visit.className = "portal-visit";
+    visit.className = "portal-visit portal-timeline-card";
     visit.innerHTML = `
       <div class="portal-visit-head">
         <strong>${apt.service || "Consulta"}</strong>
-        <span>${apt.date || ""} ${apt.time || ""} · ${STATUS_LABELS[apt.status] || apt.status}</span>
+        <span class="portal-status-pill" style="--pill-color:${STATUS_COLORS[apt.status] || "#8f53ff"}">${STATUS_LABELS[apt.status] || apt.status}</span>
       </div>
-      <span>${apt.doctor_name ? `Atendido por ${apt.doctor_name}` : ""}</span>
+      <span class="portal-visit-date">${apt.date || ""} ${apt.time || ""}${apt.doctor_name ? ` · Atendido por ${apt.doctor_name}` : ""}</span>
       <textarea placeholder="Notas clínicas de esta visita (diagnóstico, tratamiento, indicaciones)...">${apt.notes || ""}</textarea>
       <button type="button" class="portal-visit-save">Guardar nota</button>
       <span class="portal-success" hidden>Guardado ✓</span>
@@ -700,10 +721,12 @@ async function openPatientModal(key, petInfo) {
     renderExamList(examListEl, examState);
     visit.appendChild(examSection);
 
-    patientModalBody.appendChild(visit);
+    item.appendChild(visit);
+    timeline.appendChild(item);
   });
 
-  patientModal.hidden = false;
+  pacientesGridView.hidden = true;
+  patientDetailView.hidden = false;
 }
 
 async function loadTabData({ session }) {

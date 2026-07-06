@@ -708,65 +708,116 @@
   transform: translateY(-2px);
 }
 
-.portal-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(20, 10, 40, 0.45);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 40px 16px;
-  overflow-y: auto;
-  z-index: 50;
-}
-
-.portal-modal-card {
-  position: relative;
-  width: 100%;
-  max-width: 560px;
-  background: var(--panel);
-  border-radius: 20px;
-  padding: 28px;
-  box-shadow: 0 24px 60px rgba(30, 10, 70, 0.28);
-}
-
-.portal-modal-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+.portal-back-btn {
+  background: none;
   border: none;
-  background: var(--soft);
-  color: var(--text);
+  color: var(--purple);
+  font-weight: 800;
+  font-size: 14px;
   cursor: pointer;
+  padding: 0 0 18px;
+}
+
+.portal-patient-hero {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 26px 28px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #6d38ee, #9c56ff);
+  color: #fff;
+  margin-bottom: 28px;
+}
+
+.portal-patient-hero-photo {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.portal-patient-hero-photo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.2);
+  display: block;
+}
+
+.portal-patient-hero-info h2 {
+  margin: 0 0 2px;
+  font-size: 22px;
+}
+
+.portal-patient-hero-info p {
+  margin: 0 0 8px;
+  color: rgba(255, 255, 255, 0.85);
   font-size: 14px;
 }
 
-.portal-patient-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 20px;
+.portal-patient-hero-stat {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
 }
 
-.portal-patient-header img {
-  width: 56px;
-  height: 56px;
+.portal-timeline {
+  position: relative;
+  padding-left: 28px;
+}
+
+.portal-timeline::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--line);
+}
+
+.portal-timeline-item {
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.portal-timeline-dot {
+  position: absolute;
+  left: -28px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  object-fit: cover;
-  background: var(--soft);
+  background: var(--dot-color, var(--purple));
+  box-shadow: 0 0 0 4px var(--panel), 0 0 0 5px var(--line);
 }
 
-.portal-patient-header h3 {
+.portal-timeline-card {
   margin: 0;
-  font-size: 18px;
 }
 
-.portal-patient-header span {
+.portal-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--pill-color, var(--purple));
+  background: color-mix(in srgb, var(--pill-color, var(--purple)) 14%, transparent);
+}
+
+.portal-visit-date {
+  display: block;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
+  margin-bottom: 10px;
 }
 
 .portal-visit {
@@ -779,7 +830,7 @@
 .portal-visit-head {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   margin-bottom: 6px;
   flex-wrap: wrap;
   gap: 6px;

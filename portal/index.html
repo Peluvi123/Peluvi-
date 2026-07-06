@@ -93,12 +93,19 @@
           </div>
 
           <div class="portal-panel" data-panel="pacientes" hidden>
-            <div class="portal-panel-head">
-              <h2>Pacientes</h2>
-              <p class="portal-muted">Mascotas que han agendado contigo.</p>
+            <div id="pacientes-grid-view">
+              <div class="portal-panel-head">
+                <h2>Pacientes</h2>
+                <p class="portal-muted">Mascotas que han agendado contigo.</p>
+              </div>
+              <div id="pacientes-empty" class="portal-empty" hidden>Aún no tienes pacientes registrados.</div>
+              <div id="pacientes-list" class="portal-grid"></div>
             </div>
-            <div id="pacientes-empty" class="portal-empty" hidden>Aún no tienes pacientes registrados.</div>
-            <div id="pacientes-list" class="portal-grid"></div>
+
+            <div id="patient-detail-view" hidden>
+              <button type="button" class="portal-back-btn" id="patient-detail-back">← Pacientes</button>
+              <div id="patient-detail-body"></div>
+            </div>
           </div>
 
           <div class="portal-panel" data-panel="clinica" hidden>
@@ -176,13 +183,6 @@
           </div>
         </section>
       </main>
-    </div>
-
-    <div class="portal-modal" id="patient-modal" hidden>
-      <div class="portal-modal-card">
-        <button type="button" class="portal-modal-close" id="patient-modal-close" aria-label="Cerrar">✕</button>
-        <div id="patient-modal-body"></div>
-      </div>
     </div>
 
     <script type="module" src="portal.js?v=1"></script>
