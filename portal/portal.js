@@ -78,6 +78,13 @@ const clinicaFields = {
 
 const DAY_OPTIONS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const scheduleDaysList = document.getElementById("schedule-days-list");
+const scheduleToggleBtn = document.getElementById("schedule-toggle");
+const scheduleSummary = document.getElementById("schedule-summary");
+
+scheduleToggleBtn.addEventListener("click", () => {
+  scheduleDaysList.hidden = !scheduleDaysList.hidden;
+  scheduleToggleBtn.textContent = scheduleDaysList.hidden ? "Editar horario" : "Ocultar";
+});
 
 function renderScheduleDays(dayEntries) {
   const byDay = new Map((dayEntries || []).map((e) => [e.day, e]));
@@ -328,6 +335,9 @@ function fillClinicForm(profile, vetProfile) {
     (e) => typeof e.day === "string" && e.open && e.close
   );
   renderScheduleDays(validDayEntries);
+  scheduleDaysList.hidden = true;
+  scheduleToggleBtn.textContent = "Editar horario";
+  scheduleSummary.textContent = vetProfile?.schedule || "Sin definir";
   selectedServices = new Set(vetProfile?.services || []);
   renderServicesPicker();
   clinicaFields.description.value = vetProfile?.description || "";
@@ -443,15 +453,17 @@ clinicaForm.addEventListener("submit", async (e) => {
     .eq("id", session.user.id);
 
   const scheduleData = getScheduleData();
+  const scheduleSummaryText = buildScheduleSummary(scheduleData);
   await supabase.from("vet_profiles").upsert({
     id: session.user.id,
     whatsapp: clinicaFields.whatsapp.value.trim(),
-    schedule: buildScheduleSummary(scheduleData),
+    schedule: scheduleSummaryText,
     schedule_details: scheduleData,
     services: Array.from(selectedServices),
     description: clinicaFields.description.value.trim(),
     emergency: clinicaFields.emergency.checked,
   });
+  scheduleSummary.textContent = scheduleSummaryText || "Sin definir";
 
   clinicaSuccess.hidden = false;
   dashboardGreeting.textContent = `Hola, ${clinicaFields.business_name.value.trim()}`;
