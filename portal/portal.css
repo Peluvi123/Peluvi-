@@ -107,7 +107,8 @@
 }
 
 .portal-field input,
-.portal-field textarea {
+.portal-field textarea,
+.portal-field select {
   background: var(--soft);
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -116,10 +117,35 @@
   font-size: 15px;
   font-family: inherit;
   resize: vertical;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236c6480'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.portal-field input {
+  appearance: revert;
+  -webkit-appearance: revert;
+  background-image: none;
+}
+
+.portal-field textarea {
+  appearance: revert;
+  -webkit-appearance: revert;
+  background-image: none;
+}
+
+.portal-field select {
+  padding-right: 36px;
+  cursor: pointer;
 }
 
 .portal-field input:focus,
-.portal-field textarea:focus {
+.portal-field textarea:focus,
+.portal-field select:focus {
   outline: none;
   border-color: var(--purple-bright);
 }
