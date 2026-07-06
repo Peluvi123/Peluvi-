@@ -149,21 +149,36 @@
 }
 
 .portal-tag {
-  background: var(--soft);
-  border: 1px solid var(--line);
+  background: transparent;
+  border: 1.5px solid var(--line);
   color: var(--muted);
   font-size: 13px;
   font-weight: 600;
-  padding: 7px 14px;
+  padding: 6px 16px;
   border-radius: 999px;
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+
+.portal-tag:hover {
+  border-color: var(--purple-bright);
+  color: var(--purple);
 }
 
 .portal-tag.is-selected {
-  background: linear-gradient(135deg, #6d38ee, #9c56ff);
-  border-color: transparent;
-  color: #fff;
+  background: var(--soft);
+  border-color: var(--purple);
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.portal-tag.is-selected::before {
+  content: "✓ ";
+  font-weight: 800;
+}
+
+.portal-tag:active {
+  transform: scale(0.97);
 }
 
 .portal-tag-add {
@@ -258,8 +273,8 @@
   box-shadow: 0 4px 16px rgba(50, 30, 90, 0.06);
 }
 
-.portal-login-card button,
-.portal-clinic-form button {
+#login-submit,
+#clinica-save {
   margin-top: 6px;
   background: linear-gradient(135deg, #6d38ee, #9c56ff);
   border: none;
@@ -271,8 +286,8 @@
   cursor: pointer;
 }
 
-.portal-login-card button:hover,
-.portal-clinic-form button:hover {
+#login-submit:hover,
+#clinica-save:hover {
   filter: brightness(1.08);
 }
 
