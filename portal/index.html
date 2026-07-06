@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portal de veterinarias | Peluvi</title>
+    <title>Portal de proveedores | Peluvi</title>
     <meta name="robots" content="noindex" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -28,8 +28,8 @@
         <!-- Login -->
         <section class="portal-login" id="login-view">
           <div class="portal-login-card">
-            <h1 id="auth-title">Portal de veterinarias</h1>
-            <p class="portal-muted" id="auth-subtitle">Ingresa con la cuenta de tu clínica para gestionar tus citas.</p>
+            <h1 id="auth-title">Portal de proveedores</h1>
+            <p class="portal-muted" id="auth-subtitle">Ingresa con la cuenta de tu negocio para gestionar tus citas.</p>
             <form id="login-form">
               <label class="portal-field">
                 <span>Correo</span>
@@ -44,6 +44,13 @@
             </form>
 
             <form id="signup-form" hidden>
+              <label class="portal-field">
+                <span>Tipo de negocio</span>
+                <select id="signup-provider-type" required>
+                  <option value="vet">Veterinaria</option>
+                  <option value="grooming">Peluquería</option>
+                </select>
+              </label>
               <label class="portal-field">
                 <span>Nombre del negocio</span>
                 <input type="text" id="signup-business-name" required />
@@ -72,7 +79,7 @@
               <p class="portal-error" id="signup-error" hidden></p>
             </form>
 
-            <button type="button" class="portal-auth-toggle" id="auth-toggle">¿Eres veterinaria? Crea tu cuenta</button>
+            <button type="button" class="portal-auth-toggle" id="auth-toggle">¿Tienes un negocio de mascotas? Crea tu cuenta</button>
           </div>
         </section>
 
@@ -87,7 +94,7 @@
             <button class="portal-tab is-active" data-tab="inicio" type="button">Inicio</button>
             <button class="portal-tab" data-tab="citas" type="button">Citas</button>
             <button class="portal-tab" data-tab="pacientes" type="button">Pacientes</button>
-            <button class="portal-tab" data-tab="clinica" type="button">Clínica</button>
+            <button class="portal-tab" data-tab="clinica" type="button" id="clinica-tab-btn">Clínica</button>
           </nav>
 
           <div class="portal-panel" data-panel="inicio">
@@ -180,7 +187,7 @@
 
           <div class="portal-panel" data-panel="clinica" hidden>
             <div class="portal-panel-head">
-              <h2>Clínica</h2>
+              <h2 id="clinica-panel-title">Clínica</h2>
               <p class="portal-muted">Información visible en tu perfil público.</p>
             </div>
 
@@ -219,7 +226,7 @@
                   <span class="portal-muted" id="schedule-summary"></span>
                   <div id="schedule-days-list" hidden></div>
                 </div>
-                <div class="portal-field">
+                <div class="portal-field" id="clinica-vet-services">
                   <span>Servicios</span>
                   <div class="portal-tag-picker" id="clinica-services-picker"></div>
                   <div class="portal-tag-add">
@@ -227,11 +234,21 @@
                     <button type="button" id="clinica-service-add-btn">+ Agregar</button>
                   </div>
                 </div>
+                <div class="portal-field" id="clinica-grooming-services" hidden>
+                  <span>Servicios y precios</span>
+                  <div id="grooming-services-list"></div>
+                  <div class="portal-tag-add">
+                    <input type="text" id="grooming-service-name" placeholder="Nombre, ej. Baño y corte" />
+                    <input type="text" id="grooming-service-price" placeholder="Precio, ej. $45.000" />
+                    <input type="text" id="grooming-service-duration" placeholder="Duración, ej. 1h" />
+                    <button type="button" id="grooming-service-add-btn">+ Agregar</button>
+                  </div>
+                </div>
                 <label class="portal-field">
                   <span>Descripción</span>
                   <textarea id="clinica-description" rows="4" placeholder="Cuéntale a los dueños de mascotas sobre tu clínica..."></textarea>
                 </label>
-                <label class="portal-checkbox">
+                <label class="portal-checkbox" id="clinica-emergency-row">
                   <input type="checkbox" id="clinica-emergency" />
                   <span>Atendemos urgencias 24h</span>
                 </label>
@@ -242,7 +259,7 @@
               </form>
 
               <aside class="portal-clinica-side">
-                <div class="portal-side-block">
+                <div class="portal-side-block" id="clinica-doctors-block">
                   <div class="portal-side-block-head">
                     <div>
                       <h3>Equipo médico</h3>

@@ -45,6 +45,15 @@ let allAppointments = [];
 let calendarViewDate = new Date();
 let selectedDateFilter = null;
 let currentVetId = null;
+let currentProviderType = "vet";
+
+function profileTable() {
+  return currentProviderType === "grooming" ? "grooming_profiles" : "vet_profiles";
+}
+
+function isVet() {
+  return currentProviderType === "vet";
+}
 
 function groupBy(arr, key) {
   const map = new Map();
@@ -170,7 +179,62 @@ const servicesPicker = document.getElementById("clinica-services-picker");
 const serviceCustomInput = document.getElementById("clinica-service-custom");
 const serviceAddBtn = document.getElementById("clinica-service-add-btn");
 
+const vetServicesBlock = document.getElementById("clinica-vet-services");
+const groomingServicesBlock = document.getElementById("clinica-grooming-services");
+const groomingServicesList = document.getElementById("grooming-services-list");
+const groomingServiceNameInput = document.getElementById("grooming-service-name");
+const groomingServicePriceInput = document.getElementById("grooming-service-price");
+const groomingServiceDurationInput = document.getElementById("grooming-service-duration");
+const groomingServiceAddBtn = document.getElementById("grooming-service-add-btn");
+const doctorsBlock = document.getElementById("clinica-doctors-block");
+const emergencyRow = document.getElementById("clinica-emergency-row");
+const clinicaTabBtn = document.getElementById("clinica-tab-btn");
+const clinicaPanelTitle = document.getElementById("clinica-panel-title");
+
 let selectedServices = new Set();
+let currentGroomingServices = [];
+
+function applyProviderTypeUI() {
+  const vet = isVet();
+  vetServicesBlock.hidden = !vet;
+  groomingServicesBlock.hidden = vet;
+  doctorsBlock.hidden = !vet;
+  emergencyRow.hidden = !vet;
+  const label = vet ? "Clínica" : "Peluquería";
+  clinicaTabBtn.textContent = label;
+  clinicaPanelTitle.textContent = label;
+}
+
+function renderGroomingServices() {
+  groomingServicesList.innerHTML = "";
+  currentGroomingServices.forEach((svc, index) => {
+    const row = document.createElement("div");
+    row.className = "portal-grooming-service-row";
+    row.innerHTML = `
+      <strong>${svc.name || ""}</strong>
+      <span>${svc.duration || ""}</span>
+      <span>${svc.price || ""}</span>
+      <button type="button" class="portal-remove-x" aria-label="Quitar">✕</button>
+    `;
+    row.querySelector(".portal-remove-x").addEventListener("click", () => {
+      currentGroomingServices.splice(index, 1);
+      renderGroomingServices();
+    });
+    groomingServicesList.appendChild(row);
+  });
+}
+
+groomingServiceAddBtn.addEventListener("click", () => {
+  const name = groomingServiceNameInput.value.trim();
+  const price = groomingServicePriceInput.value.trim();
+  const duration = groomingServiceDurationInput.value.trim();
+  if (!name) return;
+  currentGroomingServices.push({ name, price, duration });
+  groomingServiceNameInput.value = "";
+  groomingServicePriceInput.value = "";
+  groomingServiceDurationInput.value = "";
+  renderGroomingServices();
+});
 
 function renderServicesPicker() {
   const allTags = Array.from(new Set([...SERVICE_OPTIONS, ...selectedServices]));
@@ -224,14 +288,15 @@ let currentImages = [];
 let currentProfile = null;
 
 async function persistVetProfile(patch) {
-  await supabase.from("vet_profiles").upsert({ id: currentVetId, ...patch });
+  await supabase.from(profileTable()).upsert({ id: currentVetId, ...patch });
 }
 
 async function uploadClinicMedia(file) {
+  const bucket = isVet() ? "clinic-media" : "grooming-media";
   const path = `${currentVetId}/${Date.now()}_${file.name}`;
-  const { error } = await supabase.storage.from("clinic-media").upload(path, file, { contentType: file.type });
+  const { error } = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type });
   if (error) return null;
-  return supabase.storage.from("clinic-media").getPublicUrl(path).data.publicUrl;
+  return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }
 
 function showLogin(message) {
@@ -265,14 +330,17 @@ async function requireProviderSession() {
     .eq("id", session.user.id)
     .single();
 
-  if (error || !profile || profile.role !== "provider" || profile.provider_type !== "vet") {
+  if (error || !profile || profile.role !== "provider" || !["vet", "grooming"].includes(profile.provider_type)) {
     await supabase.auth.signOut();
-    showLogin("Esta cuenta no es de veterinaria.");
+    showLogin("Esta cuenta no es de un proveedor válido.");
     return null;
   }
 
+  currentProviderType = profile.provider_type;
+  applyProviderTypeUI();
+
   const { data: vetProfile } = await supabase
-    .from("vet_profiles")
+    .from(profileTable())
     .select("*")
     .eq("id", session.user.id)
     .maybeSingle();
@@ -323,11 +391,11 @@ authToggle.addEventListener("click", () => {
   showingSignup = !showingSignup;
   loginForm.hidden = showingSignup;
   signupForm.hidden = !showingSignup;
-  authTitle.textContent = showingSignup ? "Crea tu cuenta de veterinaria" : "Portal de veterinarias";
+  authTitle.textContent = showingSignup ? "Crea tu cuenta de proveedor" : "Portal de proveedores";
   authSubtitle.textContent = showingSignup
     ? "Regístrate para empezar a gestionar tus citas en Peluvi."
-    : "Ingresa con la cuenta de tu clínica para gestionar tus citas.";
-  authToggle.textContent = showingSignup ? "¿Ya tienes cuenta? Ingresa aquí" : "¿Eres veterinaria? Crea tu cuenta";
+    : "Ingresa con la cuenta de tu negocio para gestionar tus citas.";
+  authToggle.textContent = showingSignup ? "¿Ya tienes cuenta? Ingresa aquí" : "¿Tienes un negocio de mascotas? Crea tu cuenta";
   loginError.hidden = true;
   signupError.hidden = true;
 });
@@ -338,6 +406,7 @@ signupForm.addEventListener("submit", async (e) => {
   signupSubmit.disabled = true;
   signupSubmit.textContent = "Creando cuenta...";
 
+  const signupProviderType = document.getElementById("signup-provider-type").value;
   const businessName = document.getElementById("signup-business-name").value.trim();
   const email = document.getElementById("signup-email").value.trim();
   const password = document.getElementById("signup-password").value;
@@ -362,7 +431,7 @@ signupForm.addEventListener("submit", async (e) => {
     id: userId,
     name: businessName,
     role: "provider",
-    provider_type: "vet",
+    provider_type: signupProviderType,
     business_name: businessName,
     address,
     phone,
@@ -377,7 +446,8 @@ signupForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  await supabase.from("vet_profiles").insert({ id: userId });
+  currentProviderType = signupProviderType;
+  await supabase.from(profileTable()).insert({ id: userId });
 
   signupSubmit.disabled = false;
   signupSubmit.textContent = "Crear cuenta";
@@ -412,8 +482,13 @@ function fillClinicForm(profile, vetProfile) {
   scheduleDaysList.hidden = true;
   scheduleToggleBtn.textContent = "Editar horario";
   scheduleSummary.textContent = vetProfile?.schedule || "Sin definir";
-  selectedServices = new Set(vetProfile?.services || []);
-  renderServicesPicker();
+  if (isVet()) {
+    selectedServices = new Set(vetProfile?.services || []);
+    renderServicesPicker();
+  } else {
+    currentGroomingServices = vetProfile?.services || [];
+    renderGroomingServices();
+  }
   clinicaFields.description.value = vetProfile?.description || "";
   clinicaFields.emergency.checked = !!vetProfile?.emergency;
 }
@@ -528,15 +603,20 @@ clinicaForm.addEventListener("submit", async (e) => {
 
   const scheduleData = getScheduleData();
   const scheduleSummaryText = buildScheduleSummary(scheduleData);
-  await supabase.from("vet_profiles").upsert({
+  const patch = {
     id: session.user.id,
     whatsapp: clinicaFields.whatsapp.value.trim(),
     schedule: scheduleSummaryText,
     schedule_details: scheduleData,
-    services: Array.from(selectedServices),
     description: clinicaFields.description.value.trim(),
-    emergency: clinicaFields.emergency.checked,
-  });
+  };
+  if (isVet()) {
+    patch.services = Array.from(selectedServices);
+    patch.emergency = clinicaFields.emergency.checked;
+  } else {
+    patch.services = currentGroomingServices;
+  }
+  await supabase.from(profileTable()).upsert(patch);
   scheduleSummary.textContent = scheduleSummaryText || "Sin definir";
 
   clinicaSuccess.hidden = false;
@@ -736,11 +816,12 @@ function buildAppointmentCard(apt) {
     apt.reschedule_status = "pending";
 
     if (apt.user_id) {
+      const providerWord = isVet() ? "veterinaria" : "peluquería";
       await supabase.from("notifications").insert({
         user_id: apt.user_id,
         type: "reschedule_proposed",
-        title: "🔄 Tu veterinario propone una nueva fecha",
-        body: `Tu veterinaria propone mover la cita de ${apt.pet_name || "tu mascota"} en ${apt.vet_name || "la clínica"} a ${newDate} a las ${newTime}. Ingresa a la app para aceptar, rechazar o proponer otra hora.`,
+        title: "🔄 Te proponen una nueva fecha",
+        body: `Tu ${providerWord} propone mover la cita de ${apt.pet_name || "tu mascota"} en ${apt.vet_name || "el negocio"} a ${newDate} a las ${newTime}. Ingresa a la app para aceptar, rechazar o proponer otra hora.`,
         appointment_id: apt.id,
       });
     }
@@ -1351,7 +1432,7 @@ async function showPatientDetail(key, petInfo) {
     <div class="portal-side-block" style="margin-bottom: 24px">
       <nav class="portal-subtabs">
         <button type="button" class="portal-subtab is-active" data-subtab="carnet">Carnet de la mascota</button>
-        <button type="button" class="portal-subtab" data-subtab="vacunas">Carnet de vacunas</button>
+        ${isVet() ? '<button type="button" class="portal-subtab" data-subtab="vacunas">Carnet de vacunas</button>' : ""}
         <button type="button" class="portal-subtab" data-subtab="datos">Datos del paciente</button>
       </nav>
 
@@ -1668,15 +1749,17 @@ async function showPatientDetail(key, petInfo) {
       setTimeout(() => (vitalsSavedLabel.hidden = true), 2000);
     });
 
-    const { section: rxSection, listEl: rxListEl, rxState } = createRxSection(apt);
-    rxState.push(...(rxByApt.get(apt.id) || []));
-    renderRxList(rxListEl, rxState, apt);
-    visit.appendChild(rxSection);
+    if (isVet()) {
+      const { section: rxSection, listEl: rxListEl, rxState } = createRxSection(apt);
+      rxState.push(...(rxByApt.get(apt.id) || []));
+      renderRxList(rxListEl, rxState, apt);
+      visit.appendChild(rxSection);
 
-    const { section: examSection, listEl: examListEl, examState } = createExamSection(apt);
-    examState.push(...(examByApt.get(apt.id) || []));
-    renderExamList(examListEl, examState);
-    visit.appendChild(examSection);
+      const { section: examSection, listEl: examListEl, examState } = createExamSection(apt);
+      examState.push(...(examByApt.get(apt.id) || []));
+      renderExamList(examListEl, examState);
+      visit.appendChild(examSection);
+    }
 
     item.appendChild(visit);
     timeline.appendChild(item);
