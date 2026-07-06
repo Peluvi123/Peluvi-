@@ -42,6 +42,17 @@ const WEEKDAY_START = 0; // domingo
 let allAppointments = [];
 let calendarViewDate = new Date();
 let selectedDateFilter = null;
+let currentVetId = null;
+
+function groupBy(arr, key) {
+  const map = new Map();
+  arr.forEach((item) => {
+    const k = item[key];
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(item);
+  });
+  return map;
+}
 
 function pad2(n) {
   return String(n).padStart(2, "0");
@@ -383,11 +394,202 @@ patientModal.addEventListener("click", (e) => {
   if (e.target === patientModal) closePatientModal();
 });
 
-function openPatientModal(key, petInfo) {
+function createMedicationRow(rowsContainer) {
+  const row = document.createElement("div");
+  row.className = "portal-rx-row";
+  row.innerHTML = `
+    <input type="text" placeholder="Medicamento" class="rx-name" />
+    <input type="text" placeholder="Dosis" class="rx-dose" />
+    <input type="text" placeholder="Frecuencia" class="rx-frequency" />
+    <input type="text" placeholder="Duración" class="rx-duration" />
+    <input type="text" placeholder="Indicaciones" class="rx-instructions" />
+    <button type="button" class="portal-rx-remove-line" aria-label="Quitar">✕</button>
+  `;
+  row.querySelector(".portal-rx-remove-line").addEventListener("click", () => {
+    if (rowsContainer.children.length > 1) row.remove();
+  });
+  rowsContainer.appendChild(row);
+  return row;
+}
+
+function renderRxList(container, prescriptions) {
+  container.innerHTML = "";
+  prescriptions.forEach((rx) => {
+    const card = document.createElement("div");
+    card.className = "portal-rx-card";
+    const meds = (rx.medications || [])
+      .map(
+        (m) => `
+        <div class="portal-rx-med">
+          <strong>${m.name || ""}</strong> — ${[m.dose, m.frequency, m.duration].filter(Boolean).join(" · ")}
+          ${m.instructions ? `<span>${m.instructions}</span>` : ""}
+        </div>`
+      )
+      .join("");
+    const date = rx.created_at ? new Date(rx.created_at).toLocaleDateString("es-CO") : "";
+    card.innerHTML = `<span class="portal-rx-date">${date}</span>${meds}`;
+    container.appendChild(card);
+  });
+}
+
+function createRxSection(apt) {
+  const section = document.createElement("div");
+  section.className = "portal-visit-section";
+
+  const head = document.createElement("div");
+  head.className = "portal-visit-section-head";
+  head.innerHTML = `<span>💊 Recetas</span>`;
+  section.appendChild(head);
+
+  const listEl = document.createElement("div");
+  listEl.className = "portal-rx-list";
+  section.appendChild(listEl);
+
+  const form = document.createElement("div");
+  form.className = "portal-rx-form";
+  form.hidden = true;
+  const rows = document.createElement("div");
+  rows.className = "portal-rx-rows";
+  form.appendChild(rows);
+  createMedicationRow(rows);
+
+  const addLineBtn = document.createElement("button");
+  addLineBtn.type = "button";
+  addLineBtn.className = "portal-rx-add-line";
+  addLineBtn.textContent = "+ Medicamento";
+  addLineBtn.addEventListener("click", () => createMedicationRow(rows));
+  form.appendChild(addLineBtn);
+
+  const saveBtn = document.createElement("button");
+  saveBtn.type = "button";
+  saveBtn.className = "portal-rx-save";
+  saveBtn.textContent = "Guardar receta";
+  section.appendChild(form);
+
+  const toggleBtn = document.createElement("button");
+  toggleBtn.type = "button";
+  toggleBtn.className = "portal-visit-toggle";
+  toggleBtn.textContent = "+ Agregar receta";
+  toggleBtn.addEventListener("click", () => {
+    form.hidden = !form.hidden;
+  });
+  head.appendChild(toggleBtn);
+  form.appendChild(saveBtn);
+
+  const rxState = [];
+
+  saveBtn.addEventListener("click", async () => {
+    const medications = Array.from(rows.children)
+      .map((row) => ({
+        name: row.querySelector(".rx-name").value.trim(),
+        dose: row.querySelector(".rx-dose").value.trim(),
+        frequency: row.querySelector(".rx-frequency").value.trim(),
+        duration: row.querySelector(".rx-duration").value.trim(),
+        instructions: row.querySelector(".rx-instructions").value.trim(),
+      }))
+      .filter((m) => m.name);
+    if (medications.length === 0) return;
+
+    const { data: inserted } = await supabase
+      .from("prescriptions")
+      .insert({ appointment_id: apt.id, vet_id: currentVetId, medications })
+      .select()
+      .single();
+
+    if (inserted) {
+      rxState.unshift(inserted);
+      renderRxList(listEl, rxState);
+      rows.innerHTML = "";
+      createMedicationRow(rows);
+      form.hidden = true;
+    }
+  });
+
+  return { section, listEl, rxState };
+}
+
+function renderExamList(container, exams) {
+  container.innerHTML = "";
+  exams.forEach((exam) => {
+    const item = document.createElement("div");
+    item.className = "portal-exam-item";
+    item.innerHTML = `<span>📄 ${exam.file_name}</span><button type="button" class="portal-exam-view">Ver</button>`;
+    const viewBtn = item.querySelector(".portal-exam-view");
+    viewBtn.addEventListener("click", async () => {
+      viewBtn.textContent = "Cargando...";
+      const { data } = await supabase.storage.from("medical-exams").createSignedUrl(exam.file_path, 60);
+      viewBtn.textContent = "Ver";
+      if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+    });
+    container.appendChild(item);
+  });
+}
+
+function createExamSection(apt) {
+  const section = document.createElement("div");
+  section.className = "portal-visit-section";
+
+  const head = document.createElement("div");
+  head.className = "portal-visit-section-head";
+  head.innerHTML = `<span>🧪 Exámenes</span>`;
+  section.appendChild(head);
+
+  const listEl = document.createElement("div");
+  listEl.className = "portal-exam-list";
+  section.appendChild(listEl);
+
+  const uploadLabel = document.createElement("label");
+  uploadLabel.className = "portal-file-btn";
+  uploadLabel.innerHTML = `Subir examen <input type="file" accept="image/png,image/jpeg,image/webp,application/pdf" hidden />`;
+  const fileInput = uploadLabel.querySelector("input");
+  head.appendChild(uploadLabel);
+
+  const examState = [];
+
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    uploadLabel.classList.add("is-uploading");
+    const uploadingText = uploadLabel.firstChild;
+    uploadingText.textContent = "Subiendo...";
+
+    const path = `${currentVetId}/${apt.id}/${Date.now()}_${file.name}`;
+    const { error: uploadErr } = await supabase.storage
+      .from("medical-exams")
+      .upload(path, file, { contentType: file.type });
+
+    if (!uploadErr) {
+      const { data: inserted } = await supabase
+        .from("medical_exams")
+        .insert({ appointment_id: apt.id, vet_id: currentVetId, file_path: path, file_name: file.name, mime_type: file.type })
+        .select()
+        .single();
+      if (inserted) {
+        examState.unshift(inserted);
+        renderExamList(listEl, examState);
+      }
+    }
+    uploadingText.textContent = "Subir examen";
+    uploadLabel.classList.remove("is-uploading");
+    fileInput.value = "";
+  });
+
+  return { section, listEl, examState };
+}
+
+async function openPatientModal(key, petInfo) {
   const visits = allAppointments
     .filter((a) => (a.pet_id || a.pet_name) === key)
     .slice()
     .sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  const visitIds = visits.map((v) => v.id);
+  const [{ data: rxData }, { data: examData }] = await Promise.all([
+    supabase.from("prescriptions").select("*").in("appointment_id", visitIds).order("created_at", { ascending: false }),
+    supabase.from("medical_exams").select("*").in("appointment_id", visitIds).order("uploaded_at", { ascending: false }),
+  ]);
+  const rxByApt = groupBy(rxData || [], "appointment_id");
+  const examByApt = groupBy(examData || [], "appointment_id");
 
   patientModalBody.innerHTML = `
     <div class="portal-patient-header">
@@ -421,6 +623,17 @@ function openPatientModal(key, petInfo) {
       savedLabel.hidden = false;
       setTimeout(() => (savedLabel.hidden = true), 2000);
     });
+
+    const { section: rxSection, listEl: rxListEl, rxState } = createRxSection(apt);
+    rxState.push(...(rxByApt.get(apt.id) || []));
+    renderRxList(rxListEl, rxState);
+    visit.appendChild(rxSection);
+
+    const { section: examSection, listEl: examListEl, examState } = createExamSection(apt);
+    examState.push(...(examByApt.get(apt.id) || []));
+    renderExamList(examListEl, examState);
+    visit.appendChild(examSection);
+
     patientModalBody.appendChild(visit);
   });
 
@@ -428,6 +641,7 @@ function openPatientModal(key, petInfo) {
 }
 
 async function loadTabData({ session }) {
+  currentVetId = session.user.id;
   const { data } = await supabase
     .from("appointments")
     .select("*")
