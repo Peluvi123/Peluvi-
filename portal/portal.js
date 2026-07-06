@@ -1056,6 +1056,23 @@ const STATUS_COLORS = {
   cancelled: "#e11d48",
 };
 
+function renderVaccineList(container, vaccines) {
+  container.innerHTML = "";
+  if (vaccines.length === 0) {
+    container.innerHTML = `<div class="portal-empty">Aún no hay vacunas registradas.</div>`;
+    return;
+  }
+  vaccines.forEach((v) => {
+    const item = document.createElement("div");
+    item.className = "portal-rx-card";
+    item.innerHTML = `
+      <span class="portal-rx-date">${v.date_given || ""}${v.next_due_date ? ` · Próxima: ${v.next_due_date}` : ""}</span>
+      <div class="portal-rx-med"><strong>${v.vaccine_name || ""}</strong>${v.notes ? `<span>${v.notes}</span>` : ""}</div>
+    `;
+    container.appendChild(item);
+  });
+}
+
 async function showPatientDetail(key, petInfo) {
   const visits = allAppointments
     .filter((a) => (a.pet_id || a.pet_name) === key)
@@ -1063,12 +1080,15 @@ async function showPatientDetail(key, petInfo) {
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 
   const visitIds = visits.map((v) => v.id);
-  const [{ data: rxData }, { data: examData }] = await Promise.all([
+  const [{ data: rxData }, { data: examData }, { data: recordData }] = await Promise.all([
     supabase.from("prescriptions").select("*").in("appointment_id", visitIds).order("created_at", { ascending: false }),
     supabase.from("medical_exams").select("*").in("appointment_id", visitIds).order("uploaded_at", { ascending: false }),
+    supabase.from("patient_records").select("*").eq("vet_id", currentVetId).eq("pet_key", key).maybeSingle(),
   ]);
   const rxByApt = groupBy(rxData || [], "appointment_id");
   const examByApt = groupBy(examData || [], "appointment_id");
+  const record = recordData || {};
+  let vaccines = record.vaccines || [];
 
   patientDetailBody.innerHTML = `
     <div class="portal-patient-hero">
@@ -1081,8 +1101,183 @@ async function showPatientDetail(key, petInfo) {
         <span class="portal-patient-hero-stat">${visits.length} visita${visits.length === 1 ? "" : "s"}</span>
       </div>
     </div>
+
+    <div class="portal-side-block" style="margin-bottom: 24px">
+      <div class="portal-side-block-head">
+        <h3>Datos del paciente</h3>
+        <button type="button" class="portal-visit-toggle" id="record-toggle">Editar ficha</button>
+      </div>
+      <p class="portal-muted" id="record-summary"></p>
+
+      <div id="record-form" hidden>
+        <div class="portal-field-row">
+          <label class="portal-field"><span>Especie</span><input type="text" id="record-species" placeholder="Perro, gato..." /></label>
+          <label class="portal-field"><span>Raza</span><input type="text" id="record-breed" /></label>
+        </div>
+        <div class="portal-field-row">
+          <label class="portal-field">
+            <span>Sexo</span>
+            <select id="record-gender">
+              <option value="">Sin definir</option>
+              <option value="male">Macho</option>
+              <option value="female">Hembra</option>
+            </select>
+          </label>
+          <label class="portal-field"><span>Fecha de nacimiento</span><input type="date" id="record-born" /></label>
+        </div>
+        <div class="portal-field-row">
+          <label class="portal-field"><span>Color</span><input type="text" id="record-color" /></label>
+          <label class="portal-field"><span>Peso de referencia</span><input type="text" id="record-weight" placeholder="ej. 12 kg" /></label>
+        </div>
+        <div class="portal-field-row">
+          <label class="portal-field"><span>Chip</span><input type="text" id="record-chip" /></label>
+          <label class="portal-field"><span>Tipo de sangre</span><input type="text" id="record-blood-type" /></label>
+        </div>
+        <label class="portal-field"><span>Alergias (separadas por coma)</span><input type="text" id="record-allergies" /></label>
+        <label class="portal-field"><span>Notas generales</span><textarea id="record-notes" rows="2"></textarea></label>
+        <div class="portal-field-row">
+          <label class="portal-checkbox"><input type="checkbox" id="record-sterilized" /><span>Esterilizado</span></label>
+          <label class="portal-checkbox"><input type="checkbox" id="record-dewormed" /><span>Desparasitado</span></label>
+        </div>
+        <button type="button" class="portal-rx-save" id="record-save-btn" style="margin-top: 10px">Guardar ficha</button>
+        <span class="portal-success" id="record-success" hidden>Guardado ✓</span>
+      </div>
+
+      <div class="portal-side-block-head" style="margin-top: 20px">
+        <h3>Carnet de vacunas</h3>
+        <button type="button" class="portal-visit-toggle" id="vaccine-add-toggle">+ Agregar vacuna</button>
+      </div>
+      <div id="vaccine-list" class="portal-rx-list"></div>
+      <div id="vaccine-form" class="portal-rx-form" hidden>
+        <div class="portal-field-row">
+          <label class="portal-field"><span>Vacuna</span><input type="text" id="vaccine-name" placeholder="Ej. Rabia" /></label>
+          <label class="portal-field"><span>Fecha aplicada</span><input type="date" id="vaccine-date-given" /></label>
+        </div>
+        <div class="portal-field-row">
+          <label class="portal-field"><span>Próxima dosis</span><input type="date" id="vaccine-next-due" /></label>
+          <label class="portal-field"><span>Notas</span><input type="text" id="vaccine-notes" placeholder="Opcional" /></label>
+        </div>
+        <button type="button" class="portal-rx-save" id="vaccine-save-btn">Guardar vacuna</button>
+      </div>
+    </div>
+
     <div class="portal-timeline" id="patient-timeline"></div>
   `;
+
+  // Ficha del paciente
+  const recordToggle = patientDetailBody.querySelector("#record-toggle");
+  const recordForm = patientDetailBody.querySelector("#record-form");
+  const recordSummary = patientDetailBody.querySelector("#record-summary");
+  const recordFields = {
+    species: patientDetailBody.querySelector("#record-species"),
+    breed: patientDetailBody.querySelector("#record-breed"),
+    gender: patientDetailBody.querySelector("#record-gender"),
+    born: patientDetailBody.querySelector("#record-born"),
+    color: patientDetailBody.querySelector("#record-color"),
+    weight: patientDetailBody.querySelector("#record-weight"),
+    chip: patientDetailBody.querySelector("#record-chip"),
+    blood_type: patientDetailBody.querySelector("#record-blood-type"),
+    allergies: patientDetailBody.querySelector("#record-allergies"),
+    notes: patientDetailBody.querySelector("#record-notes"),
+    sterilized: patientDetailBody.querySelector("#record-sterilized"),
+    dewormed: patientDetailBody.querySelector("#record-dewormed"),
+  };
+
+  function fillRecordSummary() {
+    const parts = [record?.species, record?.breed, record?.weight].filter(Boolean);
+    recordSummary.textContent = parts.length > 0 ? parts.join(" · ") : "Sin datos registrados aún";
+  }
+  recordFields.species.value = record?.species || "";
+  recordFields.breed.value = record?.breed || petInfo.pet_breed || "";
+  recordFields.gender.value = record?.gender || "";
+  recordFields.born.value = record?.born || "";
+  recordFields.color.value = record?.color || "";
+  recordFields.weight.value = record?.weight || "";
+  recordFields.chip.value = record?.chip || "";
+  recordFields.blood_type.value = record?.blood_type || "";
+  recordFields.allergies.value = (record?.allergies || []).join(", ");
+  recordFields.notes.value = record?.notes || "";
+  recordFields.sterilized.checked = !!record?.sterilized;
+  recordFields.dewormed.checked = !!record?.dewormed;
+  fillRecordSummary();
+
+  recordToggle.addEventListener("click", () => {
+    recordForm.hidden = !recordForm.hidden;
+    recordToggle.textContent = recordForm.hidden ? "Editar ficha" : "Ocultar";
+  });
+
+  patientDetailBody.querySelector("#record-save-btn").addEventListener("click", async () => {
+    const patch = {
+      vet_id: currentVetId,
+      pet_key: key,
+      species: recordFields.species.value.trim(),
+      breed: recordFields.breed.value.trim(),
+      gender: recordFields.gender.value,
+      born: recordFields.born.value,
+      color: recordFields.color.value.trim(),
+      weight: recordFields.weight.value.trim(),
+      chip: recordFields.chip.value.trim(),
+      blood_type: recordFields.blood_type.value.trim(),
+      allergies: recordFields.allergies.value.split(",").map((a) => a.trim()).filter(Boolean),
+      notes: recordFields.notes.value.trim(),
+      sterilized: recordFields.sterilized.checked,
+      dewormed: recordFields.dewormed.checked,
+      updated_at: new Date().toISOString(),
+    };
+    const { data: saved } = await supabase
+      .from("patient_records")
+      .upsert(patch, { onConflict: "vet_id,pet_key" })
+      .select()
+      .single();
+    if (saved) {
+      record.species = saved.species;
+      record.breed = saved.breed;
+      record.weight = saved.weight;
+      fillRecordSummary();
+    }
+    const successLabel = patientDetailBody.querySelector("#record-success");
+    successLabel.hidden = false;
+    setTimeout(() => (successLabel.hidden = true), 2000);
+  });
+
+  // Carnet de vacunas
+  const vaccineList = patientDetailBody.querySelector("#vaccine-list");
+  const vaccineForm = patientDetailBody.querySelector("#vaccine-form");
+  const vaccineAddToggle = patientDetailBody.querySelector("#vaccine-add-toggle");
+  renderVaccineList(vaccineList, vaccines);
+
+  vaccineAddToggle.addEventListener("click", () => {
+    vaccineForm.hidden = !vaccineForm.hidden;
+  });
+
+  patientDetailBody.querySelector("#vaccine-save-btn").addEventListener("click", async () => {
+    const nameInput = patientDetailBody.querySelector("#vaccine-name");
+    const dateGivenInput = patientDetailBody.querySelector("#vaccine-date-given");
+    const nextDueInput = patientDetailBody.querySelector("#vaccine-next-due");
+    const notesInput = patientDetailBody.querySelector("#vaccine-notes");
+    if (!nameInput.value.trim()) return;
+
+    vaccines = [
+      ...vaccines,
+      {
+        vaccine_name: nameInput.value.trim(),
+        date_given: dateGivenInput.value,
+        next_due_date: nextDueInput.value,
+        notes: notesInput.value.trim(),
+      },
+    ];
+
+    await supabase
+      .from("patient_records")
+      .upsert({ vet_id: currentVetId, pet_key: key, vaccines }, { onConflict: "vet_id,pet_key" });
+
+    renderVaccineList(vaccineList, vaccines);
+    nameInput.value = "";
+    dateGivenInput.value = "";
+    nextDueInput.value = "";
+    notesInput.value = "";
+    vaccineForm.hidden = true;
+  });
 
   const timeline = patientDetailBody.querySelector("#patient-timeline");
 
@@ -1103,19 +1298,46 @@ async function showPatientDetail(key, petInfo) {
         <span class="portal-status-pill" style="--pill-color:${STATUS_COLORS[apt.status] || "#8f53ff"}">${STATUS_LABELS[apt.status] || apt.status}</span>
       </div>
       <span class="portal-visit-date">${apt.date || ""} ${apt.time || ""}${apt.doctor_name ? ` · Atendido por ${apt.doctor_name}` : ""}</span>
+      <span class="portal-visit-notes-label">Signos vitales de esta visita</span>
+      <div class="portal-vitals-grid">
+        <label>Peso (kg)<input type="number" step="0.1" class="vital-weight" value="${apt.weight_kg ?? ""}" /></label>
+        <label>Temp. (°C)<input type="number" step="0.1" class="vital-temp" value="${apt.temperature_c ?? ""}" /></label>
+        <label>Frec. cardíaca<input type="number" class="vital-hr" value="${apt.heart_rate ?? ""}" /></label>
+        <label>Frec. respiratoria<input type="number" class="vital-rr" value="${apt.respiratory_rate ?? ""}" /></label>
+      </div>
+      <button type="button" class="portal-visit-save vitals-save">Guardar signos vitales</button>
+      <span class="portal-success vitals-success" hidden>Guardado ✓</span>
+
       <span class="portal-visit-notes-label">Notas clínicas</span>
       <textarea placeholder="Diagnóstico, tratamiento, indicaciones...">${apt.notes || ""}</textarea>
       <button type="button" class="portal-visit-save">Guardar nota</button>
       <span class="portal-success" hidden>Guardado ✓</span>
     `;
     const textarea = visit.querySelector("textarea");
-    const saveBtn = visit.querySelector(".portal-visit-save");
-    const savedLabel = visit.querySelector(".portal-success");
+    const saveBtn = visit.querySelector(".portal-visit-save:not(.vitals-save)");
+    const savedLabel = visit.querySelector(".portal-success:not(.vitals-success)");
     saveBtn.addEventListener("click", async () => {
       await supabase.from("appointments").update({ notes: textarea.value.trim() }).eq("id", apt.id);
       apt.notes = textarea.value.trim();
       savedLabel.hidden = false;
       setTimeout(() => (savedLabel.hidden = true), 2000);
+    });
+
+    const vitalsSaveBtn = visit.querySelector(".vitals-save");
+    const vitalsSavedLabel = visit.querySelector(".vitals-success");
+    vitalsSaveBtn.addEventListener("click", async () => {
+      const toNumOrNull = (val) => (val === "" ? null : Number(val));
+      const weight_kg = toNumOrNull(visit.querySelector(".vital-weight").value);
+      const temperature_c = toNumOrNull(visit.querySelector(".vital-temp").value);
+      const heart_rate = toNumOrNull(visit.querySelector(".vital-hr").value);
+      const respiratory_rate = toNumOrNull(visit.querySelector(".vital-rr").value);
+      await supabase
+        .from("appointments")
+        .update({ weight_kg, temperature_c, heart_rate, respiratory_rate })
+        .eq("id", apt.id);
+      Object.assign(apt, { weight_kg, temperature_c, heart_rate, respiratory_rate });
+      vitalsSavedLabel.hidden = false;
+      setTimeout(() => (vitalsSavedLabel.hidden = true), 2000);
     });
 
     const { section: rxSection, listEl: rxListEl, rxState } = createRxSection(apt);

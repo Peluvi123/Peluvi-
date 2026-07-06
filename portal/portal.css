@@ -1064,6 +1064,38 @@
   margin-bottom: 6px;
 }
 
+.portal-vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.portal-vitals-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.portal-vitals-grid input {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text);
+}
+
+@media (max-width: 600px) {
+  .portal-vitals-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .portal-visit textarea {
   width: 100%;
   background: var(--soft);
