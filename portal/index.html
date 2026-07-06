@@ -127,7 +127,15 @@
                 <h2>Pacientes</h2>
                 <p class="portal-muted">Mascotas que han agendado contigo.</p>
               </div>
-              <input type="search" id="pacientes-search" class="portal-search-input" placeholder="Buscar por nombre o raza..." />
+              <div class="portal-pacientes-toolbar">
+                <input type="search" id="pacientes-search" class="portal-search-input" placeholder="Buscar por nombre o raza..." />
+                <button type="button" class="portal-visit-toggle" id="link-code-toggle">+ Vincular paciente con código</button>
+              </div>
+              <div class="portal-tag-add" id="link-code-form" hidden>
+                <input type="text" id="link-code-input" placeholder="Código de 4 dígitos" maxlength="4" />
+                <button type="button" id="link-code-submit">Vincular</button>
+              </div>
+              <p class="portal-error" id="link-code-error" hidden></p>
               <div id="pacientes-empty" class="portal-empty" hidden>Aún no tienes pacientes registrados.</div>
               <div id="pacientes-no-results" class="portal-empty" hidden>Ninguna mascota coincide con tu búsqueda.</div>
               <div id="pacientes-list" class="portal-grid"></div>

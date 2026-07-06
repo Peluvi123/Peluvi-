@@ -648,7 +648,7 @@ const pacientesSearch = document.getElementById("pacientes-search");
 const pacientesNoResults = document.getElementById("pacientes-no-results");
 let allPatients = [];
 
-function renderPacientes(appointments) {
+function renderPacientes(appointments, linkedRecords = []) {
   const byPet = new Map();
   appointments.forEach((apt) => {
     const key = apt.pet_id || apt.pet_name;
@@ -657,6 +657,19 @@ function renderPacientes(appointments) {
       byPet.set(key, { ...apt, visits: 0 });
     }
     byPet.get(key).visits += 1;
+  });
+
+  // Pacientes vinculados por código que todavía no tienen ninguna cita
+  linkedRecords.forEach((rec) => {
+    if (!byPet.has(rec.pet_key)) {
+      byPet.set(rec.pet_key, {
+        pet_id: rec.pet_key,
+        pet_name: rec.pet_name || "Mascota",
+        pet_breed: rec.breed || "",
+        pet_image: rec.pet_image_url || "",
+        visits: 0,
+      });
+    }
   });
 
   allPatients = Array.from(byPet.values());
@@ -692,6 +705,98 @@ pacientesSearch.addEventListener("input", () => {
     (p) => (p.pet_name || "").toLowerCase().includes(q) || (p.pet_breed || "").toLowerCase().includes(q)
   );
   renderPatientCards(filtered);
+});
+
+const linkCodeToggle = document.getElementById("link-code-toggle");
+const linkCodeForm = document.getElementById("link-code-form");
+const linkCodeInput = document.getElementById("link-code-input");
+const linkCodeSubmit = document.getElementById("link-code-submit");
+const linkCodeError = document.getElementById("link-code-error");
+
+linkCodeToggle.addEventListener("click", () => {
+  linkCodeForm.hidden = !linkCodeForm.hidden;
+  linkCodeError.hidden = true;
+});
+
+linkCodeSubmit.addEventListener("click", async () => {
+  const code = linkCodeInput.value.trim();
+  linkCodeError.hidden = true;
+  if (!code) return;
+
+  linkCodeSubmit.disabled = true;
+  linkCodeSubmit.textContent = "Vinculando...";
+
+  const { data: match, error: matchErr } = await supabase
+    .from("pet_link_codes")
+    .select("*")
+    .eq("code", code)
+    .is("used_by_vet_id", null)
+    .gt("expires_at", new Date().toISOString())
+    .maybeSingle();
+
+  if (matchErr || !match) {
+    linkCodeError.textContent = "Código inválido o expirado.";
+    linkCodeError.hidden = false;
+    linkCodeSubmit.disabled = false;
+    linkCodeSubmit.textContent = "Vincular";
+    return;
+  }
+
+  const { error: claimErr } = await supabase
+    .from("pet_link_codes")
+    .update({ used_by_vet_id: currentVetId, used_at: new Date().toISOString() })
+    .eq("id", match.id);
+
+  if (claimErr) {
+    linkCodeError.textContent = "No se pudo reclamar el código. Intenta de nuevo.";
+    linkCodeError.hidden = false;
+    linkCodeSubmit.disabled = false;
+    linkCodeSubmit.textContent = "Vincular";
+    return;
+  }
+
+  const { data: pet, error: petErr } = await supabase
+    .from("user_pets")
+    .select("*")
+    .eq("id", match.pet_id)
+    .single();
+
+  if (petErr || !pet) {
+    linkCodeError.textContent = "No se pudo leer la ficha de la mascota.";
+    linkCodeError.hidden = false;
+    linkCodeSubmit.disabled = false;
+    linkCodeSubmit.textContent = "Vincular";
+    return;
+  }
+
+  await supabase.from("patient_records").upsert(
+    {
+      vet_id: currentVetId,
+      pet_key: pet.id,
+      pet_name: pet.name,
+      pet_image_url: pet.image_url,
+      species: pet.species,
+      breed: pet.breed,
+      gender: pet.gender,
+      born: pet.born,
+      weight: pet.weight,
+      color: pet.color,
+      chip: pet.chip,
+      blood_type: pet.blood_type,
+      allergies: pet.allergies || [],
+      sterilized: pet.sterilized,
+      dewormed: pet.dewormed,
+    },
+    { onConflict: "vet_id,pet_key" }
+  );
+
+  await refetchLinkedPatientRecords();
+  renderPacientes(allAppointments, linkedPatientRecords);
+
+  linkCodeInput.value = "";
+  linkCodeForm.hidden = true;
+  linkCodeSubmit.disabled = false;
+  linkCodeSubmit.textContent = "Vincular";
 });
 
 const pacientesGridView = document.getElementById("pacientes-grid-view");
@@ -1462,6 +1567,16 @@ async function showPatientDetail(key, petInfo) {
   patientDetailView.hidden = false;
 }
 
+let linkedPatientRecords = [];
+
+async function refetchLinkedPatientRecords() {
+  const { data } = await supabase
+    .from("patient_records")
+    .select("pet_key,pet_name,breed,pet_image_url")
+    .eq("vet_id", currentVetId);
+  linkedPatientRecords = data || [];
+}
+
 async function loadTabData({ session }) {
   currentVetId = session.user.id;
   const { data } = await supabase
@@ -1471,6 +1586,7 @@ async function loadTabData({ session }) {
     .order("date", { ascending: true });
 
   allAppointments = data || [];
+  await refetchLinkedPatientRecords();
   selectedDateFilter = null;
   if (allAppointments[0]?.date) {
     const [y, m] = allAppointments[0].date.split("-").map(Number);
@@ -1479,7 +1595,7 @@ async function loadTabData({ session }) {
   renderCalendar();
   renderCitas(filterAppointments());
   renderPendingCitas();
-  renderPacientes(allAppointments);
+  renderPacientes(allAppointments, linkedPatientRecords);
   renderDashboard();
 }
 

@@ -528,6 +528,29 @@
   margin-bottom: 18px;
 }
 
+.portal-pacientes-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.portal-pacientes-toolbar .portal-search-input {
+  margin-bottom: 0;
+}
+
+#link-code-form {
+  max-width: 340px;
+  margin: 10px 0 18px;
+}
+
+#link-code-input {
+  max-width: 140px;
+  text-align: center;
+  letter-spacing: 4px;
+  font-weight: 800;
+}
+
 .portal-search-input:focus {
   outline: none;
   border-color: var(--purple-bright);
