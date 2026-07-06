@@ -545,10 +545,13 @@
 }
 
 #link-code-input {
-  max-width: 140px;
+  max-width: 180px;
+  min-width: 140px;
   text-align: center;
-  letter-spacing: 4px;
+  letter-spacing: 6px;
+  font-size: 18px;
   font-weight: 800;
+  padding-left: 20px;
 }
 
 .portal-search-input:focus {
