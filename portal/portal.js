@@ -839,21 +839,23 @@ function renderRxList(container, prescriptions, apt) {
   container.innerHTML = "";
   prescriptions.forEach((rx) => {
     const card = document.createElement("div");
-    card.className = "portal-rx-card";
+    card.className = "portal-rx-group";
     const meds = (rx.medications || [])
       .map(
         (m) => `
-        <div class="portal-rx-med">
-          <strong>${m.name || ""}</strong> — ${[m.dose, m.frequency, m.duration].filter(Boolean).join(" · ")}
-          ${m.instructions ? `<span>${m.instructions}</span>` : ""}
+        <div class="portal-vaccine-card">
+          <span class="portal-vaccine-icon">💊</span>
+          <div class="portal-vaccine-body">
+            <strong>${m.name || ""}${m.dose ? ` — ${m.dose}` : ""}</strong>
+            <span>${[m.frequency, m.instructions].filter(Boolean).join(" · ")}</span>
+          </div>
+          ${m.duration ? `<span class="portal-vaccine-due" style="--due-color:#7c3aed">${m.duration}</span>` : ""}
         </div>`
       )
       .join("");
     const date = rx.created_at ? new Date(rx.created_at).toLocaleDateString("es-CO") : "";
-    const notesHtml = rx.notes ? `<div class="portal-rx-med"><span>🧪 ${rx.notes}</span></div>` : "";
-    const recommendationsHtml = rx.recommendations
-      ? `<div class="portal-rx-med"><span>📋 ${rx.recommendations}</span></div>`
-      : "";
+    const notesHtml = rx.notes ? `<p class="portal-rx-extra">🧪 ${rx.notes}</p>` : "";
+    const recommendationsHtml = rx.recommendations ? `<p class="portal-rx-extra">📋 ${rx.recommendations}</p>` : "";
     card.innerHTML = `<span class="portal-rx-date">${date}</span>${meds}${notesHtml}${recommendationsHtml}`;
 
     const actions = document.createElement("div");
