@@ -42,6 +42,11 @@ const server = createServer(async (request, response) => {
       return;
     }
 
+    if (request.method === "GET" && url.pathname.startsWith("/api/admin/")) {
+      await handleAdminApi(url.pathname, request, response);
+      return;
+    }
+
     if (request.method !== "GET" && request.method !== "HEAD") {
       sendJson(response, 405, { error: "Método no permitido" });
       return;
@@ -200,6 +205,103 @@ function readBody(request) {
 function sendJson(response, status, payload) {
   response.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
   response.end(JSON.stringify(payload));
+}
+
+const SUPABASE_URL = "https://jljeromqlkokpmwyypqo.supabase.co";
+const GRAPH_API_VERSION = "v21.0";
+const graphCache = new Map();
+
+async function requireAdminAuth(request) {
+  const authHeader = request.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!token) return { error: 401, message: "Falta el token de sesión." };
+
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) return { error: 500, message: "Falta configurar SUPABASE_SERVICE_ROLE_KEY." };
+
+  const userResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { Authorization: `Bearer ${token}`, apikey: serviceKey },
+  });
+  if (!userResp.ok) return { error: 401, message: "Sesión inválida o expirada." };
+  const user = await userResp.json();
+
+  const profileResp = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=role`, {
+    headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+  });
+  const profiles = await profileResp.json();
+  if (!profiles?.[0] || profiles[0].role !== "admin") {
+    return { error: 403, message: "Esta cuenta no tiene permisos de administrador." };
+  }
+  return { userId: user.id };
+}
+
+async function callGraphApi(path, { ttlMs = 5 * 60 * 1000 } = {}) {
+  const cached = graphCache.get(path);
+  if (cached && cached.expiresAt > Date.now()) return cached.data;
+
+  const token = process.env.META_ACCESS_TOKEN;
+  const separator = path.includes("?") ? "&" : "?";
+  const resp = await fetch(
+    `https://graph.facebook.com/${GRAPH_API_VERSION}/${path}${separator}access_token=${token}`
+  );
+  const data = await resp.json();
+  if (!resp.ok) throw new Error(data.error?.message || "Error de Graph API");
+
+  graphCache.set(path, { data, expiresAt: Date.now() + ttlMs });
+  return data;
+}
+
+async function handleAdminApi(pathname, request, response) {
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    sendJson(response, auth.error, { error: auth.message });
+    return;
+  }
+
+  const pageId = process.env.META_PAGE_ID;
+  const igUserId = process.env.META_IG_USER_ID;
+  const adAccountId = process.env.META_AD_ACCOUNT_ID;
+  const pixelId = process.env.META_PIXEL_ID;
+
+  try {
+    if (pathname === "/api/admin/page-insights") {
+      if (!pageId) throw new Error("Falta configurar META_PAGE_ID.");
+      const data = await callGraphApi(
+        `${pageId}/insights?metric=page_fans,page_impressions,page_engaged_users&period=day`
+      );
+      sendJson(response, 200, data);
+      return;
+    }
+
+    if (pathname === "/api/admin/ig-insights") {
+      if (!igUserId) throw new Error("Falta configurar META_IG_USER_ID.");
+      const data = await callGraphApi(
+        `${igUserId}/insights?metric=follower_count,reach,accounts_engaged&period=day`
+      );
+      sendJson(response, 200, data);
+      return;
+    }
+
+    if (pathname === "/api/admin/ads-insights") {
+      if (!adAccountId) throw new Error("Falta configurar META_AD_ACCOUNT_ID.");
+      const data = await callGraphApi(
+        `${adAccountId}/insights?fields=campaign_name,spend,impressions,reach,actions,cost_per_action_type&level=campaign&date_preset=last_30d`
+      );
+      sendJson(response, 200, data);
+      return;
+    }
+
+    if (pathname === "/api/admin/pixel-summary") {
+      if (!pixelId) throw new Error("Falta configurar META_PIXEL_ID.");
+      const data = await callGraphApi(`${pixelId}?fields=name,last_fired_time`);
+      sendJson(response, 200, data);
+      return;
+    }
+
+    sendJson(response, 404, { error: "Endpoint no encontrado." });
+  } catch (error) {
+    sendJson(response, 502, { error: error.message || "Error consultando la API de Meta." });
+  }
 }
 
 function extractText(data) {

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel de administrador | Peluvi</title>
+    <meta name="robots" content="noindex" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../portal/portal.css" />
+    <link rel="stylesheet" href="admin.css?v=1" />
+  </head>
+  <body class="portal-body">
+    <div class="portal-shell">
+      <header class="portal-header">
+        <a class="portal-brand" href="/">
+          <img src="../assets/peluvi-logo.png" alt="" />
+          <span>Peluvi <em>admin</em></span>
+        </a>
+        <button class="portal-logout" id="logout-btn" hidden>Salir</button>
+      </header>
+
+      <main class="portal-main">
+        <!-- Login -->
+        <section class="portal-login" id="login-view">
+          <div class="portal-login-card">
+            <h1>Panel de administrador</h1>
+            <p class="portal-muted">Ingresa con tu cuenta de administrador.</p>
+            <form id="login-form">
+              <label class="portal-field">
+                <span>Correo</span>
+                <input type="email" id="login-email" required autocomplete="username" />
+              </label>
+              <label class="portal-field">
+                <span>Contraseña</span>
+                <input type="password" id="login-password" required autocomplete="current-password" />
+              </label>
+              <button type="submit" id="login-submit">Ingresar</button>
+              <p class="portal-error" id="login-error" hidden></p>
+            </form>
+          </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section class="portal-dashboard" id="dashboard-view" hidden>
+          <div class="portal-welcome">
+            <h1 id="dashboard-greeting">Hola</h1>
+            <p class="portal-muted">Datos de Meta para peluvi.com, sin salir de tu web.</p>
+          </div>
+
+          <nav class="portal-tabs" role="tablist">
+            <button class="portal-tab is-active" data-tab="resumen" type="button">Resumen</button>
+            <button class="portal-tab" data-tab="redes" type="button">Redes sociales</button>
+            <button class="portal-tab" data-tab="anuncios" type="button">Anuncios</button>
+            <button class="portal-tab" data-tab="whatsapp" type="button">WhatsApp</button>
+          </nav>
+
+          <!-- Resumen -->
+          <div class="portal-panel" data-panel="resumen">
+            <div class="portal-panel-head">
+              <h2>Últimos 30 días</h2>
+              <p class="portal-muted">Gasto, resultados y estado del pixel de anuncios.</p>
+            </div>
+            <div class="portal-stats-row" id="resumen-stats">
+              <div class="portal-stat-card">
+                <span id="resumen-spend">—</span>
+                <p>Gasto en anuncios</p>
+              </div>
+              <div class="portal-stat-card is-accent">
+                <span id="resumen-results">—</span>
+                <p>Resultados</p>
+              </div>
+              <div class="portal-stat-card">
+                <span id="resumen-cpr">—</span>
+                <p>Costo por resultado</p>
+              </div>
+            </div>
+            <div class="admin-pixel-status" id="pixel-status">
+              <p class="portal-muted">Cargando estado del pixel…</p>
+            </div>
+            <div id="resumen-error" class="portal-error" hidden></div>
+          </div>
+
+          <!-- Redes sociales -->
+          <div class="portal-panel" data-panel="redes" hidden>
+            <div class="portal-panel-head">
+              <h2>Facebook e Instagram</h2>
+              <p class="portal-muted">Seguidores, alcance e interacciones.</p>
+            </div>
+            <div class="admin-social-grid">
+              <div class="admin-social-card">
+                <h3>Página de Facebook</h3>
+                <div class="portal-stats-row" id="page-stats">
+                  <div class="portal-stat-card"><span id="page-fans">—</span><p>Seguidores</p></div>
+                  <div class="portal-stat-card"><span id="page-impressions">—</span><p>Alcance</p></div>
+                  <div class="portal-stat-card"><span id="page-engaged">—</span><p>Interacciones</p></div>
+                </div>
+              </div>
+              <div class="admin-social-card">
+                <h3>Instagram</h3>
+                <div class="portal-stats-row" id="ig-stats">
+                  <div class="portal-stat-card"><span id="ig-followers">—</span><p>Seguidores</p></div>
+                  <div class="portal-stat-card"><span id="ig-reach">—</span><p>Alcance</p></div>
+                  <div class="portal-stat-card"><span id="ig-engaged">—</span><p>Interacciones</p></div>
+                </div>
+              </div>
+            </div>
+            <div id="redes-error" class="portal-error" hidden></div>
+          </div>
+
+          <!-- Anuncios -->
+          <div class="portal-panel" data-panel="anuncios" hidden>
+            <div class="portal-panel-head">
+              <h2>Campañas</h2>
+              <p class="portal-muted">Últimos 30 días, por campaña.</p>
+            </div>
+            <div id="ads-empty" class="portal-empty" hidden>No hay campañas con actividad en los últimos 30 días.</div>
+            <div class="admin-table-wrap">
+              <table class="admin-table" id="ads-table" hidden>
+                <thead>
+                  <tr>
+                    <th>Campaña</th>
+                    <th>Gasto</th>
+                    <th>Alcance</th>
+                    <th>Resultados</th>
+                    <th>Costo/resultado</th>
+                  </tr>
+                </thead>
+                <tbody id="ads-tbody"></tbody>
+              </table>
+            </div>
+            <div id="ads-error" class="portal-error" hidden></div>
+          </div>
+
+          <!-- WhatsApp -->
+          <div class="portal-panel" data-panel="whatsapp" hidden>
+            <div class="portal-panel-head">
+              <h2>WhatsApp Business <span class="admin-badge">Próximamente</span></h2>
+              <p class="portal-muted">
+                La bandeja de mensajes de WhatsApp se habilita en una siguiente fase, una vez completada la
+                verificación de negocio en Meta.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="admin.js?v=1"></script>
+  </body>
+</html>
