@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 const root = process.cwd();
 const port = Number(process.env.PORT || 8000);
@@ -39,6 +40,11 @@ const server = createServer(async (request, response) => {
 
     if (request.method === "POST" && url.pathname === "/api/chat") {
       await handleChat(request, response);
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/login") {
+      await handleAdminLogin(request, response);
       return;
     }
 
@@ -119,6 +125,12 @@ async function serveStatic(pathname, response, request) {
   if (!filePath.startsWith(root)) {
     response.writeHead(403);
     response.end("Forbidden");
+    return;
+  }
+
+  if (!pathname.endsWith("/") && existsSync(filePath) && statSync(filePath).isDirectory()) {
+    response.writeHead(301, { Location: `${pathname}/` });
+    response.end();
     return;
   }
 
@@ -207,32 +219,49 @@ function sendJson(response, status, payload) {
   response.end(JSON.stringify(payload));
 }
 
-const SUPABASE_URL = "https://jljeromqlkokpmwyypqo.supabase.co";
 const GRAPH_API_VERSION = "v21.0";
 const graphCache = new Map();
+const ADMIN_TOKEN_TTL_MS = 12 * 60 * 60 * 1000; // 12 horas
 
-async function requireAdminAuth(request) {
+function signAdminToken(expiresAt) {
+  return createHmac("sha256", process.env.ADMIN_PASSWORD || "").update(String(expiresAt)).digest("hex");
+}
+
+function issueAdminToken() {
+  const expiresAt = Date.now() + ADMIN_TOKEN_TTL_MS;
+  return `${expiresAt}.${signAdminToken(expiresAt)}`;
+}
+
+async function handleAdminLogin(request, response) {
+  if (!process.env.ADMIN_PASSWORD) {
+    sendJson(response, 500, { error: "Falta configurar ADMIN_PASSWORD." });
+    return;
+  }
+  const body = await readBody(request);
+  const { password } = JSON.parse(body || "{}");
+  if (password !== process.env.ADMIN_PASSWORD) {
+    sendJson(response, 401, { error: "Clave incorrecta." });
+    return;
+  }
+  sendJson(response, 200, { token: issueAdminToken() });
+}
+
+function requireAdminAuth(request) {
   const authHeader = request.headers.authorization || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  if (!token) return { error: 401, message: "Falta el token de sesión." };
+  if (!token) return { error: 401, message: "Falta iniciar sesión." };
 
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!serviceKey) return { error: 500, message: "Falta configurar SUPABASE_SERVICE_ROLE_KEY." };
-
-  const userResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-    headers: { Authorization: `Bearer ${token}`, apikey: serviceKey },
-  });
-  if (!userResp.ok) return { error: 401, message: "Sesión inválida o expirada." };
-  const user = await userResp.json();
-
-  const profileResp = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=role`, {
-    headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
-  });
-  const profiles = await profileResp.json();
-  if (!profiles?.[0] || profiles[0].role !== "admin") {
-    return { error: 403, message: "Esta cuenta no tiene permisos de administrador." };
+  const [expiresAt, signature] = token.split(".");
+  if (!expiresAt || !signature || Date.now() > Number(expiresAt)) {
+    return { error: 401, message: "Sesión inválida o expirada." };
   }
-  return { userId: user.id };
+
+  const expected = Buffer.from(signAdminToken(expiresAt));
+  const actual = Buffer.from(signature);
+  if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) {
+    return { error: 401, message: "Sesión inválida o expirada." };
+  }
+  return { ok: true };
 }
 
 async function callGraphApi(path, { ttlMs = 5 * 60 * 1000 } = {}) {
@@ -252,7 +281,7 @@ async function callGraphApi(path, { ttlMs = 5 * 60 * 1000 } = {}) {
 }
 
 async function handleAdminApi(pathname, request, response) {
-  const auth = await requireAdminAuth(request);
+  const auth = requireAdminAuth(request);
   if (auth.error) {
     sendJson(response, auth.error, { error: auth.message });
     return;
