@@ -151,16 +151,19 @@
   transform: rotate(1.4deg);
 }
 
-.page-hero-media img {
+.page-hero-media img,
+.page-hero-media video {
   width: 100%;
   height: 100%;
   position: absolute;
   inset: 0;
+  display: block;
   object-fit: cover;
   transition: transform 500ms ease;
 }
 
-.page-hero-media:hover img {
+.page-hero-media:hover img,
+.page-hero-media:hover video {
   transform: scale(1.035);
 }
 
@@ -268,6 +271,7 @@
 }
 
 .about-page .page-hero-media img,
+.about-page .page-hero-media video,
 .business-page .page-hero-media img {
   object-fit: cover;
   object-position: center;
@@ -286,6 +290,25 @@
 
 .business-page .split-media img {
   object-position: center;
+  animation: providerSceneFloat 9s ease-in-out infinite alternate;
+}
+
+@keyframes providerSceneFloat {
+  from {
+    transform: scale(1.01) translate3d(-0.35%, 0, 0);
+  }
+
+  to {
+    transform: scale(1.045) translate3d(0.5%, -0.35%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-hero-media video,
+  .business-page .split-media img {
+    animation: none;
+    transform: none;
+  }
 }
 
 .page-section {

@@ -24,3 +24,19 @@ window.addEventListener("resize", () => {
   if (window.innerWidth > 760) setOpen(false);
 });
 
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const motionVideos = document.querySelectorAll("video[autoplay]");
+
+function syncMotionPreference() {
+  motionVideos.forEach((video) => {
+    if (reducedMotion.matches) {
+      video.pause();
+      video.currentTime = 0;
+    } else {
+      video.play().catch(() => {});
+    }
+  });
+}
+
+syncMotionPreference();
+reducedMotion.addEventListener?.("change", syncMotionPreference);
