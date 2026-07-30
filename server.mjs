@@ -69,20 +69,19 @@ server.listen(port, () => {
 });
 
 async function handleChat(request, response) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    sendJson(response, 500, {
-      error: "Falta configurar OPENAI_API_KEY en .env o en el entorno.",
-    });
-    return;
-  }
-
   const body = await readBody(request);
   const payload = JSON.parse(body || "{}");
   const messages = Array.isArray(payload.messages) ? payload.messages : [];
   const cleanMessages = messages
     .filter((message) => ["user", "assistant"].includes(message.role) && typeof message.content === "string")
     .slice(-10);
+  const fallbackReply = buildPeluviFallback(cleanMessages);
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
+    sendJson(response, 200, { reply: fallbackReply, mode: "local" });
+    return;
+  }
 
   const instructions = `
 Eres Peluvi IA, un asistente amable, breve y premium para la landing de Peluvi.
@@ -92,30 +91,67 @@ No inventes disponibilidad real ni precios reales; si el usuario quiere una acci
 ${peluviContext}
 `;
 
-  const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-      instructions,
-      input: cleanMessages,
-      temperature: 0.6,
-      max_output_tokens: 420,
-    }),
-  });
-
-  const data = await openaiResponse.json();
-  if (!openaiResponse.ok) {
-    sendJson(response, openaiResponse.status, {
-      error: data.error?.message || "OpenAI no pudo responder.",
+  try {
+    const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+        instructions,
+        input: cleanMessages,
+        temperature: 0.6,
+        max_output_tokens: 420,
+      }),
     });
-    return;
+
+    const data = await openaiResponse.json();
+    if (!openaiResponse.ok) {
+      sendJson(response, 200, { reply: fallbackReply, mode: "local" });
+      return;
+    }
+
+    sendJson(response, 200, {
+      reply: extractText(data) || fallbackReply,
+      mode: extractText(data) ? "ai" : "local",
+    });
+  } catch {
+    sendJson(response, 200, { reply: fallbackReply, mode: "local" });
+  }
+}
+
+function buildPeluviFallback(messages) {
+  const lastUserMessage = [...messages].reverse().find((message) => message.role === "user")?.content || "";
+  const text = lastUserMessage
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  if (/(adop|fundacion|hogar)/.test(text)) {
+    return "En Adopción puedes conocer mascotas que buscan hogar, revisar su información y contactar a la fundación responsable. Abre la categoría Adopción desde Inicio.";
+  }
+  if (/(veter|vacun|clinica|salud|urgencia)/.test(text)) {
+    return "Peluvi reúne veterinarias, servicios, especialistas, horarios y opciones para agendar. En una urgencia real, contacta inmediatamente una clínica veterinaria cercana.";
+  }
+  if (/(peluquer|groom|bano|corte|unas|spa)/.test(text)) {
+    return "En Peluquerías puedes consultar baños, cortes, spa, cuidado de uñas y groomers. Abre esa categoría para ver todas sus funciones.";
+  }
+  if (/(tienda|comida|alimento|producto|juguete)/.test(text)) {
+    return "En Tiendas puedes explorar alimentos, juguetes y accesorios, consultar novedades y contactar directamente a negocios aliados.";
+  }
+  if (/(cuidad|paseo|guarderia|estancia)/.test(text)) {
+    return "En Cuidadores encontrarás opciones de paseos, visitas a domicilio, guardería y seguimiento durante el servicio.";
+  }
+  if (/(sos|perdid|alerta|report)/.test(text)) {
+    return "SOS permite reportar una mascota perdida, indicar su última ubicación y activar ayuda comunitaria. Abre SOS desde Inicio para conocer el proceso.";
+  }
+  if (/(negocio|proveedor|registr|portal)/.test(text)) {
+    return "Si tienes un negocio para mascotas, entra en Para negocios para conocer los beneficios y registrarte en el portal de proveedores.";
   }
 
-  sendJson(response, 200, { reply: extractText(data) || "No pude generar una respuesta ahora." });
+  return "Peluvi reúne adopciones, veterinarias, peluquerías, tiendas, cuidadores y alertas SOS. Dime qué necesita tu mascota y te indicaré dónde encontrarlo.";
 }
 
 async function serveStatic(pathname, response, request) {

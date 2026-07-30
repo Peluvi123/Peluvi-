@@ -6,12 +6,16 @@ const chatForm = document.querySelector(".chat-form");
 const chatInput = document.querySelector("#chat-input");
 const chatMessages = document.querySelector(".chat-messages");
 const heroVideo = document.querySelector(".hero-video");
-const adoptionTrigger = document.querySelector(".adoption-trigger");
+const heroShell = document.querySelector(".hero-shell");
+const heroSearch = document.querySelector(".hero-search");
+const heroSearchInput = document.querySelector("#buscar");
+const searchHint = document.querySelector("#search-hint");
+const adoptionTriggers = document.querySelectorAll(".adoption-trigger");
 const adoptionPanel = document.querySelector(".adoption-panel");
 const adoptionSurface = document.querySelector(".adoption-surface");
 const adoptionClose = document.querySelector(".adoption-close");
 const swipePaw = document.querySelector(".swipe-paw");
-const vetTrigger = document.querySelector(".vet-trigger");
+const vetTriggers = document.querySelectorAll(".vet-trigger");
 const vetPanel = document.querySelector(".vet-panel");
 const vetClose = document.querySelector(".vet-close");
 const vetDetailButtons = document.querySelectorAll("[data-vet-detail]");
@@ -21,7 +25,7 @@ const vetDetailIcon = document.querySelector(".vet-detail-icon");
 const vetDetailTitle = document.querySelector("#vet-detail-title");
 const vetDetailText = document.querySelector(".vet-detail-card p");
 const vetDetailList = document.querySelector(".vet-detail-card ul");
-const groomingTrigger = document.querySelector(".grooming-trigger");
+const groomingTriggers = document.querySelectorAll(".grooming-trigger");
 const groomingPanel = document.querySelector(".grooming-panel");
 const groomingClose = document.querySelector(".grooming-close");
 const groomingDetailButtons = document.querySelectorAll("[data-grooming-detail]");
@@ -31,7 +35,7 @@ const groomingDetailIcon = document.querySelector(".grooming-detail-icon");
 const groomingDetailTitle = document.querySelector("#grooming-detail-title");
 const groomingDetailText = document.querySelector(".grooming-detail-card p");
 const groomingDetailList = document.querySelector(".grooming-detail-card ul");
-const storeTrigger = document.querySelector(".store-trigger");
+const storeTriggers = document.querySelectorAll(".store-trigger");
 const storePanel = document.querySelector(".store-panel");
 const storeClose = document.querySelector(".store-close");
 const storeDetailButtons = document.querySelectorAll("[data-store-detail]");
@@ -41,7 +45,7 @@ const storeDetailIcon = document.querySelector(".store-detail-icon");
 const storeDetailTitle = document.querySelector("#store-detail-title");
 const storeDetailText = document.querySelector(".store-detail-card p");
 const storeDetailList = document.querySelector(".store-detail-card ul");
-const caregiversTrigger = document.querySelector(".caregivers-trigger");
+const caregiversTriggers = document.querySelectorAll(".caregivers-trigger");
 const caregiversPanel = document.querySelector(".caregivers-panel");
 const caregiversClose = document.querySelector(".caregivers-close");
 const caregiversDetailButtons = document.querySelectorAll("[data-caregivers-detail]");
@@ -51,7 +55,7 @@ const caregiversDetailIcon = document.querySelector(".caregivers-detail-icon");
 const caregiversDetailTitle = document.querySelector("#caregivers-detail-title");
 const caregiversDetailText = document.querySelector(".caregivers-detail-card p");
 const caregiversDetailList = document.querySelector(".caregivers-detail-card ul");
-const sosTrigger = document.querySelector(".sos-trigger");
+const sosTriggers = document.querySelectorAll(".sos-trigger");
 const sosPanel = document.querySelector(".sos-panel");
 const sosClose = document.querySelector(".sos-close");
 const sosDetailButtons = document.querySelectorAll("[data-sos-detail]");
@@ -61,8 +65,116 @@ const sosDetailIcon = document.querySelector(".sos-detail-icon");
 const sosDetailTitle = document.querySelector("#sos-detail-title");
 const sosDetailText = document.querySelector(".sos-detail-card p");
 const sosDetailList = document.querySelector(".sos-detail-card ul");
+const siteHeader = document.querySelector(".site-header");
+const navToggle = document.querySelector(".nav-toggle");
+const primaryNavAllLinks = [...document.querySelectorAll("#primary-navigation a")];
+const primaryNavLinks = [...document.querySelectorAll("#primary-navigation a[href^='#']")];
 
 const history = [];
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function setMenuOpen(isOpen) {
+  if (!siteHeader || !navToggle) return;
+  siteHeader.classList.toggle("menu-open", isOpen);
+  navToggle.setAttribute("aria-expanded", String(isOpen));
+  navToggle.setAttribute("aria-label", isOpen ? "Cerrar menú" : "Abrir menú");
+}
+
+function setActiveNav(hash) {
+  primaryNavLinks.forEach((link) => {
+    const isActive = link.hash === hash;
+    link.classList.toggle("active", isActive);
+    if (isActive) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+navToggle?.addEventListener("click", () => {
+  setMenuOpen(!siteHeader?.classList.contains("menu-open"));
+});
+
+primaryNavAllLinks.forEach((link) => {
+  link.addEventListener("click", () => {
+    if (link.hash && link.getAttribute("href").startsWith("#")) setActiveNav(link.hash);
+    setMenuOpen(false);
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (siteHeader?.classList.contains("menu-open") && !siteHeader.contains(event.target)) {
+    setMenuOpen(false);
+  }
+});
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth > 760) setMenuOpen(false);
+});
+
+const navTargets = primaryNavLinks
+  .map((link) => ({ hash: link.hash, element: document.querySelector(link.hash) }))
+  .filter((item) => item.element);
+
+let navFrame = 0;
+function updateActiveNav() {
+  window.cancelAnimationFrame(navFrame);
+  navFrame = window.requestAnimationFrame(() => {
+    const marker = window.scrollY + Math.min(180, window.innerHeight * 0.28);
+    let current = navTargets[0];
+    navTargets
+      .slice()
+      .sort((a, b) => a.element.offsetTop - b.element.offsetTop)
+      .forEach((item) => {
+        if (item.element.offsetTop <= marker) current = item;
+      });
+    if (current) setActiveNav(current.hash);
+  });
+}
+
+window.addEventListener("scroll", updateActiveNav, { passive: true });
+window.addEventListener("load", updateActiveNav, { once: true });
+updateActiveNav();
+
+if (!prefersReducedMotion && heroShell) {
+  let parallaxFrame = 0;
+  const setHeroParallax = (x, y) => {
+    window.cancelAnimationFrame(parallaxFrame);
+    parallaxFrame = window.requestAnimationFrame(() => {
+      const nx = (x / window.innerWidth - 0.5) * 2;
+      const ny = (y / window.innerHeight - 0.5) * 2;
+      heroShell.style.setProperty("--hero-parallax-x", String(nx * -8));
+      heroShell.style.setProperty("--hero-parallax-y", String(ny * -5));
+      heroShell.style.setProperty("--hero-fg-x", String(nx * 5));
+      heroShell.style.setProperty("--hero-fg-y", String(ny * 3));
+    });
+  };
+
+  heroShell.addEventListener("pointermove", (event) => setHeroParallax(event.clientX, event.clientY));
+  heroShell.addEventListener("pointerleave", () => {
+    heroShell.style.setProperty("--hero-parallax-x", "0");
+    heroShell.style.setProperty("--hero-parallax-y", "0");
+    heroShell.style.setProperty("--hero-fg-x", "0");
+    heroShell.style.setProperty("--hero-fg-y", "0");
+  });
+}
+
+if (!prefersReducedMotion && "IntersectionObserver" in window) {
+  const revealTargets = document.querySelectorAll(".download-panel");
+  revealTargets.forEach((el) => el.classList.add("reveal-on-scroll"));
+  const revealObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        revealObserver.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.18 }
+  );
+  revealTargets.forEach((el) => revealObserver.observe(el));
+}
 
 const vetDetails = {
   search: {
@@ -380,34 +492,46 @@ function setSosOpen(isOpen) {
   }, 220);
 }
 
-adoptionTrigger?.addEventListener("click", (event) => {
-  event.preventDefault();
-  setAdoptionOpen(true);
+adoptionTriggers.forEach((trigger) => {
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
+    setAdoptionOpen(true);
+  });
 });
 
-vetTrigger?.addEventListener("click", (event) => {
-  event.preventDefault();
-  setVetOpen(true);
+vetTriggers.forEach((trigger) => {
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
+    setVetOpen(true);
+  });
 });
 
-groomingTrigger?.addEventListener("click", (event) => {
-  event.preventDefault();
-  setGroomingOpen(true);
+groomingTriggers.forEach((trigger) => {
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
+    setGroomingOpen(true);
+  });
 });
 
-storeTrigger?.addEventListener("click", (event) => {
-  event.preventDefault();
-  setStoreOpen(true);
+storeTriggers.forEach((trigger) => {
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
+    setStoreOpen(true);
+  });
 });
 
-caregiversTrigger?.addEventListener("click", (event) => {
-  event.preventDefault();
-  setCaregiversOpen(true);
+caregiversTriggers.forEach((trigger) => {
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
+    setCaregiversOpen(true);
+  });
 });
 
-sosTrigger?.addEventListener("click", (event) => {
-  event.preventDefault();
-  setSosOpen(true);
+sosTriggers.forEach((trigger) => {
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
+    setSosOpen(true);
+  });
 });
 
 adoptionClose?.addEventListener("click", () => setAdoptionOpen(false));
@@ -416,6 +540,95 @@ groomingClose?.addEventListener("click", () => setGroomingOpen(false));
 storeClose?.addEventListener("click", () => setStoreOpen(false));
 caregiversClose?.addEventListener("click", () => setCaregiversOpen(false));
 sosClose?.addEventListener("click", () => setSosOpen(false));
+
+function closeAllServicePanels() {
+  setAdoptionOpen(false);
+  setVetOpen(false);
+  setGroomingOpen(false);
+  setStoreOpen(false);
+  setCaregiversOpen(false);
+  setSosOpen(false);
+}
+
+document.querySelectorAll('.adoption-panel a[href^="/#"], .vet-panel a[href^="/#"], .grooming-panel a[href^="/#"], .store-panel a[href^="/#"], .caregivers-panel a[href^="/#"], .sos-panel a[href^="/#"]').forEach((link) => {
+  link.addEventListener("click", (event) => {
+    const target = document.querySelector(link.hash);
+    if (!target) return;
+
+    event.preventDefault();
+    closeAllServicePanels();
+    window.history.replaceState(null, "", link.hash);
+    window.setTimeout(() => target.scrollIntoView({ behavior: "smooth", block: "center" }), 240);
+  });
+});
+
+const searchActions = [
+  {
+    words: ["adopcion", "adoptar", "adopta", "fundacion", "perro", "gato", "mascota"],
+    label: "Te llevo a adopción.",
+    run: () => setAdoptionOpen(true),
+  },
+  {
+    words: ["veterinaria", "veterinario", "vet", "vacuna", "consulta", "urgencia", "clinica"],
+    label: "Te llevo a veterinarias.",
+    run: () => setVetOpen(true),
+  },
+  {
+    words: ["peluqueria", "grooming", "baño", "bano", "corte", "uñas", "unas"],
+    label: "Te llevo a peluquerías.",
+    run: () => setGroomingOpen(true),
+  },
+  {
+    words: ["tienda", "comida", "concentrado", "alimento", "snack", "producto"],
+    label: "Te llevo a tiendas.",
+    run: () => setStoreOpen(true),
+  },
+  {
+    words: ["cuidador", "cuidadora", "paseo", "guarderia", "escuela", "entrenamiento"],
+    label: "Te llevo a cuidadores.",
+    run: () => setCaregiversOpen(true),
+  },
+  {
+    words: ["sos", "perdido", "perdida", "emergencia", "alerta", "reportar"],
+    label: "Te llevo a SOS.",
+    run: () => setSosOpen(true),
+  },
+  {
+    words: ["descargar", "descarga", "app", "aplicacion", "aplicación"],
+    label: "Te llevo a descarga.",
+    run: () => document.querySelector("#descarga")?.scrollIntoView({ behavior: "smooth", block: "start" }),
+  },
+];
+
+function normalizeSearch(value) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+heroSearch?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const query = normalizeSearch(heroSearchInput?.value.trim() || "");
+  if (!query) {
+    searchHint.textContent = "Prueba con: veterinaria, peluquería, tienda, cuidadores, SOS o adopción.";
+    searchHint.hidden = false;
+    return;
+  }
+
+  const action = searchActions.find((item) => item.words.some((word) => query.includes(word)));
+  if (action) {
+    searchHint.textContent = action.label;
+    searchHint.hidden = false;
+    action.run();
+    return;
+  }
+
+  searchHint.textContent = "No encontré un servicio exacto, pero Peluvi IA puede ayudarte con esa búsqueda.";
+  searchHint.hidden = false;
+  setChatOpen(true);
+  chatInput.value = heroSearchInput.value.trim();
+});
 
 function setVetDetailOpen(key) {
   const detail = vetDetails[key];
@@ -746,3 +959,16 @@ chatForm.addEventListener("submit", async (event) => {
     chatForm.classList.remove("is-loading");
   }
 });
+
+const requestedPanel = {
+  "#adopcion": () => setAdoptionOpen(true),
+  "#veterinarias": () => setVetOpen(true),
+  "#peluquerias": () => setGroomingOpen(true),
+  "#tiendas": () => setStoreOpen(true),
+  "#cuidadores": () => setCaregiversOpen(true),
+  "#sos": () => setSosOpen(true),
+}[window.location.hash];
+
+if (requestedPanel) {
+  window.addEventListener("load", requestedPanel, { once: true });
+}

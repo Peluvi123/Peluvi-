@@ -13,12 +13,105 @@ const STATUS_LABELS = {
   cancelled: "Cancelada",
 };
 
+const STORE_STATUS_LABELS = {
+  pending: "Pendiente",
+  confirmed: "Confirmado",
+  shipped: "Enviado",
+  delivered: "Entregado",
+  cancelled: "Cancelado",
+};
+
+const STORE_CATEGORY_LABELS = {
+  food: "Alimento",
+  snacks: "Snacks",
+  supplements: "Suplementos",
+  accessories: "Accesorios",
+  hygiene: "Higiene",
+};
+
+const CARE_STATUS_LABELS = {
+  pending: "Pendiente",
+  confirmed: "Confirmado",
+  in_progress: "En curso",
+  completed: "Completado",
+  cancelled: "Cancelado",
+};
+
+const CARE_CATEGORIES = {
+  paseo: { label: "Paseos", color: "#7c3aed", bg: "#f5f3ff" },
+  guarderia: { label: "Guarderías", color: "#f97316", bg: "#fff7ed" },
+  colegio: { label: "Escuelas", color: "#0891b2", bg: "#ecfeff" },
+};
+
+const CARE_PROFILE = {
+  id: "c1",
+  name: "Juan Camilo Reyes",
+  avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300",
+  address: "Chapinero, Bogotá",
+  phone: "+57 314 789 0123",
+  email: "juancamilo@peluvicare.com",
+  bio: "Cuidador certificado con 4 años de experiencia. Especialista en perros y gatos de todas las razas.",
+  rating: 4.9,
+  reviewCount: 156,
+  totalSessions: 423,
+  activeClients: 18,
+  monthlyRevenue: "$6.200.000",
+  services: ["Visita en casa", "Guardería", "Paseo individual", "Paseo grupal", "Entrenamiento básico"],
+  certifications: ["First Aid Pet", "Dog Trainer Level 1"],
+};
+
+const DEMO_PASSWORD = "PeluviDemo2026!";
+const DEMO_PASSWORD_ALIASES = new Set([DEMO_PASSWORD, "PeluviDemo2026", "peluvidemo2026"]);
+const DEMO_ACCOUNTS = {
+  "demo.veterinaria@peluvi.test": {
+    id: "demo_vet",
+    name: "Veterinaria Demo Peluvi",
+    business_name: "Veterinaria Demo Peluvi",
+    role: "provider",
+    provider_type: "vet",
+    address: "Cra 43 #10-20",
+    phone: "+57 300 111 1111",
+    city: "Medellín",
+  },
+  "demo.peluqueria@peluvi.test": {
+    id: "demo_grooming",
+    name: "Peluquería Demo Peluvi",
+    business_name: "Peluquería Demo Peluvi",
+    role: "provider",
+    provider_type: "grooming",
+    address: "Calle 12 #34-56",
+    phone: "+57 300 222 2222",
+    city: "Medellín",
+  },
+  "demo.tienda@peluvi.test": {
+    id: "demo_store",
+    name: "PetMarket Colombia",
+    business_name: "PetMarket Colombia",
+    role: "provider",
+    provider_type: "store",
+    address: "Cl. 72 #10-34, Chapinero, Bogotá",
+    phone: "+57 601 234 5678",
+    city: "Bogotá",
+  },
+  "demo.cuidador@peluvi.test": {
+    id: "demo_caretaker",
+    name: "Juan Camilo Reyes",
+    business_name: "Juan Camilo Reyes",
+    role: "provider",
+    provider_type: "caretaker",
+    address: "Chapinero, Bogotá",
+    phone: "+57 314 789 0123",
+    city: "Bogotá",
+  },
+};
+
 const loginView = document.getElementById("login-view");
 const dashboardView = document.getElementById("dashboard-view");
 const loginForm = document.getElementById("login-form");
 const loginError = document.getElementById("login-error");
 const loginSubmit = document.getElementById("login-submit");
 const logoutBtn = document.getElementById("logout-btn");
+const portalBrandScope = document.getElementById("portal-brand-scope");
 const dashboardGreeting = document.getElementById("dashboard-greeting");
 const dashboardSub = document.getElementById("dashboard-sub");
 
@@ -28,6 +121,8 @@ const citasPendingSection = document.getElementById("citas-pending-section");
 const citasPendingList = document.getElementById("citas-pending-list");
 const pacientesList = document.getElementById("pacientes-list");
 const pacientesEmpty = document.getElementById("pacientes-empty");
+const pacientesSearch = document.getElementById("pacientes-search");
+const pacientesNoResults = document.getElementById("pacientes-no-results");
 
 const calGrid = document.getElementById("cal-grid");
 const calMonthLabel = document.getElementById("cal-month-label");
@@ -42,17 +137,426 @@ const MONTH_NAMES = [
 const WEEKDAY_START = 0; // domingo
 
 let allAppointments = [];
+let storeOrders = [];
+let storeProducts = [];
+let careSessions = [];
+let careClients = [];
+let activeCareCategory = "paseo";
 let calendarViewDate = new Date();
 let selectedDateFilter = null;
 let currentVetId = null;
 let currentProviderType = "vet";
+let isDemoSession = false;
+
+const PROVIDER_TYPES = {
+  vet: {
+    label: "Veterinaria",
+    brandScope: "veterinarias",
+    profileTable: "vet_profiles",
+    mediaBucket: "clinic-media",
+    profileTab: "Clínica",
+    profileTitle: "Clínica",
+    photosTitle: "Fotos de la clínica",
+    photosSubtitle: "Imágenes visibles en tu perfil público.",
+    appointmentsLabel: "Citas",
+    appointmentUnit: "citas",
+    patientsLabel: "Pacientes",
+    patientsSubtitle: "Mascotas que han agendado contigo.",
+    todayTitle: "Agenda de hoy",
+    emptyToday: "No tienes citas agendadas para hoy.",
+    pendingTitle: "Nuevas citas por aprobar",
+    serviceTitle: "Servicios",
+  },
+  grooming: {
+    label: "Peluquería",
+    brandScope: "peluquerías",
+    profileTable: "grooming_profiles",
+    mediaBucket: "grooming-media",
+    profileTab: "Peluquería",
+    profileTitle: "Peluquería",
+    photosTitle: "Fotos de la peluquería",
+    photosSubtitle: "Imágenes visibles en tu perfil público.",
+    appointmentsLabel: "Citas",
+    appointmentUnit: "citas",
+    patientsLabel: "Clientes",
+    patientsSubtitle: "Mascotas que han reservado servicios contigo.",
+    todayTitle: "Agenda de hoy",
+    emptyToday: "No tienes servicios agendados para hoy.",
+    pendingTitle: "Nuevas citas por aprobar",
+    serviceTitle: "Servicios y precios",
+  },
+  store: {
+    label: "Tienda",
+    brandScope: "tiendas",
+    profileTable: null,
+    mediaBucket: null,
+    profileTab: "Tienda",
+    profileTitle: "Tienda",
+    photosTitle: "Fotos de la tienda",
+    photosSubtitle: "Productos, vitrinas o imágenes visibles en tu perfil público.",
+    appointmentsLabel: "Pedidos",
+    appointmentUnit: "pedidos",
+    patientsLabel: "Productos",
+    patientsSubtitle: "Inventario visible en la tienda de Peluvi.",
+    todayTitle: "Pedidos recientes",
+    emptyToday: "Aún no tienes pedidos recientes.",
+    pendingTitle: "Pedidos pendientes",
+    serviceTitle: "Productos destacados",
+  },
+  caregiver: {
+    label: "Cuidador",
+    brandScope: "cuidadores",
+    profileTable: "caretaker_profiles",
+    mediaBucket: "caretaker-media",
+    profileTab: "Perfil",
+    profileTitle: "Perfil",
+    photosTitle: "Fotos del servicio",
+    photosSubtitle: "Imágenes visibles en tu perfil público.",
+    appointmentsLabel: "Paseos",
+    appointmentUnit: "sesiones",
+    patientsLabel: "Clientes",
+    patientsSubtitle: "Mascotas y dueños que reservan contigo.",
+    todayTitle: "¿Qué quieres revisar hoy?",
+    emptyToday: "No tienes sesiones registradas para hoy.",
+    pendingTitle: "Sesiones por aprobar",
+    serviceTitle: "Servicios",
+  },
+};
+
+PROVIDER_TYPES.food = PROVIDER_TYPES.store;
+PROVIDER_TYPES.caretaker = PROVIDER_TYPES.caregiver;
+
+function providerMeta() {
+  return PROVIDER_TYPES[currentProviderType] || PROVIDER_TYPES.vet;
+}
 
 function profileTable() {
-  return currentProviderType === "grooming" ? "grooming_profiles" : "vet_profiles";
+  return providerMeta().profileTable;
 }
 
 function isVet() {
   return currentProviderType === "vet";
+}
+
+function isGrooming() {
+  return currentProviderType === "grooming";
+}
+
+function isStore() {
+  return currentProviderType === "store" || currentProviderType === "food";
+}
+
+function isCaretaker() {
+  return currentProviderType === "caregiver" || currentProviderType === "caretaker";
+}
+
+function supportsMedicalRecords() {
+  return isVet() || isGrooming();
+}
+
+function localProfileKey() {
+  return `peluvi_provider_profile_${currentVetId || "draft"}_${currentProviderType}`;
+}
+
+function loadLocalProviderProfile() {
+  try {
+    return JSON.parse(localStorage.getItem(localProfileKey()) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveLocalProviderProfile(profile) {
+  localStorage.setItem(localProfileKey(), JSON.stringify(profile || {}));
+}
+
+function buildDemoProfile(providerType) {
+  if (providerType === "vet") {
+    return {
+      whatsapp: "+57 300 111 1111",
+      schedule: "Lun-Vie 8:00am-6:00pm | Sáb 9:00am-1:00pm",
+      schedule_details: [
+        { day: "Lun", open: "08:00", close: "18:00" },
+        { day: "Mar", open: "08:00", close: "18:00" },
+        { day: "Mié", open: "08:00", close: "18:00" },
+        { day: "Jue", open: "08:00", close: "18:00" },
+        { day: "Vie", open: "08:00", close: "18:00" },
+        { day: "Sáb", open: "09:00", close: "13:00" },
+      ],
+      services: ["Consulta general", "Vacunación", "Urgencias 24h", "Laboratorio"],
+      description: "Atención integral para mascotas con agenda, pacientes, controles y seguimiento clínico.",
+      emergency: true,
+      doctors: [
+        { id: "doc_demo_1", name: "Dra. Laura Pérez", specialty: "Medicina general", available: true },
+        { id: "doc_demo_2", name: "Dr. Andrés Gómez", specialty: "Urgencias", available: false },
+      ],
+      images: [],
+    };
+  }
+  if (providerType === "grooming") {
+    return {
+      whatsapp: "+57 300 222 2222",
+      schedule: "Lun-Sáb 9:00am-5:00pm",
+      schedule_details: [
+        { day: "Lun", open: "09:00", close: "17:00" },
+        { day: "Mar", open: "09:00", close: "17:00" },
+        { day: "Mié", open: "09:00", close: "17:00" },
+        { day: "Jue", open: "09:00", close: "17:00" },
+        { day: "Vie", open: "09:00", close: "17:00" },
+        { day: "Sáb", open: "09:00", close: "17:00" },
+      ],
+      services: [
+        { name: "Baño y corte", price: "$45.000", duration: "1h 30m" },
+        { name: "Spa completo", price: "$70.000", duration: "2h" },
+        { name: "Corte de uñas", price: "$15.000", duration: "20m" },
+      ],
+      description: "Peluquería aliada con servicios por tamaño, tipo de pelaje y agenda de reservas.",
+      images: [],
+    };
+  }
+  if (providerType === "store" || providerType === "food") {
+    return {
+      whatsapp: "+57 601 234 5678",
+      schedule: "Lun-Sáb 8am-8pm · Dom 9am-5pm",
+      schedule_details: [
+        { day: "Lun", open: "08:00", close: "20:00" },
+        { day: "Mar", open: "08:00", close: "20:00" },
+        { day: "Mié", open: "08:00", close: "20:00" },
+        { day: "Jue", open: "08:00", close: "20:00" },
+        { day: "Vie", open: "08:00", close: "20:00" },
+        { day: "Sáb", open: "09:00", close: "18:00" },
+        { day: "Dom", open: "10:00", close: "16:00" },
+      ],
+      services: [
+        { name: "Concentrado premium", price: "$82.000", duration: "3 kg" },
+        { name: "Juguetes interactivos", price: "Desde $25.000", duration: "Perros y gatos" },
+        { name: "Snacks naturales", price: "$18.000", duration: "Bolsa 250 g" },
+      ],
+      description: "Tienda aliada para publicar catálogo, novedades, horarios y solicitudes de clientes.",
+      images: [],
+    };
+  }
+  return {
+    whatsapp: "+57 300 444 4444",
+    schedule: "Lun-Sáb 7:00am-7:00pm",
+    schedule_details: [
+      { day: "Lun", open: "07:00", close: "19:00" },
+      { day: "Mar", open: "07:00", close: "19:00" },
+      { day: "Mié", open: "07:00", close: "19:00" },
+      { day: "Jue", open: "07:00", close: "19:00" },
+      { day: "Vie", open: "07:00", close: "19:00" },
+      { day: "Sáb", open: "08:00", close: "16:00" },
+    ],
+    services: [
+      { name: "Paseo de 30 min", price: "$25.000", duration: "30m" },
+      { name: "Cuidado en casa", price: "$80.000", duration: "Medio día" },
+      { name: "Guardería por día", price: "$120.000", duration: "8h" },
+    ],
+    description: "Cuidador aliado para gestionar reservas, rutinas, paseos y seguimiento de mascotas.",
+    images: [],
+  };
+}
+
+function buildDemoAppointments(providerType) {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const todayKey = toDateKey(today.getFullYear(), today.getMonth(), today.getDate());
+  const tomorrowKey = toDateKey(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+  const base = {
+    vet_id: currentVetId,
+    pet_id: "demo_pet_luna",
+    pet_name: "Luna",
+    pet_breed: "Golden retriever",
+    pet_image: "../assets/pet-luna-golden-selfie.png",
+    user_id: "demo_user",
+  };
+  if (providerType === "store") {
+    return [
+      { ...base, id: "demo_store_1", service: "Consulta de concentrado premium", date: todayKey, time: "10:30 AM", status: "pending" },
+      { ...base, id: "demo_store_2", pet_name: "Milo", pet_breed: "Gato", pet_image: "../assets/pet-milo-cat-selfie.png", service: "Disponibilidad de snacks", date: tomorrowKey, time: "3:00 PM", status: "confirmed" },
+    ];
+  }
+  if (providerType === "caregiver") {
+    return [
+      { ...base, id: "demo_caregiver_1", service: "Paseo programado", date: todayKey, time: "7:30 AM", status: "confirmed" },
+      { ...base, id: "demo_caregiver_2", pet_name: "Simon", pet_breed: "Gato", pet_image: "../assets/pet-simon-hamster-selfie.png", service: "Cuidado en casa", date: tomorrowKey, time: "9:00 AM", status: "pending" },
+    ];
+  }
+  if (providerType === "grooming") {
+    return [
+      { ...base, id: "demo_grooming_1", service: "Baño y corte", date: todayKey, time: "11:00 AM", status: "pending" },
+      { ...base, id: "demo_grooming_2", pet_name: "Milo", pet_breed: "Gato", pet_image: "../assets/pet-milo-cat-selfie.png", service: "Corte de uñas", date: tomorrowKey, time: "2:00 PM", status: "confirmed" },
+    ];
+  }
+  return [
+    { ...base, id: "demo_vet_1", service: "Consulta general", date: todayKey, time: "9:00 AM", status: "pending", doctor_name: "Dra. Laura Pérez" },
+    { ...base, id: "demo_vet_2", pet_name: "Milo", pet_breed: "Gato", pet_image: "../assets/pet-milo-cat-selfie.png", service: "Vacunación", date: tomorrowKey, time: "4:00 PM", status: "confirmed", doctor_name: "Dr. Andrés Gómez" },
+  ];
+}
+
+function buildDemoStoreProducts() {
+  return [
+    {
+      id: "sp1",
+      name: "Rocku Adulto 800g",
+      brand: "Bonamigo",
+      category: "food",
+      species: "Perro",
+      price: 28000,
+      stock: 24,
+      sold: 142,
+      image_url: "../assets/prod-rocku.png",
+    },
+    {
+      id: "sp2",
+      name: "Pedigree Adulto 20kg",
+      brand: "Pedigree",
+      category: "food",
+      species: "Perro",
+      price: 185000,
+      stock: 18,
+      sold: 98,
+      image_url: "../assets/prod-pedigree.png",
+    },
+    {
+      id: "sp3",
+      name: "Magic Friends 2kg",
+      brand: "Magic Friends",
+      category: "food",
+      species: "Perro",
+      price: 45000,
+      stock: 60,
+      sold: 310,
+      image_url: "../assets/prod-magic.png",
+    },
+    {
+      id: "sp4",
+      name: "Champú Hipoalergénico 500ml",
+      brand: "Bio-Groom",
+      category: "hygiene",
+      species: "Perro/Gato",
+      price: 35000,
+      stock: 32,
+      sold: 87,
+      image_url: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=300&q=80",
+    },
+    {
+      id: "sp5",
+      name: "Vitaminas Articulaciones 60 cáps",
+      brand: "NutriVet",
+      category: "supplements",
+      species: "Perro",
+      price: 55000,
+      stock: 15,
+      sold: 44,
+      image_url: "https://images.unsplash.com/photo-1612532275214-e4ca76d0e4d1?auto=format&fit=crop&w=300&q=80",
+    },
+    {
+      id: "sp6",
+      name: "Cama Ortopédica M",
+      brand: "PetComfort",
+      category: "accessories",
+      species: "Perro/Gato",
+      price: 120000,
+      stock: 8,
+      sold: 22,
+      image_url: "https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?auto=format&fit=crop&w=300&q=80",
+    },
+  ];
+}
+
+function buildDemoStoreOrders() {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const lastWeek = new Date(today);
+  lastWeek.setDate(today.getDate() - 6);
+  return [
+    {
+      id: "so1",
+      customerName: "Laura Martínez",
+      phone: "+57 310 111 2222",
+      products: [
+        { name: "Pedigree Adulto 20kg", quantity: 1, price: 185000 },
+        { name: "Snack Dental Chew", quantity: 2, price: 22000 },
+      ],
+      total: 229000,
+      date: toDateKey(today.getFullYear(), today.getMonth(), today.getDate()),
+      time: "10:30 AM",
+      status: "pending",
+      address: "Cra 15 #80-12, Bogotá",
+    },
+    {
+      id: "so2",
+      customerName: "Andrés Mora",
+      phone: "+57 315 333 4444",
+      products: [{ name: "Magic Friends 2kg", quantity: 2, price: 45000 }],
+      total: 90000,
+      date: toDateKey(today.getFullYear(), today.getMonth(), today.getDate()),
+      time: "2:00 PM",
+      status: "confirmed",
+      address: "Cl. 90 #11-45, Bogotá",
+    },
+    {
+      id: "so3",
+      customerName: "Valentina Cruz",
+      phone: "+57 301 555 7788",
+      products: [
+        { name: "Champú Hipoalergénico 500ml", quantity: 1, price: 35000 },
+        { name: "Vitaminas Articulaciones", quantity: 1, price: 55000 },
+      ],
+      total: 90000,
+      date: toDateKey(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()),
+      time: "4:15 PM",
+      status: "shipped",
+      address: "Av. Suba #120-50, Bogotá",
+    },
+    {
+      id: "so4",
+      customerName: "Carlos Pérez",
+      phone: "+57 320 777 9999",
+      products: [{ name: "Cama Ortopédica M", quantity: 1, price: 120000 }],
+      total: 120000,
+      date: toDateKey(lastWeek.getFullYear(), lastWeek.getMonth(), lastWeek.getDate()),
+      time: "9:20 AM",
+      status: "delivered",
+      address: "Calle 100 #19-20, Bogotá",
+    },
+  ];
+}
+
+function careCategoryForService(service = "") {
+  const value = service.toLowerCase();
+  if (value.includes("paseo")) return "paseo";
+  if (value.includes("entrenamiento")) return "colegio";
+  return "guarderia";
+}
+
+function buildDemoCareSessions() {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const todayKey = toDateKey(today.getFullYear(), today.getMonth(), today.getDate());
+  const tomorrowKey = toDateKey(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+  return [
+    { id: "cs1", petName: "Beto", petImage: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200", petBreed: "Golden Retriever", ownerName: "Sandra López", ownerPhone: "+57 310 100 2000", service: "Paseo individual", date: todayKey, time: "07:00 am", duration: "1h", status: "completed", address: "Cra 15 #85-10", price: 35000 },
+    { id: "cs2", petName: "Nala", petImage: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=200", petBreed: "Poodle", ownerName: "Camila Torres", ownerPhone: "+57 312 200 3000", service: "Visita en casa", date: todayKey, time: "10:00 am", duration: "30min", status: "in_progress", address: "Cl. 90 #12-34", price: 25000 },
+    { id: "cs3", petName: "Max", petImage: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200", petBreed: "Labrador", ownerName: "Felipe Ruiz", ownerPhone: "+57 315 300 4000", service: "Guardería", date: todayKey, time: "08:00 am", duration: "8h", status: "confirmed", address: "Av. Chile #5-20", price: 80000, notes: "Tiene alergia al pollo" },
+    { id: "cs4", petName: "Coco", petImage: "https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=200", petBreed: "Beagle", ownerName: "Andrea Mora", ownerPhone: "+57 318 400 5000", service: "Paseo grupal", date: todayKey, time: "04:00 pm", duration: "1.5h", status: "confirmed", address: "Parque El Virrey", price: 25000 },
+    { id: "cs5", petName: "Luna", petImage: "https://images.unsplash.com/photo-1548247416-ec66f4900b2e?w=200", petBreed: "Shih Tzu", ownerName: "Paola Gómez", ownerPhone: "+57 316 500 6000", service: "Visita en casa", date: todayKey, time: "06:00 pm", duration: "30min", status: "pending", address: "Cra 11 #93-45", price: 25000 },
+    { id: "cs6", petName: "Thor", petImage: "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=200", petBreed: "Bulldog", ownerName: "Martín Díaz", ownerPhone: "+57 311 600 7000", service: "Entrenamiento básico", date: tomorrowKey, time: "09:00 am", duration: "1h", status: "confirmed", address: "Parque Simón Bolívar", price: 60000 },
+  ];
+}
+
+function buildDemoCareClients() {
+  return [
+    { id: "cc1", petName: "Beto", petImage: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200", petBreed: "Golden Retriever", petSpecies: "Perro", ownerName: "Sandra López", ownerPhone: "+57 310 100 2000", address: "Cra 15 #85-10", lastSession: "26 jun 2026", totalSessions: 48, nextSession: "27 jun 2026" },
+    { id: "cc2", petName: "Max", petImage: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200", petBreed: "Labrador", petSpecies: "Perro", ownerName: "Felipe Ruiz", ownerPhone: "+57 315 300 4000", address: "Av. Chile #5-20", lastSession: "26 jun 2026", totalSessions: 32, notes: "Alérgico al pollo" },
+    { id: "cc3", petName: "Nala", petImage: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=200", petBreed: "Poodle", petSpecies: "Perro", ownerName: "Camila Torres", ownerPhone: "+57 312 200 3000", address: "Cl. 90 #12-34", lastSession: "26 jun 2026", totalSessions: 20 },
+    { id: "cc4", petName: "Coco", petImage: "https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=200", petBreed: "Beagle", petSpecies: "Perro", ownerName: "Andrea Mora", ownerPhone: "+57 318 400 5000", address: "Parque El Virrey", lastSession: "20 jun 2026", totalSessions: 15, nextSession: "26 jun 2026" },
+    { id: "cc5", petName: "Luna", petImage: "https://images.unsplash.com/photo-1548247416-ec66f4900b2e?w=200", petBreed: "Shih Tzu", petSpecies: "Perro", ownerName: "Paola Gómez", ownerPhone: "+57 316 500 6000", address: "Cra 11 #93-45", lastSession: "15 jun 2026", totalSessions: 8 },
+  ];
 }
 
 function groupBy(arr, key) {
@@ -188,21 +692,84 @@ const groomingServiceDurationInput = document.getElementById("grooming-service-d
 const groomingServiceAddBtn = document.getElementById("grooming-service-add-btn");
 const doctorsBlock = document.getElementById("clinica-doctors-block");
 const emergencyRow = document.getElementById("clinica-emergency-row");
+const providerServicesTitle = document.getElementById("provider-services-title");
+const citasTabBtn = document.getElementById("citas-tab-btn");
+const careGuarderiaTabBtn = document.getElementById("care-guarderia-tab-btn");
+const careEscuelaTabBtn = document.getElementById("care-escuela-tab-btn");
+const pacientesTabBtn = document.getElementById("pacientes-tab-btn");
 const clinicaTabBtn = document.getElementById("clinica-tab-btn");
 const clinicaPanelTitle = document.getElementById("clinica-panel-title");
+const citasPanelTitle = document.getElementById("citas-panel-title");
+const citasPanelSubtitle = document.getElementById("citas-panel-subtitle");
+const pacientesPanelTitle = document.getElementById("pacientes-panel-title");
+const pacientesPanelSubtitle = document.getElementById("pacientes-panel-subtitle");
+const todaySectionTitle = document.getElementById("today-section-title");
+const statTodayLabel = document.getElementById("stat-today-label");
+const statPendingLabel = document.getElementById("stat-pending-label");
+const statPatientsLabel = document.getElementById("stat-patients-label");
+const statMonthLabel = document.getElementById("stat-month-label");
 
 let selectedServices = new Set();
 let currentGroomingServices = [];
 
 function applyProviderTypeUI() {
+  const meta = providerMeta();
   const vet = isVet();
+  const store = isStore();
+  const caretaker = isCaretaker();
+  const groomingLike = !vet;
+  dashboardView.classList.toggle("is-store-dashboard", store);
+  dashboardView.classList.toggle("is-caretaker-dashboard", caretaker);
+  portalBrandScope.textContent = meta.brandScope;
   vetServicesBlock.hidden = !vet;
-  groomingServicesBlock.hidden = vet;
+  groomingServicesBlock.hidden = !groomingLike;
   doctorsBlock.hidden = !vet;
   emergencyRow.hidden = !vet;
-  const label = vet ? "Clínica" : "Peluquería";
-  clinicaTabBtn.textContent = label;
-  clinicaPanelTitle.textContent = label;
+  careGuarderiaTabBtn.hidden = !caretaker;
+  careEscuelaTabBtn.hidden = !caretaker;
+  clinicaTabBtn.textContent = meta.profileTab;
+  clinicaPanelTitle.textContent = meta.profileTitle;
+  citasTabBtn.textContent = caretaker ? "Paseos" : meta.appointmentsLabel;
+  careGuarderiaTabBtn.textContent = "Guarderías";
+  careEscuelaTabBtn.textContent = "Escuelas";
+  pacientesTabBtn.textContent = meta.patientsLabel;
+  citasPanelTitle.textContent = caretaker ? CARE_CATEGORIES[activeCareCategory].label : meta.appointmentsLabel;
+  citasPanelSubtitle.textContent = `Todas las ${meta.appointmentUnit} registradas contigo.`;
+  pacientesPanelTitle.textContent = meta.patientsLabel;
+  pacientesPanelSubtitle.textContent = meta.patientsSubtitle;
+  todaySectionTitle.textContent = meta.todayTitle;
+  const todayEmptyEl = document.getElementById("today-empty");
+  if (todayEmptyEl) todayEmptyEl.textContent = meta.emptyToday;
+  statTodayLabel.textContent = store ? "Pedidos" : caretaker ? "Sesiones hoy" : `${meta.appointmentsLabel} hoy`;
+  statPendingLabel.textContent = store ? "Pendientes" : caretaker ? "Próximas" : "Por aprobar";
+  statPatientsLabel.textContent = meta.patientsLabel;
+  statMonthLabel.textContent = store ? "Stock bajo" : caretaker ? "Ganado hoy" : `${meta.appointmentsLabel} este mes`;
+  providerServicesTitle.textContent = meta.serviceTitle;
+  pacientesSearch.placeholder = store ? "Buscar producto, marca o categoría..." : caretaker ? "Buscar mascota, dueño o dirección..." : "Buscar por nombre o raza...";
+  pacientesEmpty.textContent = store ? "Aún no tienes productos registrados." : caretaker ? "Aún no tienes clientes registrados." : "Aún no tienes pacientes registrados.";
+  pacientesNoResults.textContent = store ? "Ningún producto coincide con tu búsqueda." : caretaker ? "Ningún cliente coincide con tu búsqueda." : "Ninguna mascota coincide con tu búsqueda.";
+  citasEmpty.textContent = store ? "Aún no tienes pedidos registrados." : caretaker ? "No hay sesiones para este filtro." : "Aún no tienes citas agendadas.";
+  groomingServiceNameInput.placeholder = isGrooming()
+    ? "Nombre, ej. Baño y corte"
+    : store
+      ? "Producto, ej. Concentrado premium"
+      : "Servicio, ej. Paseo de 30 min";
+  groomingServicePriceInput.placeholder = store ? "Precio, ej. $80.000" : "Precio, ej. $45.000";
+  groomingServiceDurationInput.placeholder = store ? "Detalle, ej. 3 kg" : "Duración, ej. 1h";
+
+  const photosTitle = document.querySelector("#clinica-doctors-block + .portal-side-block h3");
+  const photosSubtitle = document.querySelector("#clinica-doctors-block + .portal-side-block .portal-muted");
+  if (photosTitle) photosTitle.textContent = meta.photosTitle;
+  if (photosSubtitle) photosSubtitle.textContent = meta.photosSubtitle;
+  const linkCodeButton = document.getElementById("link-code-toggle");
+  if (linkCodeButton) linkCodeButton.hidden = !supportsMedicalRecords();
+  const pendingHead = document.querySelector(".portal-pending-head span");
+  if (pendingHead) pendingHead.textContent = `🔔 ${meta.pendingTitle}`;
+  const authSubtitleEl = document.getElementById("auth-subtitle");
+  const signupFormEl = document.getElementById("signup-form");
+  if (authSubtitleEl && signupFormEl?.hidden) {
+    authSubtitleEl.textContent = `Ingresa con la cuenta de tu negocio para gestionar tus ${meta.appointmentUnit}.`;
+  }
 }
 
 function renderGroomingServices() {
@@ -288,11 +855,22 @@ let currentImages = [];
 let currentProfile = null;
 
 async function persistVetProfile(patch) {
-  await supabase.from(profileTable()).upsert({ id: currentVetId, ...patch });
+  if (isDemoSession) {
+    saveLocalProviderProfile({ ...loadLocalProviderProfile(), ...patch });
+    return;
+  }
+  const table = profileTable();
+  if (!table) {
+    saveLocalProviderProfile({ ...loadLocalProviderProfile(), ...patch });
+    return;
+  }
+  await supabase.from(table).upsert({ id: currentVetId, ...patch });
 }
 
 async function uploadClinicMedia(file) {
-  const bucket = isVet() ? "clinic-media" : "grooming-media";
+  if (isDemoSession) return URL.createObjectURL(file);
+  const bucket = providerMeta().mediaBucket;
+  if (!bucket) return URL.createObjectURL(file);
   const path = `${currentVetId}/${Date.now()}_${file.name}`;
   const { error } = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type });
   if (error) return null;
@@ -317,6 +895,22 @@ function showDashboard(profile) {
   dashboardSub.textContent = profile.address || "";
 }
 
+function loginDemoProvider(profile) {
+  isDemoSession = true;
+  currentProviderType = profile.provider_type;
+  currentVetId = profile.id;
+  currentProfile = profile;
+  applyProviderTypeUI();
+  const providerProfile = buildDemoProfile(profile.provider_type);
+  showDashboard(profile);
+  fillClinicForm(profile, providerProfile);
+  currentDoctors = providerProfile.doctors ?? [];
+  currentImages = providerProfile.images ?? [];
+  renderDoctors();
+  renderClinicImages();
+  loadDemoTabData(profile.provider_type);
+}
+
 async function requireProviderSession() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
@@ -330,20 +924,26 @@ async function requireProviderSession() {
     .eq("id", session.user.id)
     .single();
 
-  if (error || !profile || profile.role !== "provider" || !["vet", "grooming"].includes(profile.provider_type)) {
+  if (error || !profile || profile.role !== "provider" || !Object.keys(PROVIDER_TYPES).includes(profile.provider_type)) {
     await supabase.auth.signOut();
     showLogin("Esta cuenta no es de un proveedor válido.");
     return null;
   }
 
   currentProviderType = profile.provider_type;
+  currentVetId = session.user.id;
   applyProviderTypeUI();
 
-  const { data: vetProfile } = await supabase
-    .from(profileTable())
-    .select("*")
-    .eq("id", session.user.id)
-    .maybeSingle();
+  let vetProfile = loadLocalProviderProfile();
+  const table = profileTable();
+  if (table) {
+    const { data } = await supabase
+      .from(table)
+      .select("*")
+      .eq("id", session.user.id)
+      .maybeSingle();
+    vetProfile = data || {};
+  }
 
   showDashboard(profile);
   currentProfile = profile;
@@ -362,7 +962,15 @@ loginForm.addEventListener("submit", async (e) => {
   loginSubmit.textContent = "Ingresando...";
 
   const email = document.getElementById("login-email").value.trim();
-  const password = document.getElementById("login-password").value;
+  const password = document.getElementById("login-password").value.trim();
+  const demoProfile = DEMO_ACCOUNTS[email.toLowerCase()];
+
+  if (demoProfile && DEMO_PASSWORD_ALIASES.has(password)) {
+    loginSubmit.disabled = false;
+    loginSubmit.textContent = "Ingresar";
+    loginDemoProvider(demoProfile);
+    return;
+  }
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -385,6 +993,18 @@ const signupError = document.getElementById("signup-error");
 const authToggle = document.getElementById("auth-toggle");
 const authTitle = document.getElementById("auth-title");
 const authSubtitle = document.getElementById("auth-subtitle");
+const signupProviderTypeInput = document.getElementById("signup-provider-type");
+const portalParams = new URLSearchParams(window.location.search);
+const requestedProviderType = portalParams.get("tipo");
+if (Object.keys(PROVIDER_TYPES).includes(requestedProviderType)) {
+  signupProviderTypeInput.value = requestedProviderType;
+  currentProviderType = requestedProviderType;
+  applyProviderTypeUI();
+}
+signupProviderTypeInput.addEventListener("change", () => {
+  currentProviderType = signupProviderTypeInput.value;
+  applyProviderTypeUI();
+});
 
 let showingSignup = false;
 authToggle.addEventListener("click", () => {
@@ -393,12 +1013,16 @@ authToggle.addEventListener("click", () => {
   signupForm.hidden = !showingSignup;
   authTitle.textContent = showingSignup ? "Crea tu cuenta de proveedor" : "Portal de proveedores";
   authSubtitle.textContent = showingSignup
-    ? "Regístrate para empezar a gestionar tus citas en Peluvi."
-    : "Ingresa con la cuenta de tu negocio para gestionar tus citas.";
+    ? `Regístrate para empezar a gestionar tus ${providerMeta().appointmentUnit} en Peluvi.`
+    : `Ingresa con la cuenta de tu negocio para gestionar tus ${providerMeta().appointmentUnit}.`;
   authToggle.textContent = showingSignup ? "¿Ya tienes cuenta? Ingresa aquí" : "¿Tienes un negocio de mascotas? Crea tu cuenta";
   loginError.hidden = true;
   signupError.hidden = true;
 });
+
+if (portalParams.get("registro") === "1") {
+  authToggle.click();
+}
 
 signupForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -447,7 +1071,12 @@ signupForm.addEventListener("submit", async (e) => {
   }
 
   currentProviderType = signupProviderType;
-  await supabase.from(profileTable()).insert({ id: userId });
+  const table = profileTable();
+  if (table) {
+    await supabase.from(table).insert({ id: userId });
+  } else {
+    saveLocalProviderProfile({ id: userId, services: [], images: [] });
+  }
 
   signupSubmit.disabled = false;
   signupSubmit.textContent = "Crear cuenta";
@@ -456,6 +1085,11 @@ signupForm.addEventListener("submit", async (e) => {
 });
 
 logoutBtn.addEventListener("click", async () => {
+  if (isDemoSession) {
+    isDemoSession = false;
+    showLogin();
+    return;
+  }
   await supabase.auth.signOut();
   showLogin();
 });
@@ -466,6 +1100,9 @@ document.querySelectorAll(".portal-tab").forEach((btn) => {
     document.querySelectorAll(".portal-panel").forEach((p) => (p.hidden = true));
     btn.classList.add("is-active");
     document.querySelector(`.portal-panel[data-panel="${btn.dataset.tab}"]`).hidden = false;
+    if (isCaretaker() && btn.dataset.careCategory) {
+      renderCareSessions(btn.dataset.careCategory);
+    }
   });
 });
 
@@ -587,6 +1224,22 @@ clinicPhotoInput.addEventListener("change", async () => {
 
 clinicaForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (isDemoSession) {
+    const scheduleData = getScheduleData();
+    const scheduleSummaryText = buildScheduleSummary(scheduleData);
+    await persistVetProfile({
+      whatsapp: clinicaFields.whatsapp.value.trim(),
+      schedule: scheduleSummaryText,
+      schedule_details: scheduleData,
+      description: clinicaFields.description.value.trim(),
+      services: isVet() ? Array.from(selectedServices) : currentGroomingServices,
+      emergency: isVet() ? clinicaFields.emergency.checked : undefined,
+    });
+    scheduleSummary.textContent = scheduleSummaryText || "Sin definir";
+    clinicaSuccess.hidden = false;
+    dashboardGreeting.textContent = `Hola, ${clinicaFields.business_name.value.trim()}`;
+    return;
+  }
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return;
 
@@ -729,7 +1382,7 @@ function buildAppointmentCard(apt) {
     approveBtn.className = "portal-approve-btn";
     approveBtn.textContent = "Aprobar";
     approveBtn.addEventListener("click", async () => {
-      await supabase.from("appointments").update({ status: "confirmed" }).eq("id", apt.id);
+      if (!isDemoSession) await supabase.from("appointments").update({ status: "confirmed" }).eq("id", apt.id);
       apt.status = "confirmed";
       refreshCitasViews();
     });
@@ -746,7 +1399,7 @@ function buildAppointmentCard(apt) {
     select.appendChild(opt);
   });
   select.addEventListener("change", async () => {
-    await supabase.from("appointments").update({ status: select.value }).eq("id", apt.id);
+    if (!isDemoSession) await supabase.from("appointments").update({ status: select.value }).eq("id", apt.id);
     apt.status = select.value;
     refreshCitasViews();
   });
@@ -774,10 +1427,12 @@ function buildAppointmentCard(apt) {
       banner.querySelector(".portal-proposal-accept").addEventListener("click", async () => {
         const newDate = apt.proposed_date;
         const newTime = apt.proposed_time;
-        await supabase.from("appointments").update({
-          date: newDate, time: newTime,
-          proposed_date: null, proposed_time: null, proposed_by: null, reschedule_status: null,
-        }).eq("id", apt.id);
+        if (!isDemoSession) {
+          await supabase.from("appointments").update({
+            date: newDate, time: newTime,
+            proposed_date: null, proposed_time: null, proposed_by: null, reschedule_status: null,
+          }).eq("id", apt.id);
+        }
         apt.date = newDate;
         apt.time = newTime;
         apt.proposed_date = null;
@@ -807,16 +1462,18 @@ function buildAppointmentCard(apt) {
     const newDate = rescheduleForm.querySelector(".reschedule-date").value;
     const newTime = rescheduleForm.querySelector(".reschedule-time").value.trim();
     if (!newDate || !newTime) return;
-    await supabase.from("appointments").update({
-      proposed_date: newDate, proposed_time: newTime, proposed_by: "vet", reschedule_status: "pending",
-    }).eq("id", apt.id);
+    if (!isDemoSession) {
+      await supabase.from("appointments").update({
+        proposed_date: newDate, proposed_time: newTime, proposed_by: "vet", reschedule_status: "pending",
+      }).eq("id", apt.id);
+    }
     apt.proposed_date = newDate;
     apt.proposed_time = newTime;
     apt.proposed_by = "vet";
     apt.reschedule_status = "pending";
 
-    if (apt.user_id) {
-      const providerWord = isVet() ? "veterinaria" : "peluquería";
+    if (!isDemoSession && apt.user_id) {
+      const providerWord = providerMeta().label.toLowerCase();
       await supabase.from("notifications").insert({
         user_id: apt.user_id,
         type: "reschedule_proposed",
@@ -846,8 +1503,317 @@ function renderPendingCitas() {
   pending.forEach((apt) => citasPendingList.appendChild(buildAppointmentCard(apt)));
 }
 
-const pacientesSearch = document.getElementById("pacientes-search");
-const pacientesNoResults = document.getElementById("pacientes-no-results");
+function formatMoney(value) {
+  return new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0));
+}
+
+function formatStoreDate(order) {
+  const label = order.date
+    ? new Date(`${order.date}T12:00:00`).toLocaleDateString("es-CO", { day: "numeric", month: "short" })
+    : "";
+  return [label, order.time].filter(Boolean).join(" · ");
+}
+
+function updateDemoOrderStatus(orderId, status) {
+  storeOrders = storeOrders.map((order) => (order.id === orderId ? { ...order, status } : order));
+  renderStoreOrders(storeOrders);
+  renderDashboard();
+}
+
+function buildStoreOrderCard(order) {
+  const card = document.createElement("article");
+  card.className = "portal-store-order-card";
+  const products = (order.products || [])
+    .map((item) => `<li><strong>${item.quantity || 1}x</strong> ${item.name || "Producto"} <span>${formatMoney(item.price)}</span></li>`)
+    .join("");
+
+  let actions = "";
+  if (order.status === "pending") {
+    actions = `
+      <button type="button" data-order-action="confirmed">Confirmar</button>
+      <button type="button" data-order-action="cancelled" class="is-ghost">Cancelar</button>
+    `;
+  } else if (order.status === "confirmed") {
+    actions = `<button type="button" data-order-action="shipped">Marcar enviado</button>`;
+  } else if (order.status === "shipped") {
+    actions = `<button type="button" data-order-action="delivered">Marcar entregado</button>`;
+  }
+
+  card.innerHTML = `
+    <div class="portal-store-order-main">
+      <div class="portal-store-order-head">
+        <div>
+          <strong>${order.customerName || "Cliente"}</strong>
+          <span>${order.phone || ""}</span>
+        </div>
+        <span class="portal-store-status is-${order.status || "pending"}">${STORE_STATUS_LABELS[order.status] || order.status}</span>
+      </div>
+      <ul>${products}</ul>
+      <div class="portal-store-order-foot">
+        <span>${order.address || ""}</span>
+        <span>${formatStoreDate(order)}</span>
+      </div>
+    </div>
+    <div class="portal-store-order-side">
+      <strong>${formatMoney(order.total)}</strong>
+      <div class="portal-store-actions">${actions}</div>
+    </div>
+  `;
+
+  card.querySelectorAll("[data-order-action]").forEach((btn) => {
+    btn.addEventListener("click", () => updateDemoOrderStatus(order.id, btn.dataset.orderAction));
+  });
+
+  return card;
+}
+
+function renderStoreOrders(orders = storeOrders) {
+  citasPendingSection.hidden = true;
+  citasList.innerHTML = "";
+  citasEmpty.hidden = orders.length > 0;
+  orders.forEach((order) => citasList.appendChild(buildStoreOrderCard(order)));
+}
+
+function buildStoreProductCard(product) {
+  const card = document.createElement("article");
+  card.className = "portal-store-product-card";
+  const lowStock = Number(product.stock || 0) <= 10;
+  card.innerHTML = `
+    <img src="${product.image_url || "../assets/icon-food-tight.png"}" alt="" onerror="this.src='../assets/icon-food-tight.png'" />
+    <div class="portal-store-product-body">
+      <div class="portal-store-product-top">
+        <span>${STORE_CATEGORY_LABELS[product.category] || product.category || "Producto"}</span>
+        <span class="${lowStock ? "is-low-stock" : ""}">${product.stock || 0} und.</span>
+      </div>
+      <strong>${product.name || "Producto"}</strong>
+      <p>${product.brand || ""} · ${product.species || ""}</p>
+      <div class="portal-store-product-bottom">
+        <b>${formatMoney(product.price)}</b>
+        <span>${product.sold || 0} vendidos</span>
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+function renderStoreProducts(products = storeProducts) {
+  allPatients = [];
+  pacientesList.innerHTML = "";
+  pacientesEmpty.hidden = products.length > 0;
+  pacientesNoResults.hidden = products.length > 0 || storeProducts.length === 0;
+  pacientesList.classList.remove("portal-care-client-grid");
+  pacientesList.classList.add("portal-store-products-grid");
+  products.forEach((product) => pacientesList.appendChild(buildStoreProductCard(product)));
+}
+
+function renderStoreDashboard() {
+  const pending = storeOrders.filter((order) => order.status === "pending").length;
+  const lowStock = storeProducts.filter((product) => Number(product.stock || 0) <= 10).length;
+  statToday.textContent = storeOrders.length;
+  statPending.textContent = pending;
+  statPatients.textContent = storeProducts.length;
+  statMonth.textContent = lowStock;
+  todayDateLabel.textContent = "Pedidos, inventario y ventas de la tienda";
+
+  todayList.innerHTML = "";
+  todayEmpty.hidden = storeOrders.length > 0;
+  storeOrders.slice(0, 3).forEach((order) => todayList.appendChild(buildStoreOrderCard(order)));
+
+  const strip = document.createElement("section");
+  strip.className = "portal-store-strip";
+  strip.innerHTML = `
+    <div>
+      <span>Plan Tienda</span>
+      <strong>Período de prueba activo</strong>
+    </div>
+    <div>
+      <span>Productos más vendidos</span>
+      <strong>${storeProducts.slice().sort((a, b) => (b.sold || 0) - (a.sold || 0))[0]?.name || "Sin productos"}</strong>
+    </div>
+    <div>
+      <span>Ventas registradas</span>
+      <strong>${formatMoney(storeOrders.reduce((sum, order) => sum + Number(order.total || 0), 0))}</strong>
+    </div>
+  `;
+  todayList.appendChild(strip);
+}
+
+function updateCareSessionStatus(sessionId, status) {
+  careSessions = careSessions.map((session) => (session.id === sessionId ? { ...session, status } : session));
+  renderCareSessions(activeCareCategory);
+  renderDashboard();
+}
+
+function buildCareSessionCard(session) {
+  const card = document.createElement("article");
+  const category = CARE_CATEGORIES[careCategoryForService(session.service)];
+  card.className = "portal-care-session-card";
+  const actions = {
+    pending: [
+      { next: "confirmed", label: "Confirmar" },
+      { next: "cancelled", label: "Cancelar", ghost: true },
+    ],
+    confirmed: [{ next: "in_progress", label: "Iniciar" }],
+    in_progress: [{ next: "completed", label: "Completar" }],
+  }[session.status] || [];
+
+  card.innerHTML = `
+    <div class="portal-care-stripe" style="background:${category.color}"></div>
+    <img src="${session.petImage || ""}" alt="" onerror="this.style.visibility='hidden'" />
+    <div class="portal-care-session-body">
+      <div class="portal-care-session-head">
+        <div>
+          <strong>${session.petName} <span>· ${session.petBreed}</span></strong>
+          <p>${session.ownerName} · ${session.ownerPhone}</p>
+        </div>
+        <span class="portal-care-status is-${session.status}">${CARE_STATUS_LABELS[session.status] || session.status}</span>
+      </div>
+      <p class="portal-care-service">${session.service} · ${session.duration}</p>
+      <p class="portal-care-muted">${session.address}</p>
+      <div class="portal-care-session-foot">
+        <span>${session.date} · ${session.time}</span>
+        <strong>${formatMoney(session.price)}</strong>
+      </div>
+      ${session.notes ? `<div class="portal-care-note">${session.notes}</div>` : ""}
+      <div class="portal-care-actions">
+        ${actions.map((action) => `<button type="button" class="${action.ghost ? "is-ghost" : ""}" data-care-status="${action.next}">${action.label}</button>`).join("")}
+      </div>
+    </div>
+  `;
+
+  card.querySelectorAll("[data-care-status]").forEach((btn) => {
+    btn.addEventListener("click", () => updateCareSessionStatus(session.id, btn.dataset.careStatus));
+  });
+
+  return card;
+}
+
+function renderCareSessions(category = activeCareCategory) {
+  activeCareCategory = category;
+  const categoryMeta = CARE_CATEGORIES[category] || CARE_CATEGORIES.paseo;
+  citasPanelTitle.textContent = categoryMeta.label;
+  citasPanelSubtitle.textContent = `Sesiones de ${categoryMeta.label.toLowerCase()} con estado, horario, cliente y valor.`;
+  citasPendingSection.hidden = true;
+  citasList.innerHTML = "";
+  const sessions = careSessions.filter((session) => careCategoryForService(session.service) === category);
+  citasEmpty.hidden = sessions.length > 0;
+  sessions.forEach((session) => citasList.appendChild(buildCareSessionCard(session)));
+}
+
+function buildCareClientCard(client) {
+  const card = document.createElement("article");
+  card.className = "portal-care-client-card";
+  card.innerHTML = `
+    <img src="${client.petImage || ""}" alt="" onerror="this.style.visibility='hidden'" />
+    <div>
+      <strong>${client.petName}</strong>
+      <p>${client.petSpecies} · ${client.petBreed}</p>
+      <p>${client.ownerName} · ${client.ownerPhone}</p>
+      <p class="portal-care-muted">${client.address}</p>
+      ${client.notes ? `<div class="portal-care-note">${client.notes}</div>` : ""}
+      <div class="portal-care-client-badges">
+        <span>${client.totalSessions} sesiones</span>
+        ${client.nextSession ? `<span>Próxima: ${client.nextSession}</span>` : ""}
+      </div>
+      <small>Última sesión: ${client.lastSession}</small>
+    </div>
+  `;
+  return card;
+}
+
+function renderCareClients(clients = careClients) {
+  allPatients = [];
+  pacientesList.innerHTML = "";
+  pacientesList.classList.remove("portal-store-products-grid");
+  pacientesList.classList.add("portal-care-client-grid");
+  pacientesEmpty.hidden = clients.length > 0;
+  pacientesNoResults.hidden = clients.length > 0 || careClients.length === 0;
+  clients.forEach((client) => pacientesList.appendChild(buildCareClientCard(client)));
+}
+
+function renderCareProfile() {
+  const profile = CARE_PROFILE;
+  clinicaPanelTitle.textContent = "Perfil";
+  const panel = document.querySelector('[data-panel="clinica"] .portal-clinica-layout');
+  if (!panel) return;
+  panel.innerHTML = `
+    <section class="portal-care-profile-cover">
+      <img src="${profile.avatar}" alt="" />
+      <h3>${profile.name}</h3>
+      <p>★ ${profile.rating} (${profile.reviewCount} reseñas)</p>
+    </section>
+    <section class="portal-care-profile-stats">
+      <div><strong>${profile.totalSessions}</strong><span>Sesiones</span></div>
+      <div><strong>${profile.activeClients}</strong><span>Clientes</span></div>
+      <div><strong>${profile.monthlyRevenue}</strong><span>Este mes</span></div>
+    </section>
+    <section class="portal-side-block">
+      <h3>Sobre mí</h3>
+      <p class="portal-muted">${profile.bio}</p>
+    </section>
+    <section class="portal-side-block">
+      <h3>Servicios</h3>
+      <div class="portal-care-tags">${profile.services.map((service) => `<span>${service}</span>`).join("")}</div>
+    </section>
+    <section class="portal-side-block">
+      <h3>Certificaciones</h3>
+      ${profile.certifications.map((cert) => `<p class="portal-care-muted">🎖 ${cert}</p>`).join("")}
+    </section>
+    <section class="portal-side-block">
+      <h3>Contacto</h3>
+      <p class="portal-care-muted">${profile.address}</p>
+      <p class="portal-care-muted">${profile.phone}</p>
+      <p class="portal-care-muted">${profile.email}</p>
+    </section>
+  `;
+}
+
+function renderCareDashboard() {
+  const now = new Date();
+  const todayKey = toDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+  const todays = careSessions.filter((session) => session.date === todayKey);
+  const upcoming = todays.filter((session) => session.status === "pending" || session.status === "confirmed").length;
+  const revenue = todays.reduce((sum, session) => sum + Number(session.price || 0), 0);
+
+  statToday.textContent = todays.length;
+  statPending.textContent = upcoming;
+  statPatients.textContent = careClients.length;
+  statMonth.textContent = formatMoney(revenue).replace(/\s?COP/, "");
+  todayDateLabel.textContent = "Paseos, guarderías y escuelas organizados por categoría";
+
+  todayList.innerHTML = "";
+  todayEmpty.hidden = false;
+  todayEmpty.hidden = true;
+
+  Object.entries(CARE_CATEGORIES).forEach(([category, meta]) => {
+    const sessions = todays.filter((session) => careCategoryForService(session.service) === category);
+    const next = sessions.find((session) => ["pending", "confirmed", "in_progress"].includes(session.status));
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "portal-care-category-card";
+    card.style.setProperty("--care-color", meta.color);
+    card.style.setProperty("--care-bg", meta.bg);
+    card.innerHTML = `
+      <span>${meta.label}</span>
+      <strong>${sessions.length}</strong>
+      <p>${sessions.length === 0 ? "Sin sesiones hoy" : `${sessions.length} ${sessions.length === 1 ? "sesión" : "sesiones"} hoy${next ? ` · próxima ${next.time}` : ""}`}</p>
+    `;
+    card.addEventListener("click", () => {
+      document.querySelectorAll(".portal-tab").forEach((b) => b.classList.remove("is-active"));
+      document.querySelectorAll(".portal-panel").forEach((p) => (p.hidden = true));
+      document.querySelector(`.portal-panel[data-panel="citas"]`).hidden = false;
+      const tab = document.querySelector(`.portal-tab[data-care-category="${category}"]`);
+      if (tab) tab.classList.add("is-active");
+      renderCareSessions(category);
+    });
+    todayList.appendChild(card);
+  });
+}
+
 let allPatients = [];
 
 function renderPacientes(appointments, linkedRecords = []) {
@@ -881,6 +1847,8 @@ function renderPacientes(appointments, linkedRecords = []) {
 
 function renderPatientCards(patients) {
   pacientesList.innerHTML = "";
+  pacientesList.classList.remove("portal-store-products-grid");
+  pacientesList.classList.remove("portal-care-client-grid");
   pacientesNoResults.hidden = patients.length > 0 || allPatients.length === 0;
 
   patients.forEach((p) => {
@@ -899,6 +1867,32 @@ function renderPatientCards(patients) {
 
 pacientesSearch.addEventListener("input", () => {
   const q = pacientesSearch.value.trim().toLowerCase();
+  if (isStore()) {
+    if (!q) {
+      renderStoreProducts(storeProducts);
+      return;
+    }
+    const filtered = storeProducts.filter((product) =>
+      [product.name, product.brand, STORE_CATEGORY_LABELS[product.category], product.species]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(q))
+    );
+    renderStoreProducts(filtered);
+    return;
+  }
+  if (isCaretaker()) {
+    if (!q) {
+      renderCareClients(careClients);
+      return;
+    }
+    const filtered = careClients.filter((client) =>
+      [client.petName, client.petBreed, client.petSpecies, client.ownerName, client.ownerPhone, client.address]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(q))
+    );
+    renderCareClients(filtered);
+    return;
+  }
   if (!q) {
     renderPatientCards(allPatients);
     return;
@@ -916,11 +1910,13 @@ const linkCodeSubmit = document.getElementById("link-code-submit");
 const linkCodeError = document.getElementById("link-code-error");
 
 linkCodeToggle.addEventListener("click", () => {
+  if (!supportsMedicalRecords()) return;
   linkCodeForm.hidden = !linkCodeForm.hidden;
   linkCodeError.hidden = true;
 });
 
 linkCodeSubmit.addEventListener("click", async () => {
+  if (!supportsMedicalRecords()) return;
   const code = linkCodeInput.value.trim();
   linkCodeError.hidden = true;
   if (!code) return;
@@ -1774,6 +2770,10 @@ async function showPatientDetail(key, petInfo) {
 let linkedPatientRecords = [];
 
 async function refetchLinkedPatientRecords() {
+  if (!supportsMedicalRecords()) {
+    linkedPatientRecords = [];
+    return;
+  }
   const { data } = await supabase
     .from("patient_records")
     .select("pet_key,pet_name,breed,pet_image_url")
@@ -1783,6 +2783,33 @@ async function refetchLinkedPatientRecords() {
 
 async function loadTabData({ session }) {
   currentVetId = session.user.id;
+  if (isStore()) {
+    allAppointments = [];
+    linkedPatientRecords = [];
+    storeOrders = buildDemoStoreOrders();
+    storeProducts = buildDemoStoreProducts();
+    selectedDateFilter = null;
+    renderCalendar();
+    renderStoreOrders(storeOrders);
+    renderStoreProducts(storeProducts);
+    renderDashboard();
+    return;
+  }
+  if (isCaretaker()) {
+    allAppointments = [];
+    linkedPatientRecords = [];
+    careSessions = buildDemoCareSessions();
+    careClients = buildDemoCareClients();
+    activeCareCategory = "paseo";
+    selectedDateFilter = null;
+    renderCalendar();
+    renderCareSessions(activeCareCategory);
+    renderCareClients(careClients);
+    renderCareProfile();
+    renderDashboard();
+    return;
+  }
+
   const { data } = await supabase
     .from("appointments")
     .select("*")
@@ -1791,6 +2818,63 @@ async function loadTabData({ session }) {
 
   allAppointments = data || [];
   await refetchLinkedPatientRecords();
+  selectedDateFilter = null;
+  if (allAppointments[0]?.date) {
+    const [y, m] = allAppointments[0].date.split("-").map(Number);
+    calendarViewDate = new Date(y, m - 1, 1);
+  }
+  renderCalendar();
+  renderCitas(filterAppointments());
+  renderPendingCitas();
+  renderPacientes(allAppointments, linkedPatientRecords);
+  renderDashboard();
+}
+
+function loadDemoTabData(providerType) {
+  if (providerType === "store" || providerType === "food") {
+    allAppointments = [];
+    linkedPatientRecords = [];
+    storeOrders = buildDemoStoreOrders();
+    storeProducts = buildDemoStoreProducts();
+    selectedDateFilter = null;
+    renderCalendar();
+    renderStoreOrders(storeOrders);
+    renderStoreProducts(storeProducts);
+    renderDashboard();
+    return;
+  }
+  if (providerType === "caregiver" || providerType === "caretaker") {
+    allAppointments = [];
+    linkedPatientRecords = [];
+    storeOrders = [];
+    storeProducts = [];
+    careSessions = buildDemoCareSessions();
+    careClients = buildDemoCareClients();
+    activeCareCategory = "paseo";
+    selectedDateFilter = null;
+    renderCalendar();
+    renderCareSessions(activeCareCategory);
+    renderCareClients(careClients);
+    renderCareProfile();
+    renderDashboard();
+    return;
+  }
+
+  allAppointments = buildDemoAppointments(providerType);
+  storeOrders = [];
+  storeProducts = [];
+  careSessions = [];
+  careClients = [];
+  linkedPatientRecords = supportsMedicalRecords()
+    ? [
+        {
+          pet_key: "demo_pet_luna",
+          pet_name: "Luna",
+          breed: "Golden retriever",
+          pet_image_url: "../assets/pet-luna-golden-selfie.png",
+        },
+      ]
+    : [];
   selectedDateFilter = null;
   if (allAppointments[0]?.date) {
     const [y, m] = allAppointments[0].date.split("-").map(Number);
@@ -1812,6 +2896,15 @@ const todayEmpty = document.getElementById("today-empty");
 const todayList = document.getElementById("today-list");
 
 function renderDashboard() {
+  if (isStore()) {
+    renderStoreDashboard();
+    return;
+  }
+  if (isCaretaker()) {
+    renderCareDashboard();
+    return;
+  }
+
   const now = new Date();
   const todayKey = toDateKey(now.getFullYear(), now.getMonth(), now.getDate());
   const monthPrefix = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}`;

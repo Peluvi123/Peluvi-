@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Portal de proveedores | Peluvi</title>
     <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/png" href="../assets/favicon.png?v=1" />
+    <link rel="apple-touch-icon" href="../assets/favicon.png?v=1" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -12,14 +14,14 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap"
     />
     <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="portal.css?v=1" />
+    <link rel="stylesheet" href="portal.css?v=8" />
   </head>
   <body class="portal-body">
     <div class="portal-shell">
       <header class="portal-header">
         <a class="portal-brand" href="/">
           <img src="../assets/peluvi-logo.png" alt="" />
-          <span>Peluvi <em>veterinarias</em></span>
+          <span>Peluvi <em id="portal-brand-scope">proveedores</em></span>
         </a>
         <button class="portal-logout" id="logout-btn" hidden>Salir</button>
       </header>
@@ -49,6 +51,8 @@
                 <select id="signup-provider-type" required>
                   <option value="vet">Veterinaria</option>
                   <option value="grooming">Peluquería</option>
+                  <option value="store">Tienda</option>
+                  <option value="caregiver">Cuidador</option>
                 </select>
               </label>
               <label class="portal-field">
@@ -92,8 +96,10 @@
 
           <nav class="portal-tabs" role="tablist">
             <button class="portal-tab is-active" data-tab="inicio" type="button">Inicio</button>
-            <button class="portal-tab" data-tab="citas" type="button">Citas</button>
-            <button class="portal-tab" data-tab="pacientes" type="button">Pacientes</button>
+            <button class="portal-tab" data-tab="citas" data-care-category="paseo" type="button" id="citas-tab-btn">Citas</button>
+            <button class="portal-tab" data-tab="citas" data-care-category="guarderia" type="button" id="care-guarderia-tab-btn" hidden>Guarderías</button>
+            <button class="portal-tab" data-tab="citas" data-care-category="colegio" type="button" id="care-escuela-tab-btn" hidden>Escuelas</button>
+            <button class="portal-tab" data-tab="pacientes" type="button" id="pacientes-tab-btn">Pacientes</button>
             <button class="portal-tab" data-tab="clinica" type="button" id="clinica-tab-btn">Clínica</button>
           </nav>
 
@@ -101,24 +107,24 @@
             <div class="portal-stats-row">
               <div class="portal-stat-card">
                 <span id="stat-today">0</span>
-                <p>Citas hoy</p>
+                <p id="stat-today-label">Citas hoy</p>
               </div>
               <div class="portal-stat-card is-accent">
                 <span id="stat-pending">0</span>
-                <p>Por aprobar</p>
+                <p id="stat-pending-label">Por aprobar</p>
               </div>
               <div class="portal-stat-card">
                 <span id="stat-patients">0</span>
-                <p>Pacientes</p>
+                <p id="stat-patients-label">Pacientes</p>
               </div>
               <div class="portal-stat-card">
                 <span id="stat-month">0</span>
-                <p>Citas este mes</p>
+                <p id="stat-month-label">Citas este mes</p>
               </div>
             </div>
 
             <div class="portal-panel-head" style="margin-top: 28px">
-              <h2>Agenda de hoy</h2>
+              <h2 id="today-section-title">Agenda de hoy</h2>
               <p class="portal-muted" id="today-date-label"></p>
             </div>
             <div id="today-empty" class="portal-empty" hidden>No tienes citas agendadas para hoy.</div>
@@ -127,8 +133,8 @@
 
           <div class="portal-panel" data-panel="citas" hidden>
             <div class="portal-panel-head">
-              <h2>Citas</h2>
-              <p class="portal-muted">Todas las citas agendadas contigo.</p>
+              <h2 id="citas-panel-title">Citas</h2>
+              <p class="portal-muted" id="citas-panel-subtitle">Todas las citas agendadas contigo.</p>
             </div>
 
             <div class="portal-pending-section" id="citas-pending-section" hidden>
@@ -162,8 +168,8 @@
           <div class="portal-panel" data-panel="pacientes" hidden>
             <div id="pacientes-grid-view">
               <div class="portal-panel-head">
-                <h2>Pacientes</h2>
-                <p class="portal-muted">Mascotas que han agendado contigo.</p>
+                <h2 id="pacientes-panel-title">Pacientes</h2>
+                <p class="portal-muted" id="pacientes-panel-subtitle">Mascotas que han agendado contigo.</p>
               </div>
               <div class="portal-pacientes-toolbar">
                 <input type="search" id="pacientes-search" class="portal-search-input" placeholder="Buscar por nombre o raza..." />
@@ -235,7 +241,7 @@
                   </div>
                 </div>
                 <div class="portal-field" id="clinica-grooming-services" hidden>
-                  <span>Servicios y precios</span>
+                  <span id="provider-services-title">Servicios y precios</span>
                   <div id="grooming-services-list"></div>
                   <div class="portal-tag-add">
                     <input type="text" id="grooming-service-name" placeholder="Nombre, ej. Baño y corte" />
@@ -306,6 +312,6 @@
       </main>
     </div>
 
-    <script type="module" src="portal.js?v=1"></script>
+    <script type="module" src="portal.js?v=9"></script>
   </body>
 </html>
