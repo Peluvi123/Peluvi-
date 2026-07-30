@@ -201,6 +201,64 @@
   padding: 24px;
 }
 
+.services-page .page-hero-grid {
+  grid-template-columns: minmax(0, 0.88fr) minmax(460px, 1.12fr);
+  gap: clamp(44px, 5vw, 76px);
+}
+
+.services-page .page-hero h1 span {
+  margin-left: 0.08em;
+}
+
+.services-page .page-hero-media {
+  min-height: 0;
+  aspect-ratio: 1448 / 1024;
+  padding: 12px;
+  overflow: visible;
+  border: 1px solid rgba(143, 83, 255, 0.16);
+  border-radius: 36px;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.96), transparent 15rem),
+    linear-gradient(145deg, #eee2ff, #d9c3fb);
+  box-shadow:
+    0 30px 75px rgba(74, 28, 132, 0.18),
+    0 0 0 10px rgba(255, 255, 255, 0.58);
+  transform: none;
+}
+
+.services-page .page-hero-media img {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  inset: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 26px;
+}
+
+.services-page .page-hero-media::after {
+  inset: 12px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, transparent 64%, rgba(42, 10, 84, 0.1));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.42);
+}
+
+.services-page .page-hero-media:hover img {
+  transform: none;
+}
+
+.services-page .hero-media-badge {
+  top: 28px;
+  left: 28px;
+}
+
+.services-page .hero-media-badge.bottom {
+  top: auto;
+  right: 28px;
+  bottom: 28px;
+  left: auto;
+}
+
 .page-section {
   padding: 84px 0;
 }
@@ -492,6 +550,16 @@
     transform: none;
   }
 
+  .services-page .page-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .services-page .page-hero-media {
+    width: min(720px, 100%);
+    min-height: 0;
+    margin: 0 auto;
+  }
+
   .service-detail-grid,
   .feature-grid,
   .business-type-grid {
@@ -534,6 +602,36 @@
   .split-media {
     min-height: 330px;
     border-radius: 24px;
+  }
+
+  .services-page .page-hero-media {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+    padding: 8px;
+    border-radius: 24px;
+    box-shadow:
+      0 22px 50px rgba(74, 28, 132, 0.16),
+      0 0 0 6px rgba(255, 255, 255, 0.62);
+  }
+
+  .services-page .page-hero-media img,
+  .services-page .page-hero-media::after {
+    border-radius: 17px;
+  }
+
+  .services-page .page-hero-media::after {
+    inset: 8px;
+  }
+
+  .services-page .hero-media-badge {
+    top: 18px;
+    left: 18px;
+  }
+
+  .services-page .hero-media-badge.bottom {
+    top: auto;
+    right: 18px;
+    bottom: 18px;
   }
 
   .hero-media-badge {
