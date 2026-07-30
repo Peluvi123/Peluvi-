@@ -1,7 +1,7 @@
 {
   "functions": {
     "server.mjs": {
-      "includeFiles": "{index.html,styles.css,script.js,assets/**,portal/**,admin/**}"
+      "includeFiles": "{index.html,styles.css,script.js,pages.css,pages.js,assets/**,portal/**,admin/**,servicios/**,conoce/**,negocios/**}"
     }
   }
 }
