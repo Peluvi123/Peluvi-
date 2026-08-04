@@ -182,6 +182,29 @@ async function loadSocialContent(token) {
   renderSocialContent();
 }
 
+async function loadFacebookPosts(token) {
+  const list = document.getElementById("facebook-posts-list");
+  const empty = document.getElementById("facebook-posts-empty");
+  try {
+    const response = await fetchAdminApi("social-facebook-posts", token);
+    const posts = Array.isArray(response.data) ? response.data : [];
+    empty.hidden = posts.length > 0;
+    list.innerHTML = posts.map((post) => {
+      const picture = post.full_picture
+        ? `<img src="${escapeHtml(post.full_picture)}" alt="" />`
+        : `<div class="social-facebook-picture"></div>`;
+      const date = post.created_time ? new Date(post.created_time).toLocaleString("es-CO") : "";
+      return `<article class="social-facebook-post" data-facebook-post-id="${escapeHtml(post.id)}">
+        ${picture}<div class="social-facebook-copy"><strong>${escapeHtml(post.message || "Publicación de Facebook")}</strong><span>${escapeHtml(date)}</span></div>
+        <button class="social-delete-facebook" type="button">Eliminar de Facebook</button>
+      </article>`;
+    }).join("");
+  } catch (error) {
+    empty.textContent = error.message;
+    empty.hidden = false;
+  }
+}
+
 function updateSocialPreview() {
   const payload = getSocialFormPayload();
   const preview = document.getElementById("social-preview");
@@ -274,6 +297,22 @@ function setupSocialControls(token) {
       else await fetchAdminApi(`social-content/${item.dataset.socialId}`, token, { method:"DELETE" });
       await loadSocialContent(token);
     } catch (error) { alert(error.message); button.disabled = false; }
+  };
+  document.getElementById("facebook-posts-list").onclick = async (event) => {
+    const button = event.target.closest(".social-delete-facebook");
+    const item = event.target.closest("[data-facebook-post-id]");
+    if (!button || !item) return;
+    if (!window.confirm("¿Eliminar esta publicación real de Facebook? Esta acción no se puede deshacer.")) return;
+    button.disabled = true;
+    button.textContent = "Eliminando…";
+    try {
+      await fetchAdminApi(`social-facebook-posts/${encodeURIComponent(item.dataset.facebookPostId)}`, token, { method: "DELETE" });
+      await loadFacebookPosts(token);
+    } catch (error) {
+      alert(error.message);
+      button.disabled = false;
+      button.textContent = "Eliminar de Facebook";
+    }
   };
 }
 
@@ -440,7 +479,7 @@ function loadAllPanels(token) {
   loadRedes(token);
   loadAnuncios(token);
   setupSocialControls(token);
-  Promise.all([loadSocialCapabilities(token), loadSocialContent(token)]).catch((error) => {
+  Promise.all([loadSocialCapabilities(token), loadSocialContent(token), loadFacebookPosts(token)]).catch((error) => {
     const box = document.getElementById("composer-error"); box.textContent = error.message; box.hidden = false;
   });
 }

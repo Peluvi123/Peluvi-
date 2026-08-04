@@ -13,7 +13,7 @@
     />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../portal/portal.css" />
-    <link rel="stylesheet" href="admin.css?v=3" />
+    <link rel="stylesheet" href="admin.css?v=4" />
   </head>
   <body class="portal-body">
     <div class="portal-shell">
@@ -201,6 +201,14 @@
             </section>
             <section class="admin-posts-section">
               <div class="admin-posts-head">
+                <div><h3>Publicaciones de Facebook</h3><p class="portal-muted">Puedes eliminar publicaciones reales de la página desde Peluvi.</p></div>
+                <a href="https://www.facebook.com/" target="_blank" rel="noreferrer">Abrir Facebook ↗</a>
+              </div>
+              <div class="social-facebook-list" id="facebook-posts-list"></div>
+              <div class="portal-empty" id="facebook-posts-empty" hidden>No hay publicaciones recientes de Facebook.</div>
+            </section>
+            <section class="admin-posts-section">
+              <div class="admin-posts-head">
                 <div><h3>Publicaciones recientes</h3><p class="portal-muted">Contenido publicado en @peluvi.pet.</p></div>
                 <a href="https://www.instagram.com/peluvi.pet/" target="_blank" rel="noreferrer">Abrir Instagram ↗</a>
               </div>
@@ -248,6 +256,6 @@
       </main>
     </div>
 
-    <script type="module" src="admin.js?v=3"></script>
+    <script type="module" src="admin.js?v=4"></script>
   </body>
 </html>

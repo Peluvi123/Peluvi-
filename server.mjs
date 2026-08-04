@@ -364,6 +364,17 @@ async function callGraphMutation(path, params, accessToken) {
   return data;
 }
 
+async function callGraphDelete(path, accessToken) {
+  if (!accessToken) throw new Error("Falta configurar el token de Meta.");
+  const resp = await fetch(`https://graph.facebook.com/${GRAPH_API_VERSION}/${path}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const data = await resp.json();
+  if (!resp.ok || data.success === false) throw new Error(data.error?.message || "Meta no permitió eliminar la publicación.");
+  return data;
+}
+
 function redisConfig() {
   const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
@@ -522,6 +533,29 @@ async function handleSocialApi(url, request, response) {
         access: "public", contentType: type, addRandomSuffix: true,
       });
       return sendJson(response, 201, { url: blob.url, pathname: blob.pathname, contentType: blob.contentType });
+    }
+
+    if (url.pathname === "/api/admin/social-facebook-posts" && request.method === "GET") {
+      const pageId = process.env.META_PAGE_ID;
+      const token = process.env.META_SOCIAL_ACCESS_TOKEN;
+      if (!pageId || !token) throw new Error("Falta configurar la conexión de Facebook.");
+      const pageToken = await getMetaPageAccessToken(pageId, token);
+      const data = await callGraphApi(
+        `${pageId}/feed?fields=id,message,created_time,full_picture,permalink_url&limit=10`,
+        { accessToken: pageToken, cacheNamespace: "facebook-posts", ttlMs: 0 }
+      );
+      return sendJson(response, 200, data);
+    }
+
+    if (url.pathname.startsWith("/api/admin/social-facebook-posts/") && request.method === "DELETE") {
+      const postId = decodeURIComponent(url.pathname.split("/").pop() || "");
+      if (!/^\d+_\d+$/.test(postId)) throw new Error("Identificador de publicación inválido.");
+      const pageId = process.env.META_PAGE_ID;
+      const token = process.env.META_SOCIAL_ACCESS_TOKEN;
+      const pageToken = await getMetaPageAccessToken(pageId, token);
+      const data = await callGraphDelete(postId, pageToken);
+      graphCache.delete(`facebook-posts:${pageId}/feed?fields=id,message,created_time,full_picture,permalink_url&limit=10`);
+      return sendJson(response, 200, data);
     }
 
     const parts = url.pathname.split("/").filter(Boolean);
