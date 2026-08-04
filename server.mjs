@@ -400,12 +400,15 @@ async function supabaseSocialRequest(query = "", { method = "GET", body, prefer 
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || "No se pudo acceder a la parrilla de Supabase.");
+  const responseText = await response.text();
+  let responseData = null;
+  if (responseText) {
+    try { responseData = JSON.parse(responseText); } catch { responseData = null; }
   }
-  if (response.status === 204) return null;
-  return response.json();
+  if (!response.ok) {
+    throw new Error(responseData?.message || "No se pudo acceder a la parrilla de Supabase.");
+  }
+  return responseData;
 }
 
 function socialItemFromRow(row) {
