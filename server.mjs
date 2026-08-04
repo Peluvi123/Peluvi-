@@ -318,6 +318,20 @@ async function callGraphApi(path, { ttlMs = 5 * 60 * 1000, accessToken, cacheNam
   return data;
 }
 
+async function getMetaPageAccessToken(pageId, socialToken) {
+  const pageAuth = await callGraphApi(`${pageId}?fields=access_token`, {
+    accessToken: socialToken,
+    cacheNamespace: "social-auth",
+    ttlMs: 50 * 60 * 1000,
+  });
+
+  if (!pageAuth?.access_token) {
+    throw new Error("Meta no entregó acceso a la página. Revisa los permisos del usuario del sistema.");
+  }
+
+  return pageAuth.access_token;
+}
+
 async function handleAdminApi(pathname, request, response) {
   const auth = requireAdminAuth(request);
   if (auth.error) {
@@ -343,13 +357,14 @@ async function handleAdminApi(pathname, request, response) {
       if (!igUserId) throw new Error("Falta configurar META_IG_USER_ID.");
       if (!socialToken) throw new Error("Falta configurar META_SOCIAL_ACCESS_TOKEN.");
 
+      const pageAccessToken = await getMetaPageAccessToken(pageId, socialToken);
       const [page, instagram] = await Promise.all([
         callGraphApi(`${pageId}?fields=id,name,fan_count,followers_count,picture`, {
-          accessToken: socialToken,
+          accessToken: pageAccessToken,
           cacheNamespace: "social",
         }),
         callGraphApi(`${igUserId}?fields=id,username,name,followers_count,media_count,profile_picture_url`, {
-          accessToken: socialToken,
+          accessToken: pageAccessToken,
           cacheNamespace: "social",
         }),
       ]);
@@ -359,11 +374,13 @@ async function handleAdminApi(pathname, request, response) {
     }
 
     if (pathname === "/api/admin/ig-media") {
+      if (!pageId) throw new Error("Falta configurar META_PAGE_ID.");
       if (!igUserId) throw new Error("Falta configurar META_IG_USER_ID.");
       if (!socialToken) throw new Error("Falta configurar META_SOCIAL_ACCESS_TOKEN.");
+      const pageAccessToken = await getMetaPageAccessToken(pageId, socialToken);
       const data = await callGraphApi(
         `${igUserId}/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&limit=6`,
-        { accessToken: socialToken, cacheNamespace: "social", ttlMs: 10 * 60 * 1000 }
+        { accessToken: pageAccessToken, cacheNamespace: "social", ttlMs: 10 * 60 * 1000 }
       );
       sendJson(response, 200, data);
       return;

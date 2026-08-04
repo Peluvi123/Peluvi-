@@ -165,10 +165,7 @@ async function loadRedes(token) {
   const status = document.getElementById("meta-connection-status");
   errorBox.hidden = true;
   try {
-    const [connection, media] = await Promise.all([
-      fetchAdminApi("meta-status", token),
-      fetchAdminApi("ig-media", token),
-    ]);
+    const connection = await fetchAdminApi("meta-status", token);
 
     status.classList.add("is-connected");
     status.innerHTML = "<i></i> Meta conectado";
@@ -187,9 +184,17 @@ async function loadRedes(token) {
       document.getElementById("ig-avatar").innerHTML = `<img src="${escapeHtml(connection.instagram.profile_picture_url)}" alt="" />`;
     }
 
-    const posts = Array.isArray(media?.data) ? media.data : [];
     const postsGrid = document.getElementById("ig-posts");
     const postsEmpty = document.getElementById("ig-posts-empty");
+    let posts = [];
+    try {
+      const media = await fetchAdminApi("ig-media", token);
+      posts = Array.isArray(media?.data) ? media.data : [];
+    } catch (mediaError) {
+      postsEmpty.textContent = `La cuenta está conectada, pero Meta no permitió leer publicaciones: ${mediaError.message}`;
+      postsEmpty.hidden = false;
+    }
+
     postsGrid.innerHTML = posts
       .map((post) => {
         const image = post.media_type === "VIDEO" ? post.thumbnail_url : post.media_url;
@@ -201,7 +206,8 @@ async function loadRedes(token) {
         </a>`;
       })
       .join("");
-    postsEmpty.hidden = posts.length > 0;
+    if (posts.length > 0) postsEmpty.hidden = true;
+    else if (!postsEmpty.textContent.includes("Meta no permitió")) postsEmpty.hidden = false;
   } catch (err) {
     status.classList.remove("is-connected");
     status.classList.add("is-error");
