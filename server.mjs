@@ -394,7 +394,7 @@ async function supabaseSocialRequest(query = "", { method = "GET", body, prefer 
     method,
     headers: {
       apikey: config.key,
-      Authorization: `Bearer ${config.key}`,
+      ...(config.key.startsWith("eyJ") ? { Authorization: `Bearer ${config.key}` } : {}),
       "Content-Type": "application/json",
       ...(prefer ? { Prefer: prefer } : {}),
     },
