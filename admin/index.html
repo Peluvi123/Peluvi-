@@ -13,7 +13,7 @@
     />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../portal/portal.css" />
-    <link rel="stylesheet" href="admin.css?v=1" />
+    <link rel="stylesheet" href="admin.css?v=2" />
   </head>
   <body class="portal-body">
     <div class="portal-shell">
@@ -84,28 +84,43 @@
 
           <!-- Redes sociales -->
           <div class="portal-panel" data-panel="redes" hidden>
-            <div class="portal-panel-head">
-              <h2>Facebook e Instagram</h2>
-              <p class="portal-muted">Seguidores, alcance e interacciones.</p>
+            <div class="portal-panel-head admin-social-head">
+              <div>
+                <h2>Facebook e Instagram</h2>
+                <p class="portal-muted">Cuentas oficiales conectadas a Peluvi.</p>
+              </div>
+              <span class="admin-connection-status" id="meta-connection-status"><i></i> Comprobando conexión</span>
             </div>
             <div class="admin-social-grid">
               <div class="admin-social-card">
-                <h3>Página de Facebook</h3>
-                <div class="portal-stats-row" id="page-stats">
-                  <div class="portal-stat-card"><span id="page-fans">—</span><p>Seguidores</p></div>
-                  <div class="portal-stat-card"><span id="page-impressions">—</span><p>Alcance</p></div>
-                  <div class="portal-stat-card"><span id="page-engaged">—</span><p>Interacciones</p></div>
+                <div class="admin-social-profile">
+                  <div class="admin-social-avatar is-facebook" id="page-avatar">f</div>
+                  <div><span>Facebook</span><h3 id="page-name">Página Paluvi</h3></div>
+                </div>
+                <div class="portal-stats-row admin-social-stats" id="page-stats">
+                  <div class="portal-stat-card"><span id="page-followers">—</span><p>Seguidores</p></div>
+                  <div class="portal-stat-card"><span id="page-likes">—</span><p>Me gusta</p></div>
                 </div>
               </div>
               <div class="admin-social-card">
-                <h3>Instagram</h3>
-                <div class="portal-stats-row" id="ig-stats">
+                <div class="admin-social-profile">
+                  <div class="admin-social-avatar is-instagram" id="ig-avatar">◎</div>
+                  <div><span>Instagram</span><h3 id="ig-username">@peluvi.pet</h3></div>
+                </div>
+                <div class="portal-stats-row admin-social-stats" id="ig-stats">
                   <div class="portal-stat-card"><span id="ig-followers">—</span><p>Seguidores</p></div>
-                  <div class="portal-stat-card"><span id="ig-reach">—</span><p>Alcance</p></div>
-                  <div class="portal-stat-card"><span id="ig-engaged">—</span><p>Interacciones</p></div>
+                  <div class="portal-stat-card"><span id="ig-media-count">—</span><p>Publicaciones</p></div>
                 </div>
               </div>
             </div>
+            <section class="admin-posts-section">
+              <div class="admin-posts-head">
+                <div><h3>Publicaciones recientes</h3><p class="portal-muted">Contenido publicado en @peluvi.pet.</p></div>
+                <a href="https://www.instagram.com/peluvi.pet/" target="_blank" rel="noreferrer">Abrir Instagram ↗</a>
+              </div>
+              <div class="admin-posts-grid" id="ig-posts"></div>
+              <div class="portal-empty" id="ig-posts-empty" hidden>Aún no hay publicaciones disponibles.</div>
+            </section>
             <div id="redes-error" class="portal-error" hidden></div>
           </div>
 
@@ -147,6 +162,6 @@
       </main>
     </div>
 
-    <script type="module" src="admin.js?v=1"></script>
+    <script type="module" src="admin.js?v=2"></script>
   </body>
 </html>

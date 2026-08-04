@@ -62,6 +62,7 @@ const CARE_PROFILE = {
 
 const DEMO_PASSWORD = "PeluviDemo2026!";
 const DEMO_PASSWORD_ALIASES = new Set([DEMO_PASSWORD, "PeluviDemo2026", "peluvidemo2026"]);
+const DEMO_SESSION_KEY = "peluvi_demo_provider_session";
 const DEMO_ACCOUNTS = {
   "demo.veterinaria@peluvi.test": {
     id: "demo_vet",
@@ -119,6 +120,11 @@ const citasList = document.getElementById("citas-list");
 const citasEmpty = document.getElementById("citas-empty");
 const citasPendingSection = document.getElementById("citas-pending-section");
 const citasPendingList = document.getElementById("citas-pending-list");
+const solicitudesTabBtn = document.getElementById("solicitudes-tab-btn");
+const solicitudesTabCount = document.getElementById("solicitudes-tab-count");
+const solicitudesFilter = document.getElementById("solicitudes-filter");
+const solicitudesList = document.getElementById("solicitudes-list");
+const solicitudesEmpty = document.getElementById("solicitudes-empty");
 const pacientesList = document.getElementById("pacientes-list");
 const pacientesEmpty = document.getElementById("pacientes-empty");
 const pacientesSearch = document.getElementById("pacientes-search");
@@ -270,6 +276,87 @@ function saveLocalProviderProfile(profile) {
   localStorage.setItem(localProfileKey(), JSON.stringify(profile || {}));
 }
 
+function demoMedicalRecordsKey() {
+  return `peluvi_demo_medical_records_${currentVetId || "demo_vet"}`;
+}
+
+function buildDemoPatientRecords() {
+  return {
+    demo_pet_luna: {
+      pet_key: "demo_pet_luna",
+      pet_name: "Luna",
+      breed: "Golden retriever",
+      pet_image_url: "../assets/pet-luna-golden-selfie.png",
+      species: "Perro",
+      gender: "female",
+      born: "2022-05-14",
+      color: "Dorado",
+      weight: "28.4 kg",
+      chip: "COL-9852147",
+      blood_type: "DEA 1.1 positivo",
+      allergies: ["Pollo"],
+      clinical_alerts: ["Sensibilidad digestiva"],
+      owner_name: "Laura Martínez",
+      owner_phone: "+57 310 555 0148",
+      owner_email: "laura.martinez@peluvi.test",
+      notes: "Paciente sociable. Sensibilidad digestiva; evitar alimentos con pollo.",
+      sterilized: true,
+      dewormed: true,
+      vaccines: [
+        { vaccine_name: "Rabia", date_given: "2026-02-18", next_due_date: "2027-02-18", notes: "Refuerzo anual" },
+        { vaccine_name: "Polivalente canina", date_given: "2026-01-22", next_due_date: "2027-01-22", notes: "Esquema al día" },
+      ],
+    },
+    demo_pet_milo: {
+      pet_key: "demo_pet_milo",
+      pet_name: "Milo",
+      breed: "Gato",
+      pet_image_url: "../assets/pet-milo-cat-selfie.png",
+      species: "Gato",
+      gender: "male",
+      born: "2023-09-03",
+      color: "Atigrado",
+      weight: "5.2 kg",
+      chip: "COL-7734102",
+      blood_type: "A",
+      allergies: [],
+      clinical_alerts: [],
+      owner_name: "Carlos Ramírez",
+      owner_phone: "+57 315 444 0281",
+      owner_email: "carlos.ramirez@peluvi.test",
+      notes: "Paciente tranquilo durante consulta. Vive exclusivamente en interior.",
+      sterilized: true,
+      dewormed: true,
+      vaccines: [
+        { vaccine_name: "Triple felina", date_given: "2026-03-10", next_due_date: "2027-03-10", notes: "Refuerzo anual" },
+      ],
+    },
+  };
+}
+
+function loadDemoPatientRecords() {
+  const defaults = buildDemoPatientRecords();
+  try {
+    const saved = JSON.parse(localStorage.getItem(demoMedicalRecordsKey()) || "{}");
+    Object.keys(defaults).forEach((key) => {
+      defaults[key] = { ...defaults[key], ...(saved[key] || {}) };
+    });
+  } catch {
+    // Conserva los datos demo predeterminados si el almacenamiento está dañado.
+  }
+  return defaults;
+}
+
+function saveDemoPatientRecord(key, record) {
+  const records = loadDemoPatientRecords();
+  records[key] = { ...(records[key] || {}), ...record, pet_key: key };
+  localStorage.setItem(demoMedicalRecordsKey(), JSON.stringify(records));
+  const linkedIndex = linkedPatientRecords.findIndex((item) => item.pet_key === key);
+  if (linkedIndex >= 0) linkedPatientRecords[linkedIndex] = records[key];
+  else linkedPatientRecords.push(records[key]);
+  return records[key];
+}
+
 function buildDemoProfile(providerType) {
   if (providerType === "vet") {
     return {
@@ -370,29 +457,55 @@ function buildDemoAppointments(providerType) {
     pet_breed: "Golden retriever",
     pet_image: "../assets/pet-luna-golden-selfie.png",
     user_id: "demo_user",
+    owner_name: "Laura Martínez",
+    owner_phone: "+57 310 555 0148",
+    request_note: "Control general y revisión preventiva.",
+    requested_at: new Date().toISOString(),
   };
   if (providerType === "store") {
     return [
       { ...base, id: "demo_store_1", service: "Consulta de concentrado premium", date: todayKey, time: "10:30 AM", status: "pending" },
-      { ...base, id: "demo_store_2", pet_name: "Milo", pet_breed: "Gato", pet_image: "../assets/pet-milo-cat-selfie.png", service: "Disponibilidad de snacks", date: tomorrowKey, time: "3:00 PM", status: "confirmed" },
+      { ...base, id: "demo_store_2", pet_id: "demo_pet_milo", pet_name: "Milo", pet_breed: "Gato", pet_image: "../assets/pet-milo-cat-selfie.png", service: "Disponibilidad de snacks", date: tomorrowKey, time: "3:00 PM", status: "confirmed" },
     ];
   }
   if (providerType === "caregiver") {
     return [
       { ...base, id: "demo_caregiver_1", service: "Paseo programado", date: todayKey, time: "7:30 AM", status: "confirmed" },
-      { ...base, id: "demo_caregiver_2", pet_name: "Simon", pet_breed: "Gato", pet_image: "../assets/pet-simon-hamster-selfie.png", service: "Cuidado en casa", date: tomorrowKey, time: "9:00 AM", status: "pending" },
+      { ...base, id: "demo_caregiver_2", pet_id: "demo_pet_simon", pet_name: "Simon", pet_breed: "Gato", pet_image: "../assets/pet-simon-hamster-selfie.png", service: "Cuidado en casa", date: tomorrowKey, time: "9:00 AM", status: "pending" },
     ];
   }
   if (providerType === "grooming") {
     return [
       { ...base, id: "demo_grooming_1", service: "Baño y corte", date: todayKey, time: "11:00 AM", status: "pending" },
-      { ...base, id: "demo_grooming_2", pet_name: "Milo", pet_breed: "Gato", pet_image: "../assets/pet-milo-cat-selfie.png", service: "Corte de uñas", date: tomorrowKey, time: "2:00 PM", status: "confirmed" },
+      { ...base, id: "demo_grooming_2", pet_id: "demo_pet_milo", pet_name: "Milo", pet_breed: "Gato", pet_image: "../assets/pet-milo-cat-selfie.png", service: "Corte de uñas", date: tomorrowKey, time: "2:00 PM", status: "confirmed" },
     ];
   }
   return [
-    { ...base, id: "demo_vet_1", service: "Consulta general", date: todayKey, time: "9:00 AM", status: "pending", doctor_name: "Dra. Laura Pérez" },
-    { ...base, id: "demo_vet_2", pet_name: "Milo", pet_breed: "Gato", pet_image: "../assets/pet-milo-cat-selfie.png", service: "Vacunación", date: tomorrowKey, time: "4:00 PM", status: "confirmed", doctor_name: "Dr. Andrés Gómez" },
+    { ...base, id: "demo_vet_1", service: "Consulta general", date: todayKey, time: "9:00 AM", status: "completed", doctor_name: "Dra. Laura Pérez", weight_kg: 28.4, temperature_c: 38.3, heart_rate: 92, respiratory_rate: 24, notes: "Paciente alerta y estable. Se recomienda control nutricional y seguimiento en seis meses." },
+    { ...base, id: "demo_vet_2", pet_id: "demo_pet_milo", pet_name: "Milo", pet_breed: "Gato", pet_image: "../assets/pet-milo-cat-selfie.png", owner_name: "Carlos Ramírez", owner_phone: "+57 315 444 0281", request_note: "Aplicación de refuerzo anual.", service: "Vacunación", date: tomorrowKey, time: "4:00 PM", status: "confirmed", doctor_name: "Dr. Andrés Gómez", weight_kg: 5.2, temperature_c: 38.5, heart_rate: 148, respiratory_rate: 28, notes: "Apto para vacunación. Sin reacciones adversas observadas." },
+    { ...base, id: "demo_vet_request_1", pet_id: "demo_pet_nala", pet_name: "Nala", pet_breed: "Mestiza", pet_image: "../assets/demo-firulais.png", owner_name: "Valentina Ruiz", owner_phone: "+57 301 602 1194", request_note: "Ha presentado irritación en la piel durante los últimos dos días.", service: "Consulta dermatológica", date: tomorrowKey, time: "11:30 AM", status: "pending", doctor_name: "", weight_kg: null, temperature_c: null, heart_rate: null, respiratory_rate: null, notes: "" },
   ];
+}
+
+function demoAppointmentsKey(providerType = currentProviderType) {
+  return `peluvi_demo_appointments_v2_${currentVetId || "demo"}_${providerType}`;
+}
+
+function loadDemoAppointments(providerType) {
+  const defaults = buildDemoAppointments(providerType);
+  try {
+    const saved = JSON.parse(localStorage.getItem(demoAppointmentsKey(providerType)) || "[]");
+    const savedById = new Map(saved.map((appointment) => [appointment.id, appointment]));
+    return defaults.map((appointment) => ({ ...appointment, ...(savedById.get(appointment.id) || {}) }));
+  } catch {
+    return defaults;
+  }
+}
+
+function saveDemoAppointments() {
+  if (isDemoSession) {
+    localStorage.setItem(demoAppointmentsKey(), JSON.stringify(allAppointments));
+  }
 }
 
 function buildDemoStoreProducts() {
@@ -727,14 +840,19 @@ function applyProviderTypeUI() {
   emergencyRow.hidden = !vet;
   careGuarderiaTabBtn.hidden = !caretaker;
   careEscuelaTabBtn.hidden = !caretaker;
+  solicitudesTabBtn.hidden = store || caretaker;
   clinicaTabBtn.textContent = meta.profileTab;
   clinicaPanelTitle.textContent = meta.profileTitle;
-  citasTabBtn.textContent = caretaker ? "Paseos" : meta.appointmentsLabel;
+  citasTabBtn.textContent = caretaker ? "Paseos" : store ? meta.appointmentsLabel : "Agenda";
   careGuarderiaTabBtn.textContent = "Guarderías";
   careEscuelaTabBtn.textContent = "Escuelas";
   pacientesTabBtn.textContent = meta.patientsLabel;
-  citasPanelTitle.textContent = caretaker ? CARE_CATEGORIES[activeCareCategory].label : meta.appointmentsLabel;
-  citasPanelSubtitle.textContent = `Todas las ${meta.appointmentUnit} registradas contigo.`;
+  citasPanelTitle.textContent = caretaker ? CARE_CATEGORIES[activeCareCategory].label : store ? meta.appointmentsLabel : "Agenda";
+  citasPanelSubtitle.textContent = store
+    ? `Todos los ${meta.appointmentUnit} registrados contigo.`
+    : caretaker
+      ? `Todas las ${meta.appointmentUnit} registradas contigo.`
+      : "Citas confirmadas y atenciones programadas.";
   pacientesPanelTitle.textContent = meta.patientsLabel;
   pacientesPanelSubtitle.textContent = meta.patientsSubtitle;
   todaySectionTitle.textContent = meta.todayTitle;
@@ -895,8 +1013,9 @@ function showDashboard(profile) {
   dashboardSub.textContent = profile.address || "";
 }
 
-function loginDemoProvider(profile) {
+function loginDemoProvider(profile, email = "") {
   isDemoSession = true;
+  if (email) sessionStorage.setItem(DEMO_SESSION_KEY, email.toLowerCase());
   currentProviderType = profile.provider_type;
   currentVetId = profile.id;
   currentProfile = profile;
@@ -955,6 +1074,19 @@ async function requireProviderSession() {
   return { session, profile, vetProfile };
 }
 
+document.querySelectorAll(".portal-password-toggle").forEach((button) => {
+  button.addEventListener("click", () => {
+    const input = document.getElementById(button.dataset.passwordTarget);
+    if (!input) return;
+
+    const showPassword = input.type === "password";
+    input.type = showPassword ? "text" : "password";
+    button.setAttribute("aria-pressed", String(showPassword));
+    button.setAttribute("aria-label", showPassword ? "Ocultar contraseña" : "Mostrar contraseña");
+    input.focus({ preventScroll: true });
+  });
+});
+
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginError.hidden = true;
@@ -968,7 +1100,7 @@ loginForm.addEventListener("submit", async (e) => {
   if (demoProfile && DEMO_PASSWORD_ALIASES.has(password)) {
     loginSubmit.disabled = false;
     loginSubmit.textContent = "Ingresar";
-    loginDemoProvider(demoProfile);
+    loginDemoProvider(demoProfile, email);
     return;
   }
 
@@ -1087,6 +1219,7 @@ signupForm.addEventListener("submit", async (e) => {
 logoutBtn.addEventListener("click", async () => {
   if (isDemoSession) {
     isDemoSession = false;
+    sessionStorage.removeItem(DEMO_SESSION_KEY);
     showLogin();
     return;
   }
@@ -1283,7 +1416,10 @@ function renderCalendar() {
 
   const todayKey = toDateKey(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
   const aptCountByDate = new Map();
-  allAppointments.forEach((a) => {
+  const calendarAppointments = isStore() || isCaretaker()
+    ? allAppointments
+    : allAppointments.filter((appointment) => !["pending", "cancelled"].includes(appointment.status));
+  calendarAppointments.forEach((a) => {
     if (!a.date) return;
     aptCountByDate.set(a.date, (aptCountByDate.get(a.date) || 0) + 1);
   });
@@ -1317,6 +1453,10 @@ function renderCalendar() {
       btn.textContent = dayNum;
       cellKey = toDateKey(year, month, dayNum);
       const count = aptCountByDate.get(cellKey) || 0;
+      btn.setAttribute(
+        "aria-label",
+        `${dayNum} de ${MONTH_NAMES[month]} de ${year}${count ? `, ${count} cita${count === 1 ? "" : "s"}` : ", sin citas"}`
+      );
       if (count > 0) btn.classList.add("has-apt");
       if (cellKey === todayKey) btn.classList.add("is-today");
       if (cellKey === selectedDateFilter) btn.classList.add("is-selected");
@@ -1359,6 +1499,7 @@ function refreshCitasViews() {
   renderCalendar();
   renderCitas(filterAppointments());
   renderPendingCitas();
+  renderSolicitudes();
   renderDashboard();
 }
 
@@ -1384,6 +1525,7 @@ function buildAppointmentCard(apt) {
     approveBtn.addEventListener("click", async () => {
       if (!isDemoSession) await supabase.from("appointments").update({ status: "confirmed" }).eq("id", apt.id);
       apt.status = "confirmed";
+      saveDemoAppointments();
       refreshCitasViews();
     });
     actions.appendChild(approveBtn);
@@ -1401,6 +1543,7 @@ function buildAppointmentCard(apt) {
   select.addEventListener("change", async () => {
     if (!isDemoSession) await supabase.from("appointments").update({ status: select.value }).eq("id", apt.id);
     apt.status = select.value;
+    saveDemoAppointments();
     refreshCitasViews();
   });
   actions.appendChild(select);
@@ -1439,6 +1582,7 @@ function buildAppointmentCard(apt) {
         apt.proposed_time = null;
         apt.proposed_by = null;
         apt.reschedule_status = null;
+        saveDemoAppointments();
         refreshCitasViews();
       });
     } else {
@@ -1471,6 +1615,7 @@ function buildAppointmentCard(apt) {
     apt.proposed_time = newTime;
     apt.proposed_by = "vet";
     apt.reschedule_status = "pending";
+    saveDemoAppointments();
 
     if (!isDemoSession && apt.user_id) {
       const providerWord = providerMeta().label.toLowerCase();
@@ -1490,17 +1635,141 @@ function buildAppointmentCard(apt) {
   return card;
 }
 
+function buildRequestCard(apt) {
+  const card = document.createElement("article");
+  card.className = "portal-request-card";
+  const hasProposal = apt.reschedule_status === "pending";
+  const requestStatus = hasProposal ? "Cambio propuesto" : "Pendiente";
+  card.innerHTML = `
+    <div class="portal-request-pet">
+      <img src="${apt.pet_image || ""}" alt="" onerror="this.style.visibility='hidden'" />
+      <div>
+        <span class="portal-request-status">${requestStatus}</span>
+        <h3>${apt.pet_name || "Mascota"} <small>· ${apt.pet_breed || ""}</small></h3>
+        <p>${apt.owner_name || "Responsable no registrado"}${apt.owner_phone ? ` · ${apt.owner_phone}` : ""}</p>
+      </div>
+    </div>
+    <div class="portal-request-details">
+      <div><span>Servicio solicitado</span><strong>${apt.service || "Consulta"}</strong></div>
+      <div><span>Fecha y hora</span><strong>${apt.date || "Por definir"} · ${apt.time || "Por definir"}</strong></div>
+      <div><span>Nota del responsable</span><strong>${apt.request_note || "Sin observaciones adicionales"}</strong></div>
+    </div>
+    ${hasProposal ? `<div class="portal-proposal-banner"><span>⏳ Propuesta enviada: <strong>${apt.proposed_date || ""} ${apt.proposed_time || ""}</strong></span></div>` : ""}
+    <div class="portal-request-actions">
+      <button type="button" class="portal-approve-btn request-confirm">Confirmar cita</button>
+      <button type="button" class="portal-reschedule-toggle request-propose">Proponer horario</button>
+      <button type="button" class="portal-request-reject request-reject-toggle">No aceptar</button>
+    </div>
+    <div class="portal-reschedule-form request-proposal-form" hidden>
+      <input type="date" class="request-date" value="${apt.proposed_date || apt.date || ""}" />
+      <input type="text" class="request-time" value="${apt.proposed_time || apt.time || ""}" placeholder="Hora, ej. 10:00 AM" />
+      <button type="button" class="portal-reschedule-save request-proposal-save">Enviar propuesta</button>
+    </div>
+    <div class="portal-request-reject-form" hidden>
+      <select class="request-reject-reason" aria-label="Motivo para no aceptar">
+        <option value="">Selecciona un motivo</option>
+        <option value="Sin disponibilidad">Sin disponibilidad</option>
+        <option value="Servicio no disponible">Servicio no disponible</option>
+        <option value="Se requiere otra especialidad">Se requiere otra especialidad</option>
+        <option value="Información incompleta">Información incompleta</option>
+      </select>
+      <button type="button" class="request-reject-save">Confirmar</button>
+    </div>
+  `;
+
+  card.querySelector(".request-confirm").addEventListener("click", async () => {
+    if (!isDemoSession) {
+      await supabase.from("appointments").update({ status: "confirmed", reschedule_status: null }).eq("id", apt.id);
+    }
+    apt.status = "confirmed";
+    apt.reschedule_status = null;
+    saveDemoAppointments();
+    refreshCitasViews();
+  });
+
+  const proposalForm = card.querySelector(".request-proposal-form");
+  card.querySelector(".request-propose").addEventListener("click", () => {
+    proposalForm.hidden = !proposalForm.hidden;
+  });
+  card.querySelector(".request-proposal-save").addEventListener("click", async () => {
+    const proposedDate = card.querySelector(".request-date").value;
+    const proposedTime = card.querySelector(".request-time").value.trim();
+    if (!proposedDate || !proposedTime) return;
+    if (!isDemoSession) {
+      await supabase.from("appointments").update({
+        proposed_date: proposedDate,
+        proposed_time: proposedTime,
+        proposed_by: "vet",
+        reschedule_status: "pending",
+      }).eq("id", apt.id);
+    }
+    Object.assign(apt, {
+      proposed_date: proposedDate,
+      proposed_time: proposedTime,
+      proposed_by: "vet",
+      reschedule_status: "pending",
+    });
+    saveDemoAppointments();
+    refreshCitasViews();
+  });
+
+  const rejectForm = card.querySelector(".portal-request-reject-form");
+  card.querySelector(".request-reject-toggle").addEventListener("click", () => {
+    rejectForm.hidden = !rejectForm.hidden;
+  });
+  card.querySelector(".request-reject-save").addEventListener("click", async () => {
+    const reason = card.querySelector(".request-reject-reason").value;
+    if (!reason) return;
+    if (!isDemoSession) {
+      await supabase.from("appointments").update({ status: "cancelled" }).eq("id", apt.id);
+    }
+    apt.status = "cancelled";
+    apt.rejection_reason = reason;
+    saveDemoAppointments();
+    refreshCitasViews();
+  });
+
+  return card;
+}
+
+function renderSolicitudes() {
+  if (!solicitudesList || isStore() || isCaretaker()) return;
+  const pending = allAppointments.filter((appointment) => appointment.status === "pending");
+  const proposed = allAppointments.filter((appointment) => appointment.reschedule_status === "pending");
+  const filter = solicitudesFilter.value;
+  const requests = filter === "pending"
+    ? pending
+    : filter === "reschedule"
+      ? proposed
+      : Array.from(new Map([...pending, ...proposed].map((appointment) => [appointment.id, appointment])).values());
+  solicitudesList.innerHTML = "";
+  solicitudesEmpty.hidden = requests.length > 0;
+  requests.forEach((appointment) => solicitudesList.appendChild(buildRequestCard(appointment)));
+  const count = new Set([...pending, ...proposed].map((appointment) => appointment.id)).size;
+  solicitudesTabCount.textContent = String(count);
+  solicitudesTabCount.hidden = count === 0;
+}
+
+solicitudesFilter.addEventListener("change", renderSolicitudes);
+
 function renderCitas(appointments) {
   citasList.innerHTML = "";
-  citasEmpty.hidden = appointments.length > 0;
-  appointments.forEach((apt) => citasList.appendChild(buildAppointmentCard(apt)));
+  const visibleAppointments = isStore() || isCaretaker()
+    ? appointments
+    : appointments.filter((appointment) => !["pending", "cancelled"].includes(appointment.status));
+  citasEmpty.hidden = visibleAppointments.length > 0;
+  visibleAppointments.forEach((apt) => citasList.appendChild(buildAppointmentCard(apt)));
 }
 
 function renderPendingCitas() {
   const pending = allAppointments.filter((a) => a.status === "pending");
-  citasPendingSection.hidden = pending.length === 0;
+  citasPendingSection.hidden = true;
   citasPendingList.innerHTML = "";
-  pending.forEach((apt) => citasPendingList.appendChild(buildAppointmentCard(apt)));
+  if (isStore() || isCaretaker()) {
+    citasPendingSection.hidden = pending.length === 0;
+    pending.forEach((apt) => citasPendingList.appendChild(buildAppointmentCard(apt)));
+  }
+  renderSolicitudes();
 }
 
 function formatMoney(value) {
@@ -1818,7 +2087,10 @@ let allPatients = [];
 
 function renderPacientes(appointments, linkedRecords = []) {
   const byPet = new Map();
-  appointments.forEach((apt) => {
+  const patientAppointments = isStore() || isCaretaker()
+    ? appointments
+    : appointments.filter((appointment) => !["pending", "cancelled"].includes(appointment.status));
+  patientAppointments.forEach((apt) => {
     const key = apt.pet_id || apt.pet_name;
     if (!key) return;
     if (!byPet.has(key)) {
@@ -1858,6 +2130,7 @@ function renderPatientCards(patients) {
       <img src="${p.pet_image || ""}" alt="" onerror="this.style.visibility='hidden'" />
       <strong>${p.pet_name || "Mascota"}</strong>
       <span>${p.pet_breed || ""}</span>
+      <span>${p.owner_name ? `Responsable: ${p.owner_name}` : "Responsable sin registrar"}</span>
       <span>${p.visits} cita${p.visits > 1 ? "s" : ""}</span>
     `;
     card.addEventListener("click", () => showPatientDetail(p.pet_id || p.pet_name, p));
@@ -1898,7 +2171,9 @@ pacientesSearch.addEventListener("input", () => {
     return;
   }
   const filtered = allPatients.filter(
-    (p) => (p.pet_name || "").toLowerCase().includes(q) || (p.pet_breed || "").toLowerCase().includes(q)
+    (p) => [p.pet_name, p.pet_breed, p.owner_name, p.owner_phone]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(q))
   );
   renderPatientCards(filtered);
 });
@@ -2254,17 +2529,31 @@ function createRxSection(apt) {
       .filter((m) => m.name);
     if (medications.length === 0) return;
 
-    const { data: inserted } = await supabase
-      .from("prescriptions")
-      .insert({
+    let inserted = null;
+    if (isDemoSession) {
+      inserted = {
+        id: `demo_rx_${Date.now()}`,
         appointment_id: apt.id,
         vet_id: currentVetId,
         medications,
         notes: notesInput.value.trim() || null,
         recommendations: recommendationsInput.value.trim() || null,
-      })
-      .select()
-      .single();
+        created_at: new Date().toISOString(),
+      };
+    } else {
+      const result = await supabase
+        .from("prescriptions")
+        .insert({
+          appointment_id: apt.id,
+          vet_id: currentVetId,
+          medications,
+          notes: notesInput.value.trim() || null,
+          recommendations: recommendationsInput.value.trim() || null,
+        })
+        .select()
+        .single();
+      inserted = result.data;
+    }
 
     if (inserted) {
       rxState.unshift(inserted);
@@ -2293,6 +2582,10 @@ function renderExamList(container, exams) {
     `;
     const viewBtn = item.querySelector(".portal-exam-view");
     viewBtn.addEventListener("click", async () => {
+      if (exam.local_url) {
+        window.open(exam.local_url, "_blank");
+        return;
+      }
       viewBtn.textContent = "Cargando...";
       const { data } = await supabase.storage.from("medical-exams").createSignedUrl(exam.file_path, 60);
       viewBtn.textContent = "Ver";
@@ -2330,20 +2623,32 @@ function createExamSection(apt) {
     const uploadingText = uploadLabel.firstChild;
     uploadingText.textContent = "Subiendo...";
 
-    const path = `${currentVetId}/${apt.id}/${Date.now()}_${file.name}`;
-    const { error: uploadErr } = await supabase.storage
-      .from("medical-exams")
-      .upload(path, file, { contentType: file.type });
+    if (isDemoSession) {
+      examState.unshift({
+        id: `demo_exam_${Date.now()}`,
+        appointment_id: apt.id,
+        vet_id: currentVetId,
+        file_name: file.name,
+        mime_type: file.type,
+        local_url: URL.createObjectURL(file),
+      });
+      renderExamList(listEl, examState);
+    } else {
+      const path = `${currentVetId}/${apt.id}/${Date.now()}_${file.name}`;
+      const { error: uploadErr } = await supabase.storage
+        .from("medical-exams")
+        .upload(path, file, { contentType: file.type });
 
-    if (!uploadErr) {
-      const { data: inserted } = await supabase
-        .from("medical_exams")
-        .insert({ appointment_id: apt.id, vet_id: currentVetId, file_path: path, file_name: file.name, mime_type: file.type })
-        .select()
-        .single();
-      if (inserted) {
-        examState.unshift(inserted);
-        renderExamList(listEl, examState);
+      if (!uploadErr) {
+        const { data: inserted } = await supabase
+          .from("medical_exams")
+          .insert({ appointment_id: apt.id, vet_id: currentVetId, file_path: path, file_name: file.name, mime_type: file.type })
+          .select()
+          .single();
+        if (inserted) {
+          examState.unshift(inserted);
+          renderExamList(listEl, examState);
+        }
       }
     }
     uploadingText.textContent = "Subir examen";
@@ -2398,16 +2703,26 @@ function renderVaccineList(container, vaccines) {
 
 async function showPatientDetail(key, petInfo) {
   const visits = allAppointments
-    .filter((a) => (a.pet_id || a.pet_name) === key)
+    .filter((a) => (a.pet_id || a.pet_name) === key && !["pending", "cancelled"].includes(a.status))
     .slice()
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 
   const visitIds = visits.map((v) => v.id);
-  const [{ data: rxData }, { data: examData }, { data: recordData }] = await Promise.all([
-    supabase.from("prescriptions").select("*").in("appointment_id", visitIds).order("created_at", { ascending: false }),
-    supabase.from("medical_exams").select("*").in("appointment_id", visitIds).order("uploaded_at", { ascending: false }),
-    supabase.from("patient_records").select("*").eq("vet_id", currentVetId).eq("pet_key", key).maybeSingle(),
-  ]);
+  let rxData = [];
+  let examData = [];
+  let recordData = null;
+  if (isDemoSession) {
+    recordData = loadDemoPatientRecords()[key] || {};
+  } else {
+    const [rxResult, examResult, recordResult] = await Promise.all([
+      supabase.from("prescriptions").select("*").in("appointment_id", visitIds).order("created_at", { ascending: false }),
+      supabase.from("medical_exams").select("*").in("appointment_id", visitIds).order("uploaded_at", { ascending: false }),
+      supabase.from("patient_records").select("*").eq("vet_id", currentVetId).eq("pet_key", key).maybeSingle(),
+    ]);
+    rxData = rxResult.data || [];
+    examData = examResult.data || [];
+    recordData = recordResult.data || {};
+  }
   const rxByApt = groupBy(rxData || [], "appointment_id");
   const examByApt = groupBy(examData || [], "appointment_id");
   const record = recordData || {};
@@ -2535,6 +2850,9 @@ async function showPatientDetail(key, petInfo) {
   const idCardEl = patientDetailBody.querySelector("#pet-id-card");
 
   function renderIdCard() {
+    const responsibleName = record.owner_name || petInfo.owner_name || visits[0]?.owner_name || "Sin registrar";
+    const responsiblePhone = record.owner_phone || petInfo.owner_phone || visits[0]?.owner_phone || "Sin teléfono";
+    const alerts = [...(record.clinical_alerts || []), ...(record.allergies || []).map((allergy) => `Alergia: ${allergy}`)];
     const rows = [
       ["🐾", "Especie", record.species],
       ["🏷️", "Raza", record.breed || petInfo.pet_breed],
@@ -2560,6 +2878,11 @@ async function showPatientDetail(key, petInfo) {
           <span>Carnet de identificación</span>
         </div>
       </div>
+      <div class="portal-patient-responsible">
+        <div><span>Responsable</span><strong>${responsibleName}</strong></div>
+        <div><span>Contacto</span><strong>${responsiblePhone}</strong></div>
+      </div>
+      ${alerts.length ? `<div class="portal-clinical-alert"><strong>Alertas clínicas</strong><span>${alerts.join(" · ")}</span></div>` : ""}
       <div class="portal-id-card-grid">
         ${rows
           .map(
@@ -2607,11 +2930,17 @@ async function showPatientDetail(key, petInfo) {
       dewormed: recordFields.dewormed.checked,
       updated_at: new Date().toISOString(),
     };
-    const { data: saved } = await supabase
-      .from("patient_records")
-      .upsert(patch, { onConflict: "vet_id,pet_key" })
-      .select()
-      .single();
+    let saved = null;
+    if (isDemoSession) {
+      saved = saveDemoPatientRecord(key, patch);
+    } else {
+      const result = await supabase
+        .from("patient_records")
+        .upsert(patch, { onConflict: "vet_id,pet_key" })
+        .select()
+        .single();
+      saved = result.data;
+    }
     if (saved) {
       Object.assign(record, saved);
       renderIdCard();
@@ -2648,9 +2977,13 @@ async function showPatientDetail(key, petInfo) {
       },
     ];
 
-    await supabase
-      .from("patient_records")
-      .upsert({ vet_id: currentVetId, pet_key: key, vaccines }, { onConflict: "vet_id,pet_key" });
+    if (isDemoSession) {
+      saveDemoPatientRecord(key, { ...record, vaccines });
+    } else {
+      await supabase
+        .from("patient_records")
+        .upsert({ vet_id: currentVetId, pet_key: key, vaccines }, { onConflict: "vet_id,pet_key" });
+    }
 
     renderVaccineList(vaccineList, vaccines);
     nameInput.value = "";
@@ -2722,8 +3055,11 @@ async function showPatientDetail(key, petInfo) {
     const saveBtn = visit.querySelector(".portal-visit-save:not(.vitals-save)");
     const savedLabel = visit.querySelector(".portal-success:not(.vitals-success)");
     saveBtn.addEventListener("click", async () => {
-      await supabase.from("appointments").update({ notes: textarea.value.trim() }).eq("id", apt.id);
+      if (!isDemoSession) {
+        await supabase.from("appointments").update({ notes: textarea.value.trim() }).eq("id", apt.id);
+      }
       apt.notes = textarea.value.trim();
+      saveDemoAppointments();
       savedLabel.hidden = false;
       setTimeout(() => (savedLabel.hidden = true), 2000);
     });
@@ -2736,11 +3072,14 @@ async function showPatientDetail(key, petInfo) {
       const temperature_c = toNumOrNull(visit.querySelector(".vital-temp").value);
       const heart_rate = toNumOrNull(visit.querySelector(".vital-hr").value);
       const respiratory_rate = toNumOrNull(visit.querySelector(".vital-rr").value);
-      await supabase
-        .from("appointments")
-        .update({ weight_kg, temperature_c, heart_rate, respiratory_rate })
-        .eq("id", apt.id);
+      if (!isDemoSession) {
+        await supabase
+          .from("appointments")
+          .update({ weight_kg, temperature_c, heart_rate, respiratory_rate })
+          .eq("id", apt.id);
+      }
       Object.assign(apt, { weight_kg, temperature_c, heart_rate, respiratory_rate });
+      saveDemoAppointments();
       vitalsSavedLabel.hidden = false;
       setTimeout(() => (vitalsSavedLabel.hidden = true), 2000);
     });
@@ -2860,20 +3199,13 @@ function loadDemoTabData(providerType) {
     return;
   }
 
-  allAppointments = buildDemoAppointments(providerType);
+  allAppointments = loadDemoAppointments(providerType);
   storeOrders = [];
   storeProducts = [];
   careSessions = [];
   careClients = [];
   linkedPatientRecords = supportsMedicalRecords()
-    ? [
-        {
-          pet_key: "demo_pet_luna",
-          pet_name: "Luna",
-          breed: "Golden retriever",
-          pet_image_url: "../assets/pet-luna-golden-selfie.png",
-        },
-      ]
+    ? Object.values(loadDemoPatientRecords())
     : [];
   selectedDateFilter = null;
   if (allAppointments[0]?.date) {
@@ -2909,10 +3241,11 @@ function renderDashboard() {
   const todayKey = toDateKey(now.getFullYear(), now.getMonth(), now.getDate());
   const monthPrefix = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}`;
 
-  const todaysAppointments = allAppointments.filter((a) => a.date === todayKey);
+  const scheduledAppointments = allAppointments.filter((appointment) => !["pending", "cancelled"].includes(appointment.status));
+  const todaysAppointments = scheduledAppointments.filter((a) => a.date === todayKey);
   const pendingCount = allAppointments.filter((a) => a.status === "pending").length;
-  const monthCount = allAppointments.filter((a) => (a.date || "").startsWith(monthPrefix)).length;
-  const patientKeys = new Set(allAppointments.map((a) => a.pet_id || a.pet_name).filter(Boolean));
+  const monthCount = scheduledAppointments.filter((a) => (a.date || "").startsWith(monthPrefix)).length;
+  const patientKeys = new Set(scheduledAppointments.map((a) => a.pet_id || a.pet_name).filter(Boolean));
 
   statToday.textContent = todaysAppointments.length;
   statPending.textContent = pendingCount;
@@ -2927,8 +3260,14 @@ function renderDashboard() {
 }
 
 (async function init() {
-  const ctx = await requireProviderSession();
-  if (ctx) await loadTabData(ctx);
+  const demoEmail = sessionStorage.getItem(DEMO_SESSION_KEY) || "";
+  const demoProfile = DEMO_ACCOUNTS[demoEmail.toLowerCase()];
+  if (demoProfile) {
+    loginDemoProvider(demoProfile, demoEmail);
+  } else {
+    const ctx = await requireProviderSession();
+    if (ctx) await loadTabData(ctx);
+  }
 
   supabase.auth.onAuthStateChange((event) => {
     if (event === "SIGNED_OUT") showLogin();

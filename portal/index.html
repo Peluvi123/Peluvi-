@@ -39,7 +39,13 @@
               </label>
               <label class="portal-field">
                 <span>Contraseña</span>
-                <input type="password" id="login-password" required autocomplete="current-password" />
+                <span class="portal-password-wrap">
+                  <input type="password" id="login-password" required autocomplete="current-password" />
+                  <button class="portal-password-toggle" type="button" data-password-target="login-password" aria-label="Mostrar contraseña" aria-pressed="false">
+                    <svg class="eye-show" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.75"/></svg>
+                    <svg class="eye-hide" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 6.15A9.8 9.8 0 0 1 12 6c6 0 9.5 6 9.5 6a15 15 0 0 1-2.1 2.8M6.2 6.2C3.8 8 2.5 12 2.5 12s3.5 6 9.5 6a9.6 9.6 0 0 0 3.1-.5M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+                  </button>
+                </span>
               </label>
               <button type="submit" id="login-submit">Ingresar</button>
               <p class="portal-error" id="login-error" hidden></p>
@@ -65,7 +71,13 @@
               </label>
               <label class="portal-field">
                 <span>Contraseña</span>
-                <input type="password" id="signup-password" required minlength="6" autocomplete="new-password" />
+                <span class="portal-password-wrap">
+                  <input type="password" id="signup-password" required minlength="6" autocomplete="new-password" />
+                  <button class="portal-password-toggle" type="button" data-password-target="signup-password" aria-label="Mostrar contraseña" aria-pressed="false">
+                    <svg class="eye-show" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.75"/></svg>
+                    <svg class="eye-hide" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 6.15A9.8 9.8 0 0 1 12 6c6 0 9.5 6 9.5 6a15 15 0 0 1-2.1 2.8M6.2 6.2C3.8 8 2.5 12 2.5 12s3.5 6 9.5 6a9.6 9.6 0 0 0 3.1-.5M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+                  </button>
+                </span>
               </label>
               <label class="portal-field">
                 <span>Dirección</span>
@@ -96,11 +108,13 @@
 
           <nav class="portal-tabs" role="tablist">
             <button class="portal-tab is-active" data-tab="inicio" type="button">Inicio</button>
-            <button class="portal-tab" data-tab="citas" data-care-category="paseo" type="button" id="citas-tab-btn">Citas</button>
+            <button class="portal-tab" data-tab="solicitudes" type="button" id="solicitudes-tab-btn">Solicitudes <span class="portal-tab-count" id="solicitudes-tab-count" hidden>0</span></button>
+            <button class="portal-tab" data-tab="citas" data-care-category="paseo" type="button" id="citas-tab-btn">Agenda</button>
             <button class="portal-tab" data-tab="citas" data-care-category="guarderia" type="button" id="care-guarderia-tab-btn" hidden>Guarderías</button>
             <button class="portal-tab" data-tab="citas" data-care-category="colegio" type="button" id="care-escuela-tab-btn" hidden>Escuelas</button>
             <button class="portal-tab" data-tab="pacientes" type="button" id="pacientes-tab-btn">Pacientes</button>
             <button class="portal-tab" data-tab="clinica" type="button" id="clinica-tab-btn">Clínica</button>
+            <button class="portal-tab" data-tab="suscripcion" type="button">Suscripción</button>
           </nav>
 
           <div class="portal-panel" data-panel="inicio">
@@ -131,10 +145,26 @@
             <div id="today-list" class="portal-list"></div>
           </div>
 
+          <div class="portal-panel" data-panel="solicitudes" hidden>
+            <div class="portal-panel-head portal-requests-head">
+              <div>
+                <h2>Solicitudes</h2>
+                <p class="portal-muted">Responde nuevas reservas antes de incorporarlas a la agenda.</p>
+              </div>
+              <select id="solicitudes-filter" class="portal-status" aria-label="Filtrar solicitudes">
+                <option value="pending">Pendientes</option>
+                <option value="reschedule">Cambios propuestos</option>
+                <option value="all">Todas</option>
+              </select>
+            </div>
+            <div id="solicitudes-empty" class="portal-empty" hidden>No hay solicitudes con este estado.</div>
+            <div id="solicitudes-list" class="portal-requests-list"></div>
+          </div>
+
           <div class="portal-panel" data-panel="citas" hidden>
             <div class="portal-panel-head">
-              <h2 id="citas-panel-title">Citas</h2>
-              <p class="portal-muted" id="citas-panel-subtitle">Todas las citas agendadas contigo.</p>
+              <h2 id="citas-panel-title">Agenda</h2>
+              <p class="portal-muted" id="citas-panel-subtitle">Citas confirmadas y atenciones programadas.</p>
             </div>
 
             <div class="portal-pending-section" id="citas-pending-section" hidden>
@@ -308,10 +338,66 @@
               </aside>
             </div>
           </div>
+
+          <div class="portal-panel" data-panel="suscripcion" hidden>
+            <div class="portal-panel-head portal-subscription-head">
+              <div>
+                <span class="portal-eyebrow">Cuenta Peluvi</span>
+                <h2>Tu suscripción</h2>
+                <p class="portal-muted">Administra el acceso de tu veterinaria a la plataforma.</p>
+              </div>
+              <span class="portal-plan-status"><span aria-hidden="true"></span> Plan activo</span>
+            </div>
+
+            <div class="portal-subscription-layout">
+              <article class="portal-plan-card">
+                <div class="portal-plan-topline">
+                  <div>
+                    <span class="portal-muted">Plan actual</span>
+                    <h3>Profesional</h3>
+                  </div>
+                  <span class="portal-plan-chip">Veterinarias</span>
+                </div>
+                <p>Todo lo necesario para recibir solicitudes, organizar la agenda y mantener el historial clínico de tus pacientes.</p>
+                <div class="portal-plan-renewal">
+                  <span>Próxima renovación</span>
+                  <strong>3 de septiembre de 2026</strong>
+                </div>
+                <a class="portal-plan-support" href="mailto:soporte@peluvi.com?subject=Consulta%20sobre%20mi%20plan%20Peluvi">Hablar con Peluvi →</a>
+              </article>
+
+              <div class="portal-plan-details">
+                <article class="portal-plan-usage">
+                  <h3>Uso del plan</h3>
+                  <div class="portal-usage-row">
+                    <div><strong>1 de 1</strong><span>Sede activa</span></div>
+                    <div><strong>2 de 5</strong><span>Profesionales</span></div>
+                  </div>
+                </article>
+                <article class="portal-plan-includes">
+                  <h3>Incluido en tu plan</h3>
+                  <ul>
+                    <li>Solicitudes y agenda de citas</li>
+                    <li>Pacientes e historia clínica</li>
+                    <li>Vacunas, fórmulas y exámenes</li>
+                    <li>Perfil público y equipo médico</li>
+                  </ul>
+                </article>
+              </div>
+            </div>
+
+            <div class="portal-platform-note">
+              <span class="portal-platform-note-icon" aria-hidden="true">i</span>
+              <div>
+                <strong>Peluvi presta la plataforma.</strong>
+                <p>Los pagos por consultas o servicios se acuerdan directamente entre la veterinaria y el responsable de la mascota. Peluvi no cobra ni procesa esos pagos.</p>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
     </div>
 
-    <script type="module" src="portal.js?v=9"></script>
+    <script type="module" src="portal.js?v=11"></script>
   </body>
 </html>

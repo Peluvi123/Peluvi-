@@ -255,7 +255,7 @@ function sendJson(response, status, payload) {
   response.end(JSON.stringify(payload));
 }
 
-const GRAPH_API_VERSION = "v21.0";
+const GRAPH_API_VERSION = process.env.META_GRAPH_VERSION || "v26.0";
 const graphCache = new Map();
 const ADMIN_TOKEN_TTL_MS = 12 * 60 * 60 * 1000; // 12 horas
 
@@ -300,19 +300,21 @@ function requireAdminAuth(request) {
   return { ok: true };
 }
 
-async function callGraphApi(path, { ttlMs = 5 * 60 * 1000 } = {}) {
-  const cached = graphCache.get(path);
+async function callGraphApi(path, { ttlMs = 5 * 60 * 1000, accessToken, cacheNamespace = "default" } = {}) {
+  const token = accessToken || process.env.META_ACCESS_TOKEN;
+  if (!token) throw new Error("Falta configurar el token de Meta.");
+
+  const cacheKey = `${cacheNamespace}:${path}`;
+  const cached = graphCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) return cached.data;
 
-  const token = process.env.META_ACCESS_TOKEN;
-  const separator = path.includes("?") ? "&" : "?";
-  const resp = await fetch(
-    `https://graph.facebook.com/${GRAPH_API_VERSION}/${path}${separator}access_token=${token}`
-  );
+  const resp = await fetch(`https://graph.facebook.com/${GRAPH_API_VERSION}/${path}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   const data = await resp.json();
   if (!resp.ok) throw new Error(data.error?.message || "Error de Graph API");
 
-  graphCache.set(path, { data, expiresAt: Date.now() + ttlMs });
+  graphCache.set(cacheKey, { data, expiresAt: Date.now() + ttlMs });
   return data;
 }
 
@@ -327,12 +329,51 @@ async function handleAdminApi(pathname, request, response) {
   const igUserId = process.env.META_IG_USER_ID;
   const adAccountId = process.env.META_AD_ACCOUNT_ID;
   const pixelId = process.env.META_PIXEL_ID;
+  const socialToken = process.env.META_SOCIAL_ACCESS_TOKEN;
+  const marketingToken = process.env.META_MARKETING_ACCESS_TOKEN || process.env.META_ACCESS_TOKEN;
 
   try {
+    if (pathname === "/api/admin/session") {
+      sendJson(response, 200, { ok: true });
+      return;
+    }
+
+    if (pathname === "/api/admin/meta-status") {
+      if (!pageId) throw new Error("Falta configurar META_PAGE_ID.");
+      if (!igUserId) throw new Error("Falta configurar META_IG_USER_ID.");
+      if (!socialToken) throw new Error("Falta configurar META_SOCIAL_ACCESS_TOKEN.");
+
+      const [page, instagram] = await Promise.all([
+        callGraphApi(`${pageId}?fields=id,name,fan_count,followers_count,picture`, {
+          accessToken: socialToken,
+          cacheNamespace: "social",
+        }),
+        callGraphApi(`${igUserId}?fields=id,username,name,followers_count,media_count,profile_picture_url`, {
+          accessToken: socialToken,
+          cacheNamespace: "social",
+        }),
+      ]);
+
+      sendJson(response, 200, { connected: true, page, instagram });
+      return;
+    }
+
+    if (pathname === "/api/admin/ig-media") {
+      if (!igUserId) throw new Error("Falta configurar META_IG_USER_ID.");
+      if (!socialToken) throw new Error("Falta configurar META_SOCIAL_ACCESS_TOKEN.");
+      const data = await callGraphApi(
+        `${igUserId}/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&limit=6`,
+        { accessToken: socialToken, cacheNamespace: "social", ttlMs: 10 * 60 * 1000 }
+      );
+      sendJson(response, 200, data);
+      return;
+    }
+
     if (pathname === "/api/admin/page-insights") {
       if (!pageId) throw new Error("Falta configurar META_PAGE_ID.");
       const data = await callGraphApi(
-        `${pageId}/insights?metric=page_fans,page_impressions,page_engaged_users&period=day`
+        `${pageId}/insights?metric=page_fans,page_impressions,page_engaged_users&period=day`,
+        { accessToken: socialToken, cacheNamespace: "social" }
       );
       sendJson(response, 200, data);
       return;
@@ -341,7 +382,8 @@ async function handleAdminApi(pathname, request, response) {
     if (pathname === "/api/admin/ig-insights") {
       if (!igUserId) throw new Error("Falta configurar META_IG_USER_ID.");
       const data = await callGraphApi(
-        `${igUserId}/insights?metric=follower_count,reach,accounts_engaged&period=day`
+        `${igUserId}/insights?metric=follower_count,reach,accounts_engaged&period=day`,
+        { accessToken: socialToken, cacheNamespace: "social" }
       );
       sendJson(response, 200, data);
       return;
@@ -350,7 +392,8 @@ async function handleAdminApi(pathname, request, response) {
     if (pathname === "/api/admin/ads-insights") {
       if (!adAccountId) throw new Error("Falta configurar META_AD_ACCOUNT_ID.");
       const data = await callGraphApi(
-        `${adAccountId}/insights?fields=campaign_name,spend,impressions,reach,actions,cost_per_action_type&level=campaign&date_preset=last_30d`
+        `${adAccountId}/insights?fields=campaign_name,spend,impressions,reach,actions,cost_per_action_type&level=campaign&date_preset=last_30d`,
+        { accessToken: marketingToken, cacheNamespace: "marketing" }
       );
       sendJson(response, 200, data);
       return;
@@ -358,7 +401,10 @@ async function handleAdminApi(pathname, request, response) {
 
     if (pathname === "/api/admin/pixel-summary") {
       if (!pixelId) throw new Error("Falta configurar META_PIXEL_ID.");
-      const data = await callGraphApi(`${pixelId}?fields=name,last_fired_time`);
+      const data = await callGraphApi(`${pixelId}?fields=name,last_fired_time`, {
+        accessToken: marketingToken,
+        cacheNamespace: "marketing",
+      });
       sendJson(response, 200, data);
       return;
     }

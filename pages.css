@@ -205,8 +205,8 @@
 }
 
 .services-page .page-hero-grid {
-  grid-template-columns: minmax(0, 0.88fr) minmax(460px, 1.12fr);
-  gap: clamp(44px, 5vw, 76px);
+  grid-template-columns: minmax(0, 0.78fr) minmax(540px, 1.22fr);
+  gap: clamp(34px, 4vw, 58px);
 }
 
 .services-page .page-hero h1 span {
@@ -215,9 +215,9 @@
 
 .services-page .page-hero-media {
   min-height: 0;
-  aspect-ratio: 1448 / 1024;
-  padding: 12px;
-  overflow: visible;
+  aspect-ratio: 4 / 3;
+  padding: 0;
+  overflow: hidden;
   border: 1px solid rgba(143, 83, 255, 0.16);
   border-radius: 36px;
   background:
@@ -235,19 +235,20 @@
   position: relative;
   inset: auto;
   display: block;
-  object-fit: contain;
-  border-radius: 26px;
+  object-fit: cover;
+  border-radius: 34px;
+  transform: scale(1.012);
 }
 
 .services-page .page-hero-media::after {
-  inset: 12px;
-  border-radius: 26px;
+  inset: 0;
+  border-radius: 34px;
   background: linear-gradient(180deg, transparent 64%, rgba(42, 10, 84, 0.1));
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.42);
 }
 
 .services-page .page-hero-media:hover img {
-  transform: none;
+  transform: scale(1.025);
 }
 
 .services-page .hero-media-badge {
@@ -268,6 +269,17 @@
   aspect-ratio: 4 / 3;
   border-radius: 34px;
   transform: none;
+}
+
+.business-page .page-hero-grid {
+  grid-template-columns: minmax(0, 0.86fr) minmax(550px, 1.14fr);
+  gap: clamp(30px, 3.5vw, 52px);
+  padding: clamp(34px, 4vw, 54px);
+}
+
+.business-page .page-hero-media {
+  width: 100%;
+  box-shadow: 0 38px 90px rgba(74, 28, 132, 0.2);
 }
 
 .about-page .page-hero-media img,
@@ -404,6 +416,42 @@
   width: 66px;
   height: 66px;
   object-fit: contain;
+}
+
+.value-card {
+  min-height: 270px;
+  padding: 30px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(178, 120, 255, 0.13), transparent 11rem),
+    rgba(255, 255, 255, 0.94);
+}
+
+.value-card .detail-card-icon {
+  width: 68px;
+  height: 68px;
+  margin-bottom: 28px;
+  color: #7c3feb;
+  background: linear-gradient(145deg, #f7f0ff, #eee1ff);
+  box-shadow: inset 0 0 0 1px rgba(124, 63, 235, 0.12), 0 12px 30px rgba(100, 48, 175, 0.1);
+}
+
+.value-card .detail-card-icon svg {
+  width: 36px;
+  height: 36px;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.value-number {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  color: rgba(90, 50, 138, 0.25);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
 }
 
 .detail-card h2,
@@ -606,6 +654,10 @@
     grid-template-columns: 1fr;
   }
 
+  .business-page .page-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
   .services-page .page-hero-media {
     width: min(720px, 100%);
     min-height: 0;
@@ -667,7 +719,7 @@
   .services-page .page-hero-media {
     min-height: 0;
     aspect-ratio: 4 / 3;
-    padding: 8px;
+    padding: 0;
     border-radius: 24px;
     box-shadow:
       0 22px 50px rgba(74, 28, 132, 0.16),
@@ -676,11 +728,11 @@
 
   .services-page .page-hero-media img,
   .services-page .page-hero-media::after {
-    border-radius: 17px;
+    border-radius: 23px;
   }
 
   .services-page .page-hero-media::after {
-    inset: 8px;
+    inset: 0;
   }
 
   .services-page .hero-media-badge {

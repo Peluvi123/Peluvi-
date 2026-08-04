@@ -33,7 +33,7 @@ async function trySession() {
   }
 
   try {
-    await fetchAdminApi("pixel-summary", token);
+    await fetchAdminApi("session", token);
     showDashboard();
     loadAllPanels(token);
   } catch (err) {
@@ -111,11 +111,13 @@ function formatCurrency(value) {
   return new Intl.NumberFormat("es-CO", { style: "currency", currency: "USD" }).format(Number(value));
 }
 
-function metricValue(insightData, metricName) {
-  const entry = insightData?.data?.find((item) => item.name === metricName);
-  const values = entry?.values;
-  if (!values || values.length === 0) return null;
-  return values[values.length - 1].value;
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 async function loadResumen(token) {
@@ -160,21 +162,50 @@ async function loadResumen(token) {
 
 async function loadRedes(token) {
   const errorBox = document.getElementById("redes-error");
+  const status = document.getElementById("meta-connection-status");
   errorBox.hidden = true;
   try {
-    const [page, ig] = await Promise.all([
-      fetchAdminApi("page-insights", token),
-      fetchAdminApi("ig-insights", token),
+    const [connection, media] = await Promise.all([
+      fetchAdminApi("meta-status", token),
+      fetchAdminApi("ig-media", token),
     ]);
 
-    document.getElementById("page-fans").textContent = formatNumber(metricValue(page, "page_fans"));
-    document.getElementById("page-impressions").textContent = formatNumber(metricValue(page, "page_impressions"));
-    document.getElementById("page-engaged").textContent = formatNumber(metricValue(page, "page_engaged_users"));
+    status.classList.add("is-connected");
+    status.innerHTML = "<i></i> Meta conectado";
 
-    document.getElementById("ig-followers").textContent = formatNumber(metricValue(ig, "follower_count"));
-    document.getElementById("ig-reach").textContent = formatNumber(metricValue(ig, "reach"));
-    document.getElementById("ig-engaged").textContent = formatNumber(metricValue(ig, "accounts_engaged"));
+    document.getElementById("page-name").textContent = connection.page?.name || "Página Paluvi";
+    document.getElementById("page-followers").textContent = formatNumber(connection.page?.followers_count);
+    document.getElementById("page-likes").textContent = formatNumber(connection.page?.fan_count);
+    if (connection.page?.picture?.data?.url) {
+      document.getElementById("page-avatar").innerHTML = `<img src="${escapeHtml(connection.page.picture.data.url)}" alt="" />`;
+    }
+
+    document.getElementById("ig-username").textContent = `@${connection.instagram?.username || "peluvi.pet"}`;
+    document.getElementById("ig-followers").textContent = formatNumber(connection.instagram?.followers_count);
+    document.getElementById("ig-media-count").textContent = formatNumber(connection.instagram?.media_count);
+    if (connection.instagram?.profile_picture_url) {
+      document.getElementById("ig-avatar").innerHTML = `<img src="${escapeHtml(connection.instagram.profile_picture_url)}" alt="" />`;
+    }
+
+    const posts = Array.isArray(media?.data) ? media.data : [];
+    const postsGrid = document.getElementById("ig-posts");
+    const postsEmpty = document.getElementById("ig-posts-empty");
+    postsGrid.innerHTML = posts
+      .map((post) => {
+        const image = post.media_type === "VIDEO" ? post.thumbnail_url : post.media_url;
+        const date = post.timestamp ? new Date(post.timestamp).toLocaleDateString("es-CO", { day: "numeric", month: "short" }) : "";
+        return `<a class="admin-post-card" href="${escapeHtml(post.permalink || "#")}" target="_blank" rel="noreferrer">
+          ${image ? `<img src="${escapeHtml(image)}" alt="Publicación de Instagram" loading="lazy" />` : ""}
+          <span>${escapeHtml(date)}</span>
+          <p>${escapeHtml((post.caption || "Publicación de Peluvi").slice(0, 100))}</p>
+        </a>`;
+      })
+      .join("");
+    postsEmpty.hidden = posts.length > 0;
   } catch (err) {
+    status.classList.remove("is-connected");
+    status.classList.add("is-error");
+    status.innerHTML = "<i></i> Requiere configuración";
     errorBox.textContent = err.message;
     errorBox.hidden = false;
   }
