@@ -364,7 +364,7 @@ async function handleAdminApi(pathname, request, response) {
           cacheNamespace: "social",
         }),
         callGraphApi(`${igUserId}?fields=id,username,name,followers_count,media_count,profile_picture_url`, {
-          accessToken: pageAccessToken,
+          accessToken: socialToken,
           cacheNamespace: "social",
         }),
       ]);
@@ -377,10 +377,9 @@ async function handleAdminApi(pathname, request, response) {
       if (!pageId) throw new Error("Falta configurar META_PAGE_ID.");
       if (!igUserId) throw new Error("Falta configurar META_IG_USER_ID.");
       if (!socialToken) throw new Error("Falta configurar META_SOCIAL_ACCESS_TOKEN.");
-      const pageAccessToken = await getMetaPageAccessToken(pageId, socialToken);
       const data = await callGraphApi(
         `${igUserId}/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&limit=6`,
-        { accessToken: pageAccessToken, cacheNamespace: "social", ttlMs: 10 * 60 * 1000 }
+        { accessToken: socialToken, cacheNamespace: "social", ttlMs: 10 * 60 * 1000 }
       );
       sendJson(response, 200, data);
       return;
