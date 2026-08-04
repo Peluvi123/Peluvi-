@@ -90,15 +90,191 @@ document.querySelectorAll(".portal-tab").forEach((btn) => {
   });
 });
 
-async function fetchAdminApi(path, token) {
+async function fetchAdminApi(path, token, options = {}) {
   const response = await fetch(`/api/admin/${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    ...options,
+    headers: { Authorization: `Bearer ${token}`, ...(options.headers || {}) },
   });
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "No se pudo cargar la información.");
   }
   return data;
+}
+
+const socialState = { items: [], filter: "all", capabilities: null };
+
+function getSocialFormPayload() {
+  const mediaUrls = document.getElementById("social-media-urls").value
+    .split(/\n|,/).map((url) => url.trim()).filter(Boolean);
+  const scheduledValue = document.getElementById("social-scheduled-at").value;
+  return {
+    platform: document.querySelector('input[name="platform"]:checked').value,
+    mediaType: document.getElementById("social-media-type").value,
+    caption: document.getElementById("social-caption").value,
+    mediaUrls,
+    scheduledAt: scheduledValue ? new Date(scheduledValue).toISOString() : null,
+  };
+}
+
+function setReadiness(id, ready, readyText, missingText) {
+  const row = document.getElementById(id);
+  row.classList.toggle("is-ready", ready);
+  row.classList.toggle("is-missing", !ready);
+  row.querySelector("b").textContent = ready ? readyText : missingText;
+}
+
+async function loadSocialCapabilities(token) {
+  const banner = document.getElementById("social-capability-banner");
+  const capabilities = await fetchAdminApi("social-capabilities", token);
+  socialState.capabilities = capabilities;
+  setReadiness("ready-instagram", capabilities.canPublishInstagram, "Listo", "Falta permiso");
+  setReadiness("ready-facebook", capabilities.canPublishFacebook, "Listo", "Falta permiso");
+  setReadiness("ready-storage", capabilities.persistentStorage, "Persistente", "Modo temporal");
+  setReadiness("ready-scheduler", capabilities.schedulerConfigured, "Protegido", "Sin cron");
+  const missing = [];
+  if (!capabilities.canPublishInstagram) missing.push("instagram_content_publish");
+  if (!capabilities.canPublishFacebook) missing.push("pages_manage_posts");
+  if (!capabilities.persistentStorage) missing.push("Upstash Redis para conservar agenda y borradores");
+  if (!capabilities.mediaStorage) missing.push("Vercel Blob para subir archivos");
+  if (!capabilities.schedulerConfigured) missing.push("CRON_SECRET y un cron para ejecutar la agenda");
+  if (missing.length) {
+    banner.classList.add("is-warning");
+    banner.innerHTML = `<strong>El centro está operativo con límites</strong><span>Falta: ${escapeHtml(missing.join(" · "))}</span>`;
+  } else {
+    banner.classList.remove("is-warning");
+    banner.innerHTML = "<strong>Peluvi Social está listo</strong><span>Publicación y agenda persistente habilitadas.</span>";
+  }
+  const uploadLabel = document.getElementById("social-upload-label");
+  uploadLabel.classList.toggle("is-disabled", !capabilities.mediaStorage);
+  document.getElementById("social-file-upload").disabled = !capabilities.mediaStorage;
+}
+
+function socialStatusLabel(status) {
+  return ({ draft:"Borrador", scheduled:"Programado", processing:"Procesando", published:"Publicado", failed:"Error" })[status] || status;
+}
+
+function renderSocialContent() {
+  const list = document.getElementById("social-content-list");
+  const empty = document.getElementById("social-content-empty");
+  const filtered = socialState.filter === "all" ? socialState.items : socialState.items.filter((item) => item.status === socialState.filter);
+  empty.hidden = filtered.length > 0;
+  list.innerHTML = filtered.map((item) => {
+    const when = item.status === "scheduled" && item.scheduledAt
+      ? `Para ${new Date(item.scheduledAt).toLocaleString("es-CO")}`
+      : new Date(item.publishedAt || item.updatedAt || item.createdAt).toLocaleString("es-CO");
+    const thumb = item.mediaUrls?.[0]
+      ? `<img class="social-content-thumb" src="${escapeHtml(item.mediaUrls[0])}" alt="" />`
+      : `<div class="social-content-thumb"></div>`;
+    const canPublish = ["draft", "failed"].includes(item.status);
+    return `<article class="social-content-item" data-social-id="${item.id}">
+      ${thumb}<div class="social-content-copy"><strong>${escapeHtml(item.caption || "Publicación sin texto")}</strong>
+      <span><em class="social-status ${item.status}">${socialStatusLabel(item.status)}</em>${escapeHtml(item.platform)} · ${escapeHtml(when)}</span>
+      ${item.error ? `<span class="portal-error">${escapeHtml(item.error)}</span>` : ""}</div>
+      <div class="social-item-actions">${canPublish ? `<button data-social-action="publish" type="button">Publicar</button>` : ""}<button data-social-action="delete" type="button">Eliminar</button></div>
+    </article>`;
+  }).join("");
+}
+
+async function loadSocialContent(token) {
+  const data = await fetchAdminApi("social-content", token);
+  socialState.items = data.data || [];
+  renderSocialContent();
+}
+
+function updateSocialPreview() {
+  const payload = getSocialFormPayload();
+  const preview = document.getElementById("social-preview");
+  const media = payload.mediaUrls[0];
+  let html = `<div class="social-preview-empty"><span>＋</span><p>Agrega una URL pública para ver el contenido</p></div>`;
+  if (media) html = payload.mediaType === "reel"
+    ? `<video src="${escapeHtml(media)}" muted playsinline></video>`
+    : `<img src="${escapeHtml(media)}" alt="Vista previa" />`;
+  if (payload.caption) html += `<p class="social-preview-caption">${escapeHtml(payload.caption.slice(0, 180))}</p>`;
+  preview.innerHTML = html;
+  document.getElementById("caption-count").textContent = payload.caption.length;
+}
+
+async function createSocialContent(token, status) {
+  const errorBox = document.getElementById("composer-error");
+  const successBox = document.getElementById("composer-success");
+  errorBox.hidden = true; successBox.hidden = true;
+  try {
+    const item = await fetchAdminApi("social-content", token, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-social-options": JSON.stringify({ status }) },
+      body: JSON.stringify(getSocialFormPayload()),
+    });
+    let finalItem = item;
+    if (status === "publish") {
+      finalItem = await fetchAdminApi(`social-content/${item.id}/publish`, token, { method: "POST" });
+      if (finalItem.status === "failed") throw new Error(finalItem.error);
+    }
+    successBox.textContent = status === "draft" ? "Borrador guardado." : status === "scheduled" ? "Publicación programada." : "Publicación enviada a Meta correctamente.";
+    successBox.hidden = false;
+    document.getElementById("composer-state").textContent = socialStatusLabel(finalItem.status);
+    await loadSocialContent(token);
+  } catch (error) {
+    errorBox.textContent = error.message;
+    errorBox.hidden = false;
+    await loadSocialContent(token).catch(() => {});
+  }
+}
+
+function setupSocialControls(token) {
+  const caption = document.getElementById("social-caption");
+  const mediaUrls = document.getElementById("social-media-urls");
+  const mediaType = document.getElementById("social-media-type");
+  [caption, mediaUrls, mediaType].forEach((field) => field.addEventListener("input", updateSocialPreview));
+  document.querySelectorAll('input[name="platform"]').forEach((field) => field.addEventListener("change", updateSocialPreview));
+  document.getElementById("save-draft-btn").onclick = () => createSocialContent(token, "draft");
+  document.getElementById("schedule-btn").onclick = () => createSocialContent(token, "scheduled");
+  document.getElementById("publish-now-btn").onclick = () => createSocialContent(token, "publish");
+  document.getElementById("social-file-upload").onchange = async (event) => {
+    const files = [...event.target.files].slice(0, 10);
+    if (!files.length) return;
+    const label = document.getElementById("social-upload-label");
+    const errorBox = document.getElementById("composer-error");
+    label.querySelector("span").textContent = `Subiendo 0/${files.length}…`;
+    errorBox.hidden = true;
+    try {
+      const urls = [];
+      for (let index = 0; index < files.length; index += 1) {
+        const file = files[index];
+        const data = await fetchAdminApi("social-upload", token, {
+          method: "POST",
+          headers: { "Content-Type": file.type, "x-file-name": encodeURIComponent(file.name) },
+          body: file,
+        });
+        urls.push(data.url);
+        label.querySelector("span").textContent = `Subiendo ${index + 1}/${files.length}…`;
+      }
+      const field = document.getElementById("social-media-urls");
+      field.value = [...field.value.split(/\n|,/).map((v) => v.trim()).filter(Boolean), ...urls].join("\n");
+      if (urls.length > 1) document.getElementById("social-media-type").value = "carousel";
+      updateSocialPreview();
+    } catch (error) {
+      errorBox.textContent = error.message; errorBox.hidden = false;
+    } finally {
+      label.querySelector("span").textContent = "↑ Subir desde el equipo";
+      event.target.value = "";
+    }
+  };
+  document.querySelectorAll("[data-social-filter]").forEach((button) => button.onclick = () => {
+    document.querySelectorAll("[data-social-filter]").forEach((b) => b.classList.remove("is-active"));
+    button.classList.add("is-active"); socialState.filter = button.dataset.socialFilter; renderSocialContent();
+  });
+  document.getElementById("social-content-list").onclick = async (event) => {
+    const button = event.target.closest("[data-social-action]");
+    const item = event.target.closest("[data-social-id]");
+    if (!button || !item) return;
+    button.disabled = true;
+    try {
+      if (button.dataset.socialAction === "publish") await fetchAdminApi(`social-content/${item.dataset.socialId}/publish`, token, { method:"POST" });
+      else await fetchAdminApi(`social-content/${item.dataset.socialId}`, token, { method:"DELETE" });
+      await loadSocialContent(token);
+    } catch (error) { alert(error.message); button.disabled = false; }
+  };
 }
 
 function formatNumber(value) {
@@ -263,6 +439,10 @@ function loadAllPanels(token) {
   loadResumen(token);
   loadRedes(token);
   loadAnuncios(token);
+  setupSocialControls(token);
+  Promise.all([loadSocialCapabilities(token), loadSocialContent(token)]).catch((error) => {
+    const box = document.getElementById("composer-error"); box.textContent = error.message; box.hidden = false;
+  });
 }
 
 trySession();

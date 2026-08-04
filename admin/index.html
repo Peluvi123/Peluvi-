@@ -13,7 +13,7 @@
     />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../portal/portal.css" />
-    <link rel="stylesheet" href="admin.css?v=2" />
+    <link rel="stylesheet" href="admin.css?v=3" />
   </head>
   <body class="portal-body">
     <div class="portal-shell">
@@ -51,7 +51,7 @@
 
           <nav class="portal-tabs" role="tablist">
             <button class="portal-tab is-active" data-tab="resumen" type="button">Resumen</button>
-            <button class="portal-tab" data-tab="redes" type="button">Redes sociales</button>
+            <button class="portal-tab" data-tab="redes" type="button">Peluvi Social</button>
             <button class="portal-tab" data-tab="anuncios" type="button">Anuncios</button>
             <button class="portal-tab" data-tab="whatsapp" type="button">WhatsApp</button>
           </nav>
@@ -91,7 +91,67 @@
               </div>
               <span class="admin-connection-status" id="meta-connection-status"><i></i> Comprobando conexión</span>
             </div>
-            <div class="admin-social-grid">
+            <div class="social-capability-banner" id="social-capability-banner">
+              <strong>Preparando centro de publicaciones…</strong>
+              <span>Comprobando permisos y almacenamiento.</span>
+            </div>
+
+            <div class="social-command-grid">
+              <section class="social-composer">
+                <div class="social-section-title">
+                  <div><span class="social-kicker">Nueva publicación</span><h3>Crea una vez, publica donde quieras</h3></div>
+                  <span class="social-draft-state" id="composer-state">Sin guardar</span>
+                </div>
+                <form id="social-composer-form">
+                  <div class="social-choice-row" aria-label="Red social">
+                    <label><input type="radio" name="platform" value="instagram" checked /><span>◎ Instagram</span></label>
+                    <label><input type="radio" name="platform" value="facebook" /><span>f Facebook</span></label>
+                    <label><input type="radio" name="platform" value="both" /><span>✦ Ambas</span></label>
+                  </div>
+                  <label class="social-field">
+                    <span>Texto de la publicación</span>
+                    <textarea id="social-caption" maxlength="2200" rows="6" placeholder="Cuenta una historia que conecte con la comunidad Peluvi…"></textarea>
+                    <small><b id="caption-count">0</b>/2200 caracteres</small>
+                  </label>
+                  <div class="social-form-grid">
+                    <label class="social-field">
+                      <span>Formato</span>
+                      <select id="social-media-type">
+                        <option value="image">Imagen</option>
+                        <option value="carousel">Carrusel</option>
+                        <option value="reel">Reel / video</option>
+                        <option value="text">Solo texto (Facebook)</option>
+                      </select>
+                    </label>
+                    <label class="social-field">
+                      <span>Fecha y hora</span>
+                      <input id="social-scheduled-at" type="datetime-local" />
+                    </label>
+                  </div>
+                  <label class="social-field">
+                    <span>URL pública de imagen o video</span>
+                    <textarea id="social-media-urls" rows="2" placeholder="https://…"></textarea>
+                    <small id="media-help">Para carrusel, pega hasta 10 URLs separadas por salto de línea.</small>
+                  </label>
+                  <label class="social-upload" id="social-upload-label">
+                    <input id="social-file-upload" type="file" accept="image/*,video/*" multiple />
+                    <span>↑ Subir desde el equipo</span><small>Imágenes de hasta 4 MB. Los videos grandes pueden agregarse por URL.</small>
+                  </label>
+                  <div class="social-preview" id="social-preview">
+                    <div class="social-preview-empty"><span>＋</span><p>La vista previa aparecerá aquí</p></div>
+                  </div>
+                  <p class="portal-error" id="composer-error" hidden></p>
+                  <p class="social-success" id="composer-success" hidden></p>
+                  <div class="social-actions">
+                    <button class="social-btn is-ghost" type="button" id="save-draft-btn">Guardar borrador</button>
+                    <button class="social-btn is-soft" type="button" id="schedule-btn">Programar</button>
+                    <button class="social-btn is-primary" type="button" id="publish-now-btn">Publicar ahora →</button>
+                  </div>
+                </form>
+              </section>
+
+              <aside class="social-side">
+                <div class="admin-social-grid">
               <div class="admin-social-card">
                 <div class="admin-social-profile">
                   <div class="admin-social-avatar is-facebook" id="page-avatar">f</div>
@@ -112,7 +172,33 @@
                   <div class="portal-stat-card"><span id="ig-media-count">—</span><p>Publicaciones</p></div>
                 </div>
               </div>
+                </div>
+                <section class="social-readiness">
+                  <h3>Estado del sistema</h3>
+                  <ul>
+                    <li id="ready-instagram"><i></i><span>Publicar en Instagram</span><b>Revisando</b></li>
+                    <li id="ready-facebook"><i></i><span>Publicar en Facebook</span><b>Revisando</b></li>
+                    <li id="ready-storage"><i></i><span>Agenda persistente</span><b>Revisando</b></li>
+                    <li id="ready-scheduler"><i></i><span>Procesador automático</span><b>Revisando</b></li>
+                  </ul>
+                </section>
+              </aside>
             </div>
+
+            <section class="social-library-section">
+              <div class="admin-posts-head">
+                <div><span class="social-kicker">Flujo de contenido</span><h3>Agenda, borradores e historial</h3></div>
+                <div class="social-filter-row">
+                  <button class="is-active" data-social-filter="all" type="button">Todo</button>
+                  <button data-social-filter="draft" type="button">Borradores</button>
+                  <button data-social-filter="scheduled" type="button">Programado</button>
+                  <button data-social-filter="published" type="button">Publicado</button>
+                  <button data-social-filter="failed" type="button">Errores</button>
+                </div>
+              </div>
+              <div class="social-content-list" id="social-content-list"></div>
+              <div class="portal-empty" id="social-content-empty">Aún no hay contenido en Peluvi Social.</div>
+            </section>
             <section class="admin-posts-section">
               <div class="admin-posts-head">
                 <div><h3>Publicaciones recientes</h3><p class="portal-muted">Contenido publicado en @peluvi.pet.</p></div>
@@ -162,6 +248,6 @@
       </main>
     </div>
 
-    <script type="module" src="admin.js?v=2"></script>
+    <script type="module" src="admin.js?v=3"></script>
   </body>
 </html>

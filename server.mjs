@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
 const root = process.cwd();
 const port = Number(process.env.PORT || 8000);
@@ -45,6 +45,16 @@ const server = createServer(async (request, response) => {
 
     if (request.method === "POST" && url.pathname === "/api/admin/login") {
       await handleAdminLogin(request, response);
+      return;
+    }
+
+    if (url.pathname === "/api/cron/social-publisher") {
+      await handleSocialCron(request, response);
+      return;
+    }
+
+    if (url.pathname.startsWith("/api/admin/social")) {
+      await handleSocialApi(url, request, response);
       return;
     }
 
@@ -240,12 +250,30 @@ function readBody(request) {
     let body = "";
     request.on("data", (chunk) => {
       body += chunk;
-      if (body.length > 100_000) {
+      if (body.length > 1_000_000) {
         request.destroy();
         reject(new Error("Payload demasiado grande"));
       }
     });
     request.on("end", () => resolve(body));
+    request.on("error", reject);
+  });
+}
+
+function readBinaryBody(request, maxBytes = 4_000_000) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    request.on("data", (chunk) => {
+      size += chunk.length;
+      if (size > maxBytes) {
+        request.destroy();
+        reject(new Error("El archivo supera el límite de 4 MB."));
+        return;
+      }
+      chunks.push(chunk);
+    });
+    request.on("end", () => resolve(Buffer.concat(chunks)));
     request.on("error", reject);
   });
 }
@@ -257,6 +285,8 @@ function sendJson(response, status, payload) {
 
 const GRAPH_API_VERSION = process.env.META_GRAPH_VERSION || "v26.0";
 const graphCache = new Map();
+const socialMemoryStore = { items: [] };
+const SOCIAL_STORE_KEY = "peluvi:social:content:v1";
 const ADMIN_TOKEN_TTL_MS = 12 * 60 * 60 * 1000; // 12 horas
 
 function signAdminToken(expiresAt) {
@@ -316,6 +346,234 @@ async function callGraphApi(path, { ttlMs = 5 * 60 * 1000, accessToken, cacheNam
 
   graphCache.set(cacheKey, { data, expiresAt: Date.now() + ttlMs });
   return data;
+}
+
+async function callGraphMutation(path, params, accessToken) {
+  if (!accessToken) throw new Error("Falta configurar el token de Meta.");
+  const body = new URLSearchParams();
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") body.set(key, String(value));
+  });
+  const resp = await fetch(`https://graph.facebook.com/${GRAPH_API_VERSION}/${path}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+  const data = await resp.json();
+  if (!resp.ok) throw new Error(data.error?.message || "Meta rechazó la publicación.");
+  return data;
+}
+
+function redisConfig() {
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+  return url && token ? { url: url.replace(/\/$/, ""), token } : null;
+}
+
+async function redisCommand(...command) {
+  const config = redisConfig();
+  if (!config) return null;
+  const resp = await fetch(config.url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${config.token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(command),
+  });
+  const data = await resp.json();
+  if (!resp.ok || data.error) throw new Error(data.error || "No se pudo acceder al almacenamiento social.");
+  return data.result;
+}
+
+async function readSocialItems() {
+  const stored = await redisCommand("GET", SOCIAL_STORE_KEY);
+  if (stored === null) return socialMemoryStore.items;
+  try { return JSON.parse(stored || "[]"); } catch { return []; }
+}
+
+async function writeSocialItems(items) {
+  socialMemoryStore.items = items;
+  if (redisConfig()) await redisCommand("SET", SOCIAL_STORE_KEY, JSON.stringify(items));
+}
+
+function cleanSocialPayload(payload = {}) {
+  const platform = ["instagram", "facebook", "both"].includes(payload.platform) ? payload.platform : "instagram";
+  const mediaType = ["image", "carousel", "reel", "text"].includes(payload.mediaType) ? payload.mediaType : "image";
+  const mediaUrls = Array.isArray(payload.mediaUrls)
+    ? payload.mediaUrls.map((url) => String(url).trim()).filter((url) => /^https:\/\//i.test(url)).slice(0, 10)
+    : [];
+  return {
+    platform,
+    mediaType,
+    caption: String(payload.caption || "").trim().slice(0, 2200),
+    mediaUrls,
+    scheduledAt: payload.scheduledAt ? new Date(payload.scheduledAt).toISOString() : null,
+  };
+}
+
+async function publishInstagram(item, token, igUserId) {
+  if (!igUserId) throw new Error("Falta configurar META_IG_USER_ID.");
+  if (item.mediaType === "text") throw new Error("Instagram requiere una imagen o un video.");
+  if (item.mediaType === "carousel") {
+    if (item.mediaUrls.length < 2) throw new Error("El carrusel necesita al menos dos imágenes.");
+    const children = [];
+    for (const imageUrl of item.mediaUrls) {
+      const child = await callGraphMutation(`${igUserId}/media`, { image_url: imageUrl, is_carousel_item: true }, token);
+      children.push(child.id);
+    }
+    const container = await callGraphMutation(`${igUserId}/media`, {
+      media_type: "CAROUSEL", children: children.join(","), caption: item.caption,
+    }, token);
+    return callGraphMutation(`${igUserId}/media_publish`, { creation_id: container.id }, token);
+  }
+  const mediaUrl = item.mediaUrls[0];
+  if (!mediaUrl) throw new Error("Agrega una URL pública del archivo.");
+  const container = await callGraphMutation(`${igUserId}/media`, item.mediaType === "reel"
+    ? { media_type: "REELS", video_url: mediaUrl, caption: item.caption, share_to_feed: true }
+    : { image_url: mediaUrl, caption: item.caption }, token);
+  if (item.mediaType === "reel") {
+    let ready = false;
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const status = await callGraphApi(`${container.id}?fields=status_code,status`, {
+        accessToken: token, cacheNamespace: `reel-${attempt}`, ttlMs: 0,
+      });
+      if (status.status_code === "FINISHED") { ready = true; break; }
+      if (status.status_code === "ERROR" || status.status_code === "EXPIRED") {
+        throw new Error(status.status || "Meta no pudo procesar el Reel.");
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+    if (!ready) throw new Error("Meta todavía está procesando el Reel. Intenta publicarlo de nuevo en unos minutos.");
+  }
+  return callGraphMutation(`${igUserId}/media_publish`, { creation_id: container.id }, token);
+}
+
+async function publishFacebook(item, socialToken, pageId) {
+  if (!pageId) throw new Error("Falta configurar META_PAGE_ID.");
+  const pageToken = await getMetaPageAccessToken(pageId, socialToken);
+  if (item.mediaType === "text" || !item.mediaUrls[0]) {
+    return callGraphMutation(`${pageId}/feed`, { message: item.caption }, pageToken);
+  }
+  if (item.mediaType === "reel") {
+    throw new Error("Los Reels de Facebook se habilitarán en una siguiente iteración; publica este Reel en Instagram.");
+  }
+  return callGraphMutation(`${pageId}/photos`, { url: item.mediaUrls[0], caption: item.caption, published: true }, pageToken);
+}
+
+async function publishSocialItem(item) {
+  const token = process.env.META_SOCIAL_ACCESS_TOKEN;
+  if (!token) throw new Error("Falta configurar META_SOCIAL_ACCESS_TOKEN.");
+  const results = {};
+  if (item.platform === "instagram" || item.platform === "both") {
+    results.instagram = await publishInstagram(item, token, process.env.META_IG_USER_ID);
+  }
+  if (item.platform === "facebook" || item.platform === "both") {
+    results.facebook = await publishFacebook(item, token, process.env.META_PAGE_ID);
+  }
+  return results;
+}
+
+async function processSocialItem(id) {
+  const items = await readSocialItems();
+  const index = items.findIndex((item) => item.id === id);
+  if (index === -1) throw new Error("Publicación no encontrada.");
+  if (items[index].status === "processing") throw new Error("La publicación ya se está procesando.");
+  items[index] = { ...items[index], status: "processing", updatedAt: new Date().toISOString(), error: null };
+  await writeSocialItems(items);
+  try {
+    const result = await publishSocialItem(items[index]);
+    items[index] = { ...items[index], status: "published", publishedAt: new Date().toISOString(), result };
+  } catch (error) {
+    items[index] = { ...items[index], status: "failed", error: error.message, updatedAt: new Date().toISOString() };
+  }
+  await writeSocialItems(items);
+  return items[index];
+}
+
+async function handleSocialApi(url, request, response) {
+  const auth = requireAdminAuth(request);
+  if (auth.error) return sendJson(response, auth.error, { error: auth.message });
+  try {
+    if (url.pathname === "/api/admin/social-capabilities" && request.method === "GET") {
+      let permissions = [];
+      try {
+        const data = await callGraphApi("me/permissions", {
+          accessToken: process.env.META_SOCIAL_ACCESS_TOKEN, cacheNamespace: "permissions", ttlMs: 60_000,
+        });
+        permissions = (data.data || []).filter((p) => p.status === "granted").map((p) => p.permission);
+      } catch {}
+      return sendJson(response, 200, {
+        persistentStorage: Boolean(redisConfig()),
+        mediaStorage: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+        schedulerConfigured: Boolean(process.env.CRON_SECRET),
+        permissions,
+        canPublishInstagram: permissions.includes("instagram_content_publish"),
+        canPublishFacebook: permissions.includes("pages_manage_posts"),
+      });
+    }
+
+    if (url.pathname === "/api/admin/social-upload" && request.method === "POST") {
+      if (!process.env.BLOB_READ_WRITE_TOKEN) throw new Error("Falta conectar Vercel Blob para subir archivos.");
+      const type = String(request.headers["content-type"] || "");
+      if (!type.startsWith("image/") && !type.startsWith("video/")) throw new Error("Selecciona una imagen o video válido.");
+      const originalName = decodeURIComponent(String(request.headers["x-file-name"] || "contenido"));
+      const safeName = originalName.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-100);
+      const bytes = await readBinaryBody(request);
+      const { put } = await import("@vercel/blob");
+      const blob = await put(`social/${Date.now()}-${safeName}`, bytes, {
+        access: "public", contentType: type, addRandomSuffix: true,
+      });
+      return sendJson(response, 201, { url: blob.url, pathname: blob.pathname, contentType: blob.contentType });
+    }
+
+    const parts = url.pathname.split("/").filter(Boolean);
+    const id = parts[3];
+    const action = parts[4];
+    if (url.pathname === "/api/admin/social-content" && request.method === "GET") {
+      const items = await readSocialItems();
+      return sendJson(response, 200, { data: items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) });
+    }
+    if (url.pathname === "/api/admin/social-content" && request.method === "POST") {
+      const payload = cleanSocialPayload(JSON.parse((await readBody(request)) || "{}"));
+      if (!payload.caption && payload.mediaUrls.length === 0) throw new Error("Escribe un texto o agrega contenido multimedia.");
+      const now = new Date().toISOString();
+      const requestedStatus = JSON.parse(request.headers["x-social-options"] || "{}").status;
+      const status = requestedStatus === "scheduled" ? "scheduled" : "draft";
+      if (status === "scheduled" && (!payload.scheduledAt || new Date(payload.scheduledAt) <= new Date())) {
+        throw new Error("Selecciona una fecha futura para programar.");
+      }
+      const item = { id: randomUUID(), ...payload, status, createdAt: now, updatedAt: now, error: null };
+      const items = await readSocialItems();
+      items.push(item);
+      await writeSocialItems(items);
+      return sendJson(response, 201, item);
+    }
+    if (id && action === "publish" && request.method === "POST") {
+      return sendJson(response, 200, await processSocialItem(id));
+    }
+    if (id && request.method === "DELETE") {
+      const items = (await readSocialItems()).filter((item) => item.id !== id);
+      await writeSocialItems(items);
+      return sendJson(response, 200, { ok: true });
+    }
+    sendJson(response, 404, { error: "Endpoint social no encontrado." });
+  } catch (error) {
+    sendJson(response, 400, { error: error.message || "No se pudo completar la acción." });
+  }
+}
+
+async function handleSocialCron(request, response) {
+  const expected = process.env.CRON_SECRET;
+  if (!expected || request.headers.authorization !== `Bearer ${expected}`) {
+    return sendJson(response, 401, { error: "Cron no autorizado." });
+  }
+  try {
+    const items = await readSocialItems();
+    const due = items.filter((item) => item.status === "scheduled" && new Date(item.scheduledAt) <= new Date()).slice(0, 5);
+    const results = [];
+    for (const item of due) results.push(await processSocialItem(item.id));
+    sendJson(response, 200, { processed: results.length, data: results });
+  } catch (error) {
+    sendJson(response, 500, { error: error.message });
+  }
 }
 
 async function getMetaPageAccessToken(pageId, socialToken) {
