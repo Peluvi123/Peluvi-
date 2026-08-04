@@ -3,5 +3,11 @@
     "server.mjs": {
       "includeFiles": "{index.html,styles.css,script.js,pages.css,pages.js,assets/**,portal/**,admin/**,servicios/**,conoce/**,negocios/**}"
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/social-publisher",
+      "schedule": "0 13 * * *"
+    }
+  ]
 }

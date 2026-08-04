@@ -571,6 +571,9 @@ async function handleSocialApi(url, request, response) {
       const now = new Date().toISOString();
       const requestedStatus = JSON.parse(request.headers["x-social-options"] || "{}").status;
       const status = requestedStatus === "scheduled" ? "scheduled" : "draft";
+      if (status === "scheduled" && !redisConfig()) {
+        throw new Error("Conecta Upstash Redis antes de programar publicaciones. Así la parrilla no se perderá al desplegar.");
+      }
       if (status === "scheduled" && (!payload.scheduledAt || new Date(payload.scheduledAt) <= new Date())) {
         throw new Error("Selecciona una fecha futura para programar.");
       }

@@ -102,7 +102,7 @@ async function fetchAdminApi(path, token, options = {}) {
   return data;
 }
 
-const socialState = { items: [], filter: "all", capabilities: null };
+const socialState = { items: [], filter: "all", capabilities: null, calendarDate: new Date() };
 
 function getSocialFormPayload() {
   const mediaUrls = document.getElementById("social-media-urls").value
@@ -148,10 +148,75 @@ async function loadSocialCapabilities(token) {
   const uploadLabel = document.getElementById("social-upload-label");
   uploadLabel.classList.toggle("is-disabled", !capabilities.mediaStorage);
   document.getElementById("social-file-upload").disabled = !capabilities.mediaStorage;
+  const scheduleButton = document.getElementById("schedule-btn");
+  scheduleButton.disabled = !capabilities.persistentStorage || !capabilities.schedulerConfigured;
+  scheduleButton.title = !capabilities.persistentStorage
+    ? "Conecta Upstash Redis para conservar la parrilla."
+    : !capabilities.schedulerConfigured ? "Configura CRON_SECRET para activar la publicación automática." : "";
 }
 
 function socialStatusLabel(status) {
   return ({ draft:"Borrador", scheduled:"Programado", processing:"Procesando", published:"Publicado", failed:"Error" })[status] || status;
+}
+
+function calendarDateKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function socialPlatformMark(platform) {
+  return platform === "instagram" ? "◎" : platform === "facebook" ? "f" : "✦";
+}
+
+function renderSocialCalendar() {
+  const grid = document.getElementById("social-calendar-grid");
+  if (!grid) return;
+  const focus = socialState.calendarDate;
+  const year = focus.getFullYear();
+  const month = focus.getMonth();
+  document.getElementById("calendar-month-label").textContent = new Intl.DateTimeFormat("es-CO", { month: "long", year: "numeric" }).format(focus);
+  const first = new Date(year, month, 1);
+  const offset = (first.getDay() + 6) % 7;
+  const start = new Date(year, month, 1 - offset);
+  const todayKey = calendarDateKey(new Date());
+  const monthItems = socialState.items.filter((item) => {
+    const source = item.scheduledAt || item.publishedAt || item.createdAt;
+    if (!source) return false;
+    const date = new Date(source);
+    return date.getFullYear() === year && date.getMonth() === month;
+  });
+  document.getElementById("calendar-scheduled-count").textContent = monthItems.filter((item) => item.status === "scheduled").length;
+  document.getElementById("calendar-published-count").textContent = monthItems.filter((item) => item.status === "published").length;
+  document.getElementById("calendar-failed-count").textContent = monthItems.filter((item) => item.status === "failed").length;
+  const cells = [];
+  for (let index = 0; index < 42; index += 1) {
+    const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + index);
+    const key = calendarDateKey(date);
+    const dayItems = socialState.items.filter((item) => {
+      const source = item.scheduledAt || item.publishedAt || item.createdAt;
+      return source && calendarDateKey(new Date(source)) === key;
+    }).sort((a, b) => new Date(a.scheduledAt || a.createdAt) - new Date(b.scheduledAt || b.createdAt));
+    const posts = dayItems.slice(0, 3).map((item) => {
+      const source = new Date(item.scheduledAt || item.publishedAt || item.createdAt);
+      return `<button class="social-calendar-post ${escapeHtml(item.status)}" type="button" data-calendar-post="${escapeHtml(item.id)}" title="${escapeHtml(item.caption || "Publicación")}"><b>${socialPlatformMark(item.platform)}</b><span>${source.toLocaleTimeString("es-CO", { hour:"2-digit", minute:"2-digit" })} · ${escapeHtml((item.caption || "Sin texto").slice(0, 28))}</span></button>`;
+    }).join("");
+    cells.push(`<div class="social-calendar-day${date.getMonth() !== month ? " is-outside" : ""}${key === todayKey ? " is-today" : ""}" data-calendar-day="${key}">
+      <button class="social-calendar-date" type="button" data-calendar-date="${key}" aria-label="Crear publicación el ${date.toLocaleDateString("es-CO")}">${date.getDate()}<span>＋</span></button>
+      <div class="social-calendar-posts">${posts}${dayItems.length > 3 ? `<small>+${dayItems.length - 3} más</small>` : ""}</div>
+    </div>`);
+  }
+  grid.innerHTML = cells.join("");
+}
+
+function chooseCalendarDay(key) {
+  const [year, month, day] = key.split("-").map(Number);
+  const date = new Date(year, month - 1, day, 9, 0);
+  const localValue = `${calendarDateKey(date)}T09:00`;
+  document.getElementById("social-scheduled-at").value = localValue;
+  const composer = document.querySelector(".social-composer");
+  composer.classList.add("is-calendar-focus");
+  composer.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.getElementById("social-caption").focus({ preventScroll: true });
+  window.setTimeout(() => composer.classList.remove("is-calendar-focus"), 1400);
 }
 
 function renderSocialContent() {
@@ -180,6 +245,7 @@ async function loadSocialContent(token) {
   const data = await fetchAdminApi("social-content", token);
   socialState.items = data.data || [];
   renderSocialContent();
+  renderSocialCalendar();
 }
 
 async function loadFacebookPosts(token) {
@@ -233,7 +299,7 @@ async function createSocialContent(token, status) {
       finalItem = await fetchAdminApi(`social-content/${item.id}/publish`, token, { method: "POST" });
       if (finalItem.status === "failed") throw new Error(finalItem.error);
     }
-    successBox.textContent = status === "draft" ? "Borrador guardado." : status === "scheduled" ? "Publicación programada." : "Publicación enviada a Meta correctamente.";
+    successBox.textContent = status === "draft" ? "Borrador guardado." : status === "scheduled" ? "Publicación añadida a la parrilla." : "Publicación enviada a Meta correctamente.";
     successBox.hidden = false;
     document.getElementById("composer-state").textContent = socialStatusLabel(finalItem.status);
     await loadSocialContent(token);
@@ -253,6 +319,24 @@ function setupSocialControls(token) {
   document.getElementById("save-draft-btn").onclick = () => createSocialContent(token, "draft");
   document.getElementById("schedule-btn").onclick = () => createSocialContent(token, "scheduled");
   document.getElementById("publish-now-btn").onclick = () => createSocialContent(token, "publish");
+  document.getElementById("calendar-prev").onclick = () => {
+    socialState.calendarDate = new Date(socialState.calendarDate.getFullYear(), socialState.calendarDate.getMonth() - 1, 1);
+    renderSocialCalendar();
+  };
+  document.getElementById("calendar-next").onclick = () => {
+    socialState.calendarDate = new Date(socialState.calendarDate.getFullYear(), socialState.calendarDate.getMonth() + 1, 1);
+    renderSocialCalendar();
+  };
+  document.getElementById("calendar-today").onclick = () => { socialState.calendarDate = new Date(); renderSocialCalendar(); };
+  document.getElementById("social-calendar-grid").onclick = (event) => {
+    const dateButton = event.target.closest("[data-calendar-date]");
+    if (dateButton) chooseCalendarDay(dateButton.dataset.calendarDate);
+    const postButton = event.target.closest("[data-calendar-post]");
+    if (postButton) {
+      const item = document.querySelector(`[data-social-id="${CSS.escape(postButton.dataset.calendarPost)}"]`);
+      item?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
   document.getElementById("social-file-upload").onchange = async (event) => {
     const files = [...event.target.files].slice(0, 10);
     if (!files.length) return;
