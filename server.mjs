@@ -381,6 +381,51 @@ function redisConfig() {
   return url && token ? { url: url.replace(/\/$/, ""), token } : null;
 }
 
+function supabaseConfig() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+  return url && key ? { url: url.replace(/\/$/, ""), key } : null;
+}
+
+async function supabaseSocialRequest(query = "", { method = "GET", body, prefer } = {}) {
+  const config = supabaseConfig();
+  if (!config) return null;
+  const response = await fetch(`${config.url}/rest/v1/social_posts${query}`, {
+    method,
+    headers: {
+      apikey: config.key,
+      Authorization: `Bearer ${config.key}`,
+      "Content-Type": "application/json",
+      ...(prefer ? { Prefer: prefer } : {}),
+    },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "No se pudo acceder a la parrilla de Supabase.");
+  }
+  if (response.status === 204) return null;
+  return response.json();
+}
+
+function socialItemFromRow(row) {
+  return {
+    id: row.id, platform: row.platform, mediaType: row.media_type, caption: row.caption,
+    mediaUrls: Array.isArray(row.media_urls) ? row.media_urls : [], scheduledAt: row.scheduled_at,
+    status: row.status, result: row.result, error: row.error, publishedAt: row.published_at,
+    createdAt: row.created_at, updatedAt: row.updated_at,
+  };
+}
+
+function socialItemToRow(item) {
+  return {
+    id: item.id, platform: item.platform, media_type: item.mediaType, caption: item.caption,
+    media_urls: item.mediaUrls || [], scheduled_at: item.scheduledAt, status: item.status,
+    result: item.result || null, error: item.error || null, published_at: item.publishedAt || null,
+    created_at: item.createdAt, updated_at: item.updatedAt || new Date().toISOString(),
+  };
+}
+
 async function redisCommand(...command) {
   const config = redisConfig();
   if (!config) return null;
@@ -395,6 +440,10 @@ async function redisCommand(...command) {
 }
 
 async function readSocialItems() {
+  if (supabaseConfig()) {
+    const rows = await supabaseSocialRequest("?select=*&order=created_at.desc");
+    return (rows || []).map(socialItemFromRow);
+  }
   const stored = await redisCommand("GET", SOCIAL_STORE_KEY);
   if (stored === null) return socialMemoryStore.items;
   try { return JSON.parse(stored || "[]"); } catch { return []; }
@@ -402,7 +451,21 @@ async function readSocialItems() {
 
 async function writeSocialItems(items) {
   socialMemoryStore.items = items;
-  if (redisConfig()) await redisCommand("SET", SOCIAL_STORE_KEY, JSON.stringify(items));
+  if (supabaseConfig()) {
+    if (items.length) await supabaseSocialRequest("?on_conflict=id", {
+      method: "POST", body: items.map(socialItemToRow), prefer: "resolution=merge-duplicates,return=minimal",
+    });
+  } else if (redisConfig()) await redisCommand("SET", SOCIAL_STORE_KEY, JSON.stringify(items));
+}
+
+async function deleteSocialItem(id) {
+  socialMemoryStore.items = socialMemoryStore.items.filter((item) => item.id !== id);
+  if (supabaseConfig()) {
+    await supabaseSocialRequest(`?id=eq.${encodeURIComponent(id)}`, { method: "DELETE", prefer: "return=minimal" });
+    return;
+  }
+  const items = (await readSocialItems()).filter((item) => item.id !== id);
+  await writeSocialItems(items);
 }
 
 function cleanSocialPayload(payload = {}) {
@@ -512,7 +575,8 @@ async function handleSocialApi(url, request, response) {
         permissions = (data.data || []).filter((p) => p.status === "granted").map((p) => p.permission);
       } catch {}
       return sendJson(response, 200, {
-        persistentStorage: Boolean(redisConfig()),
+        persistentStorage: Boolean(supabaseConfig() || redisConfig()),
+        storageProvider: supabaseConfig() ? "Supabase" : redisConfig() ? "Redis" : null,
         mediaStorage: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
         schedulerConfigured: Boolean(process.env.CRON_SECRET),
         permissions,
@@ -571,8 +635,8 @@ async function handleSocialApi(url, request, response) {
       const now = new Date().toISOString();
       const requestedStatus = JSON.parse(request.headers["x-social-options"] || "{}").status;
       const status = requestedStatus === "scheduled" ? "scheduled" : "draft";
-      if (status === "scheduled" && !redisConfig()) {
-        throw new Error("Conecta Upstash Redis antes de programar publicaciones. Así la parrilla no se perderá al desplegar.");
+      if (status === "scheduled" && !supabaseConfig() && !redisConfig()) {
+        throw new Error("Conecta Supabase antes de programar publicaciones. Así la parrilla no se perderá al desplegar.");
       }
       if (status === "scheduled" && (!payload.scheduledAt || new Date(payload.scheduledAt) <= new Date())) {
         throw new Error("Selecciona una fecha futura para programar.");
@@ -587,8 +651,7 @@ async function handleSocialApi(url, request, response) {
       return sendJson(response, 200, await processSocialItem(id));
     }
     if (id && request.method === "DELETE") {
-      const items = (await readSocialItems()).filter((item) => item.id !== id);
-      await writeSocialItems(items);
+      await deleteSocialItem(id);
       return sendJson(response, 200, { ok: true });
     }
     sendJson(response, 404, { error: "Endpoint social no encontrado." });

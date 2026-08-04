@@ -130,12 +130,12 @@ async function loadSocialCapabilities(token) {
   socialState.capabilities = capabilities;
   setReadiness("ready-instagram", capabilities.canPublishInstagram, "Listo", "Falta permiso");
   setReadiness("ready-facebook", capabilities.canPublishFacebook, "Listo", "Falta permiso");
-  setReadiness("ready-storage", capabilities.persistentStorage, "Persistente", "Modo temporal");
+  setReadiness("ready-storage", capabilities.persistentStorage, capabilities.storageProvider || "Persistente", "Modo temporal");
   setReadiness("ready-scheduler", capabilities.schedulerConfigured, "Protegido", "Sin cron");
   const missing = [];
   if (!capabilities.canPublishInstagram) missing.push("instagram_content_publish");
   if (!capabilities.canPublishFacebook) missing.push("pages_manage_posts");
-  if (!capabilities.persistentStorage) missing.push("Upstash Redis para conservar agenda y borradores");
+  if (!capabilities.persistentStorage) missing.push("Supabase para conservar agenda y borradores");
   if (!capabilities.mediaStorage) missing.push("Vercel Blob para subir archivos");
   if (!capabilities.schedulerConfigured) missing.push("CRON_SECRET y un cron para ejecutar la agenda");
   if (missing.length) {
@@ -151,7 +151,7 @@ async function loadSocialCapabilities(token) {
   const scheduleButton = document.getElementById("schedule-btn");
   scheduleButton.disabled = !capabilities.persistentStorage || !capabilities.schedulerConfigured;
   scheduleButton.title = !capabilities.persistentStorage
-    ? "Conecta Upstash Redis para conservar la parrilla."
+    ? "Conecta Supabase para conservar la parrilla."
     : !capabilities.schedulerConfigured ? "Configura CRON_SECRET para activar la publicación automática." : "";
 }
 
