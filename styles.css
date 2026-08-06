@@ -4389,74 +4389,24 @@ body.modal-open {
     right: 2vw;
   }
 
-  .vet-layout {
-    align-items: flex-start;
-    padding-top: 44px;
-  }
-
-  .vet-copy {
-    width: min(760px, 72vw);
-  }
-
   .vet-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-width: 560px;
-  }
-
-  .grooming-layout {
-    align-items: flex-start;
-    padding-top: 44px;
-  }
-
-  .grooming-copy {
-    width: min(760px, 72vw);
   }
 
   .grooming-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-width: 560px;
-  }
-
-  .store-layout {
-    align-items: flex-start;
-    padding-top: 44px;
-  }
-
-  .store-copy {
-    width: min(760px, 72vw);
   }
 
   .store-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-width: 560px;
-  }
-
-  .caregivers-layout {
-    align-items: flex-start;
-    padding-top: 44px;
-  }
-
-  .caregivers-copy {
-    width: min(690px, 72vw);
   }
 
   .caregivers-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-width: 560px;
-  }
-
-  .sos-layout {
-    align-items: flex-start;
-    padding-top: 44px;
-  }
-
-  .sos-copy {
-    width: min(690px, 72vw);
   }
 
   .sos-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-width: 560px;
   }
 
 }
