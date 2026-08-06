@@ -1,3 +1,37 @@
+const preloader = document.querySelector("#preloader");
+
+if (preloader && sessionStorage.getItem("peluviIntroSeen")) {
+  preloader.remove();
+} else if (preloader) {
+  sessionStorage.setItem("peluviIntroSeen", "1");
+  const preloaderVideo = preloader.querySelector(".preloader-video");
+  const preloaderLogo = preloader.querySelector(".preloader-logo");
+  const PRELOADER_MAX_MS = 8000;
+  const LOGO_FADE_END = 0.65;
+
+  if (preloaderVideo && preloaderLogo) {
+    preloaderVideo.addEventListener("timeupdate", () => {
+      if (!preloaderVideo.duration) return;
+      const progress = preloaderVideo.currentTime / preloaderVideo.duration;
+      preloaderLogo.style.opacity = Math.max(0, 1 - progress / LOGO_FADE_END);
+    });
+  }
+
+  const hidePreloader = () => {
+    if (preloader.classList.contains("is-hidden")) return;
+    preloader.classList.add("is-hidden");
+    setTimeout(() => preloader.remove(), 500);
+  };
+
+  if (preloaderVideo) {
+    preloaderVideo.addEventListener("ended", hidePreloader, { once: true });
+  } else {
+    hidePreloader();
+  }
+
+  setTimeout(hidePreloader, PRELOADER_MAX_MS);
+}
+
 const chatWidget = document.querySelector(".chat-widget");
 const chatToggle = document.querySelector(".chat-toggle");
 const chatPanel = document.querySelector(".chat-panel");
@@ -190,16 +224,16 @@ const vetDetails = {
     items: ["Horarios disponibles en tiempo real.", "Recordatorios antes de la cita.", "Historial de reservas para tu mascota."],
   },
   services: {
-    icon: "✚",
-    title: "Servicios y doctores",
-    text: "Mira qué ofrece cada veterinaria y conoce el perfil de sus profesionales antes de agendar.",
-    items: ["Consulta general, vacunas y urgencias.", "Especialistas y experiencia del equipo.", "Precios o rangos visibles cuando estén disponibles."],
+    icon: "▤",
+    title: "Historia médica",
+    text: "Accede al historial, vacunas y tratamientos de tu mascota siempre que lo necesites.",
+    items: ["Registro de vacunas y tratamientos.", "Historial disponible desde cualquier veterinaria aliada.", "Recordatorios de próximas dosis o controles."],
   },
   trust: {
-    icon: "✚",
-    title: "Atención confiable",
-    text: "Ayuda a los dueños a elegir espacios verificados y con información clara para cuidar mejor.",
-    items: ["Clínicas verificadas por Peluvi.", "Calificaciones y reseñas de usuarios.", "Información actualizada de contacto y ubicación."],
+    icon: "◎",
+    title: "Atención cercana",
+    text: "Encuentra atención de calidad cerca de ti, cuando tu mascota más lo necesita.",
+    items: ["Clínicas verificadas por Peluvi.", "Calificaciones y reseñas de usuarios.", "Ubicación y disponibilidad en tiempo real."],
   },
 };
 
@@ -972,3 +1006,7 @@ const requestedPanel = {
 if (requestedPanel) {
   window.addEventListener("load", requestedPanel, { once: true });
 }
+
+document.querySelectorAll(".pet-strip video").forEach((video) => {
+  video.play().catch(() => {});
+});

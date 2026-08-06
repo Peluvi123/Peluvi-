@@ -39,6 +39,23 @@
     /></noscript>
   </head>
   <body>
+    <div class="preloader" id="preloader" aria-hidden="true">
+      <video
+        class="preloader-video"
+        autoplay
+        muted
+        playsinline
+        webkit-playsinline
+      >
+        <source
+          src="assets/loading-intro-mobile.mp4"
+          type="video/mp4"
+          media="(max-width: 640px)"
+        />
+        <source src="assets/loading-intro.mp4" type="video/mp4" />
+      </video>
+      <img class="preloader-logo" src="assets/preloader-logo.png" alt="" />
+    </div>
     <section class="hero-shell" id="inicio">
       <video
         class="hero-video"
@@ -141,6 +158,83 @@
       </main>
     </section>
 
+    <section class="pet-strip" aria-label="Galería de Peluvi">
+      <div class="pet-strip-track">
+        <div class="pet-strip-tile">
+          <video src="assets/showcase/peluvi-video-1.mp4" autoplay muted loop playsinline></video>
+        </div>
+        <div class="pet-strip-tile">
+          <img src="assets/showcase/peluvi-pet-1.png" alt="Gato con audífonos y gafas moradas" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile">
+          <img src="assets/showcase/peluvi-pet-4.jpg" alt="Cachorro golden retriever con gafas y audífonos morados" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile">
+          <video src="assets/showcase/peluvi-video-2.mp4" autoplay muted loop playsinline></video>
+        </div>
+        <div class="pet-strip-tile">
+          <img src="assets/showcase/peluvi-pet-2.png" alt="Gato gris con gafas redondas moradas y audífonos" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile">
+          <img src="assets/showcase/peluvi-pet-5.jpg" alt="Bulldog francés con gafas moradas" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile">
+          <video src="assets/showcase/peluvi-video-3.mp4" autoplay muted loop playsinline></video>
+        </div>
+        <div class="pet-strip-tile">
+          <img src="assets/showcase/peluvi-pet-3.jpg" alt="Perro con audífonos morados y collar dorado" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile">
+          <img src="assets/showcase/peluvi-pet-6.jpg" alt="Conejo blanco con audífonos morados" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile">
+          <video src="assets/showcase/peluvi-video-4.mp4" autoplay muted loop playsinline></video>
+        </div>
+        <div class="pet-strip-tile">
+          <img src="assets/showcase/peluvi-pet-7.jpg" alt="Corgi con gafas y audífonos morados" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile">
+          <img src="assets/showcase/peluvi-pet-8.jpg" alt="Gato siamés con gafas moradas" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <video src="assets/showcase/peluvi-video-1.mp4" autoplay muted loop playsinline></video>
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <img src="assets/showcase/peluvi-pet-1.png" alt="" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <img src="assets/showcase/peluvi-pet-4.jpg" alt="" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <video src="assets/showcase/peluvi-video-2.mp4" autoplay muted loop playsinline></video>
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <img src="assets/showcase/peluvi-pet-2.png" alt="" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <img src="assets/showcase/peluvi-pet-5.jpg" alt="" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <video src="assets/showcase/peluvi-video-3.mp4" autoplay muted loop playsinline></video>
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <img src="assets/showcase/peluvi-pet-3.jpg" alt="" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <img src="assets/showcase/peluvi-pet-6.jpg" alt="" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <video src="assets/showcase/peluvi-video-4.mp4" autoplay muted loop playsinline></video>
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <img src="assets/showcase/peluvi-pet-7.jpg" alt="" loading="lazy" />
+        </div>
+        <div class="pet-strip-tile" aria-hidden="true">
+          <img src="assets/showcase/peluvi-pet-8.jpg" alt="" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
     <section class="content home-value" id="descarga" aria-label="Descarga y beneficios de Peluvi">
       <div class="section-kicker">
         <p class="pill dark">Lo que puedes hacer en Peluvi</p>
@@ -187,28 +281,16 @@
 
       <div class="promo-grid" aria-label="Destacados Peluvi">
         <article class="promo-card promo-adoption">
-          <div>
-            <p>Adopción</p>
-            <h3>Encuentra una historia nueva</h3>
-            <a class="adoption-trigger" href="#adopcion" aria-controls="adoption-panel">Ver mascotas</a>
-          </div>
-          <img src="assets/promo-adoption-real.png" alt="Gato real disponible para adopción en Peluvi" />
+          <img src="assets/promo-adoption-card.png" alt="Adopción: encuentra una historia nueva" />
+          <a class="adoption-trigger" href="#adopcion" aria-controls="adoption-panel"><span class="sr-only">Ver mascotas</span></a>
         </article>
         <article class="promo-card promo-store">
-          <div>
-            <p>Tiendas</p>
-            <h3>Productos y alimento cerca de ti</h3>
-            <a class="store-trigger" href="#tiendas" aria-controls="store-panel">Explorar tiendas</a>
-          </div>
-          <img src="assets/promo-store-real.png" alt="Productos reales para mascotas en Peluvi" />
+          <img src="assets/promo-store-card.png" alt="Tiendas: productos y alimento cerca de ti" />
+          <a class="store-trigger" href="#tiendas" aria-controls="store-panel"><span class="sr-only">Explorar tiendas</span></a>
         </article>
         <article class="promo-card promo-care">
-          <div>
-            <p>Cuidadores</p>
-            <h3>Paseos y cuidado con confianza</h3>
-            <a class="caregivers-trigger" href="#cuidadores" aria-controls="caregivers-panel">Ver cuidadores</a>
-          </div>
-          <img src="assets/promo-care-real.png" alt="Perro real con correa para cuidadores en Peluvi" />
+          <img src="assets/promo-care-card.png" alt="Cuidadores: paseos y cuidado con confianza" />
+          <a class="caregivers-trigger" href="#cuidadores" aria-controls="caregivers-panel"><span class="sr-only">Ver cuidadores</span></a>
         </article>
       </div>
 
@@ -312,39 +394,88 @@
 
         <div class="vet-layout">
           <div class="vet-copy">
-            <div class="vet-icon-card" aria-hidden="true">
-              <img src="assets/icon-vet-crop.png" alt="" />
-            </div>
             <p class="vet-pill">Nuevo módulo</p>
             <h2>Veterinarias</h2>
+            <p class="vet-subtitle">Todo en un solo lugar</p>
             <p class="vet-text">
-              Encuentra las mejores veterinarias, agenda citas y cuida la salud
-              de tu mascota, <strong>todo en un solo lugar.</strong>
+              Encuentra veterinarias confiables, agenda citas en segundos y cuida
+              la salud de tu mascota desde una sola plataforma.
             </p>
-            <div class="vet-actions" aria-label="Funciones de veterinarias">
-              <article role="button" tabindex="0" data-vet-detail="search">
-                <span>⌕</span>
-                <h3>Busca veterinarias</h3>
-                <p>Encuentra clínicas cercanas y ve calificaciones.</p>
-              </article>
-              <article role="button" tabindex="0" data-vet-detail="schedule">
-                <span>▦</span>
-                <h3>Agenda citas</h3>
-                <p>Reserva en pocos pasos de forma fácil y rápida.</p>
-              </article>
-              <article role="button" tabindex="0" data-vet-detail="services">
-                <span>✚</span>
-                <h3>Servicios y doctores</h3>
-                <p>Consulta servicios y conoce sus especialistas.</p>
-              </article>
-              <article role="button" tabindex="0" data-vet-detail="trust">
-                <span>✚</span>
-                <h3>Atención confiable</h3>
-                <p>Clínicas verificadas para cuidar lo que más quieres.</p>
-              </article>
+            <div class="vet-cta-row">
+              <button type="button" class="vet-cta-primary" data-vet-detail="search">
+                <span>⌕</span> Buscar veterinarias
+              </button>
+              <button type="button" class="vet-cta-secondary" data-vet-detail="schedule">
+                <span>▦</span> Agendar cita
+              </button>
+            </div>
+            <div class="vet-stats">
+              <div class="vet-stat">
+                <span>🏥</span>
+                <p><strong>+120</strong> veterinarias aliadas</p>
+              </div>
+              <div class="vet-stat">
+                <span>⏱️</span>
+                <p>Agenda en <strong>1 min</strong></p>
+              </div>
+              <div class="vet-stat">
+                <span>📍</span>
+                <p>Atención <strong>cerca de ti</strong></p>
+              </div>
+            </div>
+          </div>
+          <div class="vet-photo" aria-hidden="true">
+            <img src="assets/vet-panel-bg-v2.png" alt="" />
+            <div class="vet-badge vet-badge-top">
+              <span class="vet-badge-icon">✓</span>
+              <div>
+                <strong>Veterinarias verificadas</strong>
+                <p>Calidad y confianza garantizadas.</p>
+              </div>
+            </div>
+            <div class="vet-badge vet-badge-bottom">
+              <span class="vet-badge-icon">▦</span>
+              <div>
+                <strong>Citas rápidas</strong>
+                <p>Agenda en segundos desde la app.</p>
+              </div>
             </div>
           </div>
         </div>
+
+        <div class="vet-actions" aria-label="Funciones de veterinarias">
+          <article role="button" tabindex="0" data-vet-detail="search">
+            <span class="vet-action-icon">⌕</span>
+            <div>
+              <h3>Busca veterinarias</h3>
+              <p>Encuentra clínicas cercanas y ve calificaciones reales de otros tutores.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-vet-detail="schedule">
+            <span class="vet-action-icon">▦</span>
+            <div>
+              <h3>Agenda citas</h3>
+              <p>Reserva la mejor hora para tu mascota en pocos pasos, de forma fácil y rápida.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-vet-detail="services">
+            <span class="vet-action-icon">▤</span>
+            <div>
+              <h3>Historia médica</h3>
+              <p>Accede al historial, vacunas y tratamientos de tu mascota siempre que lo necesites.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-vet-detail="trust">
+            <span class="vet-action-icon">◎</span>
+            <div>
+              <h3>Atención cercana</h3>
+              <p>Encuentra atención de calidad cerca de ti, cuando tu mascota más lo necesita.</p>
+            </div>
+          </article>
+        </div>
+
+        <p class="vet-banner">💜 Tu mascota merece lo mejor. Nosotros te ayudamos a encontrarlo. 🐾</p>
+
         <div class="vet-detail-modal" hidden>
           <div class="vet-detail-card" role="dialog" aria-modal="true" aria-labelledby="vet-detail-title">
             <button class="vet-detail-close" type="button" aria-label="Cerrar detalle">×</button>
@@ -373,38 +504,88 @@
 
         <div class="grooming-layout">
           <div class="grooming-copy">
-            <div class="grooming-icon-card" aria-hidden="true">
-              <img src="assets/icon-grooming-tight.png" alt="" />
-            </div>
             <p class="grooming-pill">Nuevo módulo</p>
             <h2>Peluquerías</h2>
+            <p class="grooming-subtitle">Cuidado para tu mejor amigo</p>
             <p class="grooming-text">
-              Agenda baños, cortes, spa y mucho más para <strong>tu mejor amigo.</strong>
+              Agenda baños, cortes y tratamientos de spa con groomers certificados,
+              todo desde una sola app.
             </p>
-            <div class="grooming-actions" aria-label="Funciones de peluquerias">
-              <article role="button" tabindex="0" data-grooming-detail="schedule">
-                <span>▦</span>
-                <h3>Agenda citas</h3>
-                <p>Reserva baños y cortes en pocos pasos.</p>
-              </article>
-              <article role="button" tabindex="0" data-grooming-detail="certified">
-                <span>✿</span>
-                <h3>Groomers certificados</h3>
-                <p>Profesionales con experiencia y buen trato.</p>
-              </article>
-              <article role="button" tabindex="0" data-grooming-detail="special">
-                <span>♡</span>
-                <h3>Servicios especializados</h3>
-                <p>Spa, deslanado, uñas y cuidado del pelaje.</p>
-              </article>
-              <article role="button" tabindex="0" data-grooming-detail="tracking">
-                <span>✓</span>
-                <h3>Seguimiento de citas</h3>
-                <p>Recordatorios y detalles de cada visita.</p>
-              </article>
+            <div class="grooming-cta-row">
+              <button type="button" class="grooming-cta-primary" data-grooming-detail="schedule">
+                <span>▦</span> Agendar cita
+              </button>
+              <button type="button" class="grooming-cta-secondary" data-grooming-detail="certified">
+                <span>✿</span> Ver certificados
+              </button>
+            </div>
+            <div class="grooming-stats">
+              <div class="grooming-stat">
+                <span>✂️</span>
+                <p><strong>+80</strong> groomers aliados</p>
+              </div>
+              <div class="grooming-stat">
+                <span>⏱️</span>
+                <p>Agenda en <strong>2 min</strong></p>
+              </div>
+              <div class="grooming-stat">
+                <span>📍</span>
+                <p>Servicio <strong>cerca de ti</strong></p>
+              </div>
+            </div>
+          </div>
+          <div class="grooming-photo" aria-hidden="true">
+            <img src="assets/grooming-panel-bg.png" alt="" />
+            <div class="grooming-badge grooming-badge-top">
+              <span class="grooming-badge-icon">✓</span>
+              <div>
+                <strong>Groomers certificados</strong>
+                <p>Profesionales de confianza.</p>
+              </div>
+            </div>
+            <div class="grooming-badge grooming-badge-bottom">
+              <span class="grooming-badge-icon">▦</span>
+              <div>
+                <strong>Reserva flexible</strong>
+                <p>Elige fecha y hora ideal.</p>
+              </div>
             </div>
           </div>
         </div>
+
+        <div class="grooming-actions" aria-label="Funciones de peluquerias">
+          <article role="button" tabindex="0" data-grooming-detail="schedule">
+            <span class="grooming-action-icon">▦</span>
+            <div>
+              <h3>Agenda citas</h3>
+              <p>Reserva baños y cortes en pocos pasos.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-grooming-detail="certified">
+            <span class="grooming-action-icon">✿</span>
+            <div>
+              <h3>Groomers certificados</h3>
+              <p>Profesionales con experiencia y buen trato.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-grooming-detail="special">
+            <span class="grooming-action-icon">♡</span>
+            <div>
+              <h3>Servicios especializados</h3>
+              <p>Spa, deslanado, uñas y cuidado del pelaje.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-grooming-detail="tracking">
+            <span class="grooming-action-icon">✓</span>
+            <div>
+              <h3>Seguimiento de citas</h3>
+              <p>Recordatorios y detalles de cada visita.</p>
+            </div>
+          </article>
+        </div>
+
+        <p class="grooming-banner">💜 Tu mascota merece lucir y sentirse increíble. 🐾</p>
+
         <div class="grooming-detail-modal" hidden>
           <div class="grooming-detail-card" role="dialog" aria-modal="true" aria-labelledby="grooming-detail-title">
             <button class="grooming-detail-close" type="button" aria-label="Cerrar detalle">×</button>
@@ -433,39 +614,88 @@
 
         <div class="store-layout">
           <div class="store-copy">
-            <div class="store-icon-card" aria-hidden="true">
-              <img src="assets/icon-food-tight.png" alt="" />
-            </div>
             <p class="store-pill">Nuevo módulo</p>
             <h2>Tiendas</h2>
+            <p class="store-subtitle">Todo cerca de ti</p>
             <p class="store-text">
-              Conecta con tiendas aliadas y encuentra lo que tu mascota necesita.
-              <strong>Todo más cerca, sin complicarte.</strong>
+              Conecta con tiendas aliadas y encuentra alimento, juguetes y
+              accesorios para tu mascota, sin complicarte.
             </p>
-            <div class="store-actions" aria-label="Funciones de tiendas">
-              <article role="button" tabindex="0" data-store-detail="products">
-                <span>▣</span>
-                <h3>Catálogo aliado</h3>
-                <p>Alimentos, juguetes y accesorios de tiendas cercanas.</p>
-              </article>
-              <article role="button" tabindex="0" data-store-detail="offers">
-                <span>%</span>
-                <h3>Novedades y promos</h3>
-                <p>Información publicada por tiendas aliadas.</p>
-              </article>
-              <article role="button" tabindex="0" data-store-detail="delivery">
-                <span>▱</span>
-                <h3>Contacto directo</h3>
-                <p>Pregunta disponibilidad y coordina con la tienda.</p>
-              </article>
-              <article role="button" tabindex="0" data-store-detail="secure">
-                <span>✓</span>
-                <h3>Aliados verificados</h3>
-                <p>Perfiles claros para elegir con confianza.</p>
-              </article>
+            <div class="store-cta-row">
+              <button type="button" class="store-cta-primary" data-store-detail="products">
+                <span>▣</span> Ver catálogo
+              </button>
+              <button type="button" class="store-cta-secondary" data-store-detail="delivery">
+                <span>▱</span> Contactar tienda
+              </button>
+            </div>
+            <div class="store-stats">
+              <div class="store-stat">
+                <span>🏬</span>
+                <p><strong>+60</strong> tiendas aliadas</p>
+              </div>
+              <div class="store-stat">
+                <span>💬</span>
+                <p>Contacto <strong>directo</strong></p>
+              </div>
+              <div class="store-stat">
+                <span>📍</span>
+                <p>Productos <strong>cerca de ti</strong></p>
+              </div>
+            </div>
+          </div>
+          <div class="store-photo" aria-hidden="true">
+            <img src="assets/store-panel-bg.png" alt="" />
+            <div class="store-badge store-badge-top">
+              <span class="store-badge-icon">✓</span>
+              <div>
+                <strong>Aliados verificados</strong>
+                <p>Perfiles claros y confiables.</p>
+              </div>
+            </div>
+            <div class="store-badge store-badge-bottom">
+              <span class="store-badge-icon">%</span>
+              <div>
+                <strong>Novedades y promos</strong>
+                <p>Ofertas de tiendas aliadas.</p>
+              </div>
             </div>
           </div>
         </div>
+
+        <div class="store-actions" aria-label="Funciones de tiendas">
+          <article role="button" tabindex="0" data-store-detail="products">
+            <span class="store-action-icon">▣</span>
+            <div>
+              <h3>Catálogo aliado</h3>
+              <p>Alimentos, juguetes y accesorios de tiendas cercanas.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-store-detail="offers">
+            <span class="store-action-icon">%</span>
+            <div>
+              <h3>Novedades y promos</h3>
+              <p>Información publicada por tiendas aliadas.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-store-detail="delivery">
+            <span class="store-action-icon">▱</span>
+            <div>
+              <h3>Contacto directo</h3>
+              <p>Pregunta disponibilidad y coordina con la tienda.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-store-detail="secure">
+            <span class="store-action-icon">✓</span>
+            <div>
+              <h3>Aliados verificados</h3>
+              <p>Perfiles claros para elegir con confianza.</p>
+            </div>
+          </article>
+        </div>
+
+        <p class="store-banner">💜 Todo lo que tu mascota necesita, a un mensaje de distancia. 🐾</p>
+
         <div class="store-detail-modal" hidden>
           <div class="store-detail-card" role="dialog" aria-modal="true" aria-labelledby="store-detail-title">
             <button class="store-detail-close" type="button" aria-label="Cerrar detalle">×</button>
@@ -494,39 +724,88 @@
 
         <div class="caregivers-layout">
           <div class="caregivers-copy">
-            <div class="caregivers-icon-card" aria-hidden="true">
-              <img src="assets/icon-walkers-crop.png" alt="" />
-            </div>
             <p class="caregivers-pill">Nuevo módulo</p>
             <h2>Cuidadores</h2>
+            <p class="caregivers-subtitle">Con confianza y cariño</p>
             <p class="caregivers-text">
-              Encuentra <strong>cuidadores verificados</strong> para paseos,
-              visitas a domicilio o estancias mientras tú no estás.
+              Encuentra cuidadores verificados para paseos, visitas a domicilio
+              o estancias mientras tú no estás.
             </p>
-            <div class="caregivers-actions" aria-label="Funciones de cuidadores">
-              <article role="button" tabindex="0" data-caregivers-detail="verified">
-                <span>✓</span>
-                <h3>Cuidadores verificados</h3>
-                <p>Perfiles claros para contactar con confianza.</p>
-              </article>
-              <article role="button" tabindex="0" data-caregivers-detail="walks">
+            <div class="caregivers-cta-row">
+              <button type="button" class="caregivers-cta-primary" data-caregivers-detail="verified">
+                <span>✓</span> Buscar cuidadores
+              </button>
+              <button type="button" class="caregivers-cta-secondary" data-caregivers-detail="walks">
+                <span>⌁</span> Agendar paseo
+              </button>
+            </div>
+            <div class="caregivers-stats">
+              <div class="caregivers-stat">
+                <span>🧑‍🤝‍🧑</span>
+                <p><strong>+90</strong> cuidadores verificados</p>
+              </div>
+              <div class="caregivers-stat">
                 <span>⌁</span>
-                <h3>Paseos programados</h3>
-                <p>Coordina rutinas y horarios para tu mascota.</p>
-              </article>
-              <article role="button" tabindex="0" data-caregivers-detail="home">
-                <span>⌂</span>
-                <h3>Cuidado en casa</h3>
-                <p>Opciones para visitas o estancias temporales.</p>
-              </article>
-              <article role="button" tabindex="0" data-caregivers-detail="tracking">
+                <p>Paseos <strong>programados</strong></p>
+              </div>
+              <div class="caregivers-stat">
                 <span>⌖</span>
-                <h3>Seguimiento en tiempo real</h3>
-                <p>Actualizaciones durante el servicio.</p>
-              </article>
+                <p>Seguimiento <strong>en tiempo real</strong></p>
+              </div>
+            </div>
+          </div>
+          <div class="caregivers-photo" aria-hidden="true">
+            <img src="assets/caregivers-panel-bg.png" alt="" />
+            <div class="caregivers-badge caregivers-badge-top">
+              <span class="caregivers-badge-icon">✓</span>
+              <div>
+                <strong>Cuidadores verificados</strong>
+                <p>Perfiles confiables y evaluados.</p>
+              </div>
+            </div>
+            <div class="caregivers-badge caregivers-badge-bottom">
+              <span class="caregivers-badge-icon">⌖</span>
+              <div>
+                <strong>Seguimiento en vivo</strong>
+                <p>Tranquilidad durante el servicio.</p>
+              </div>
             </div>
           </div>
         </div>
+
+        <div class="caregivers-actions" aria-label="Funciones de cuidadores">
+          <article role="button" tabindex="0" data-caregivers-detail="verified">
+            <span class="caregivers-action-icon">✓</span>
+            <div>
+              <h3>Cuidadores verificados</h3>
+              <p>Perfiles claros para contactar con confianza.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-caregivers-detail="walks">
+            <span class="caregivers-action-icon">⌁</span>
+            <div>
+              <h3>Paseos programados</h3>
+              <p>Coordina rutinas y horarios para tu mascota.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-caregivers-detail="home">
+            <span class="caregivers-action-icon">⌂</span>
+            <div>
+              <h3>Cuidado en casa</h3>
+              <p>Opciones para visitas o estancias temporales.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-caregivers-detail="tracking">
+            <span class="caregivers-action-icon">⌖</span>
+            <div>
+              <h3>Seguimiento en tiempo real</h3>
+              <p>Actualizaciones durante el servicio.</p>
+            </div>
+          </article>
+        </div>
+
+        <p class="caregivers-banner">💜 Tu mascota en las mejores manos, siempre. 🐾</p>
+
         <div class="caregivers-detail-modal" hidden>
           <div class="caregivers-detail-card" role="dialog" aria-modal="true" aria-labelledby="caregivers-detail-title">
             <button class="caregivers-detail-close" type="button" aria-label="Cerrar detalle">×</button>
@@ -555,47 +834,88 @@
 
         <div class="sos-layout">
           <div class="sos-copy">
-            <div class="sos-icon-card" aria-hidden="true">
-              <img src="assets/icon-map-tight.png" alt="" />
-            </div>
             <p class="sos-pill">Nuevo módulo</p>
-            <h2><span>SOS</span> Mascotas</h2>
+            <h2><span class="sos-title-mark">SOS</span> <span class="sos-title-script">Mascotas</span></h2>
+            <p class="sos-subtitle">Ayuda cerca, cuando más se necesita</p>
             <p class="sos-text">
-              Activa una alerta comunitaria y ayuda a reunir a las
-              <strong>mascotas perdidas</strong> con su familia.
+              Activa una alerta comunitaria y ayuda a reunir a las mascotas
+              perdidas con su familia, rápido y fácil.
             </p>
-            <div class="sos-actions" aria-label="Funciones de SOS mascotas">
-              <article role="button" tabindex="0" data-sos-detail="report">
-                <span>▤</span>
-                <div>
-                  <h3>Reporta una mascota</h3>
-                  <p>Publica foto, última ubicación y descripción.</p>
-                </div>
-              </article>
-              <article role="button" tabindex="0" data-sos-detail="map">
-                <span>⌖</span>
-                <div>
-                  <h3>Mapa en tiempo real</h3>
-                  <p>Consulta reportes cercanos en tu zona.</p>
-                </div>
-              </article>
-              <article role="button" tabindex="0" data-sos-detail="alerts">
-                <span>!</span>
-                <div>
-                  <h3>Alertas a la comunidad</h3>
-                  <p>Los usuarios cercanos reciben una notificación.</p>
-                </div>
-              </article>
-              <article role="button" tabindex="0" data-sos-detail="community">
-                <span>♡</span>
-                <div>
-                  <h3>Más posibilidades de encontrarla</h3>
-                  <p>Cada reporte conecta a la comunidad.</p>
-                </div>
-              </article>
+            <div class="sos-cta-row">
+              <button type="button" class="sos-cta-primary" data-sos-detail="report">
+                <span>▤</span> Reportar mascota
+              </button>
+              <button type="button" class="sos-cta-secondary" data-sos-detail="map">
+                <span>⌖</span> Ver mapa
+              </button>
+            </div>
+            <div class="sos-stats">
+              <div class="sos-stat">
+                <span>🚨</span>
+                <p><strong>+300</strong> reportes activos</p>
+              </div>
+              <div class="sos-stat">
+                <span>📢</span>
+                <p>Alertas <strong>a la comunidad</strong></p>
+              </div>
+              <div class="sos-stat">
+                <span>📍</span>
+                <p>Radio <strong>cercano</strong></p>
+              </div>
+            </div>
+          </div>
+          <div class="sos-photo" aria-hidden="true">
+            <img src="assets/sos-panel-bg.png" alt="" />
+            <div class="sos-badge sos-badge-top">
+              <span class="sos-badge-icon">!</span>
+              <div>
+                <strong>Alertas comunitarias</strong>
+                <p>Vecinos listos para ayudar.</p>
+              </div>
+            </div>
+            <div class="sos-badge sos-badge-bottom">
+              <span class="sos-badge-icon">⌖</span>
+              <div>
+                <strong>Mapa en tiempo real</strong>
+                <p>Reportes cercanos a ti.</p>
+              </div>
             </div>
           </div>
         </div>
+
+        <div class="sos-actions" aria-label="Funciones de SOS mascotas">
+          <article role="button" tabindex="0" data-sos-detail="report">
+            <span class="sos-action-icon">▤</span>
+            <div>
+              <h3>Reporta una mascota</h3>
+              <p>Publica foto, última ubicación y descripción.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-sos-detail="map">
+            <span class="sos-action-icon">⌖</span>
+            <div>
+              <h3>Mapa en tiempo real</h3>
+              <p>Consulta reportes cercanos en tu zona.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-sos-detail="alerts">
+            <span class="sos-action-icon">!</span>
+            <div>
+              <h3>Alertas a la comunidad</h3>
+              <p>Los usuarios cercanos reciben una notificación.</p>
+            </div>
+          </article>
+          <article role="button" tabindex="0" data-sos-detail="community">
+            <span class="sos-action-icon">♡</span>
+            <div>
+              <h3>Más posibilidades de encontrarla</h3>
+              <p>Cada reporte conecta a la comunidad.</p>
+            </div>
+          </article>
+        </div>
+
+        <p class="sos-banner">💜 Cada reporte suma. Ayudemos a reunir familias. 🐾</p>
+
         <div class="sos-detail-modal" hidden>
           <div class="sos-detail-card" role="dialog" aria-modal="true" aria-labelledby="sos-detail-title">
             <button class="sos-detail-close" type="button" aria-label="Cerrar detalle">×</button>
