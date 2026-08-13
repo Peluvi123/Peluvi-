@@ -469,7 +469,7 @@ async function loadRedes(token) {
     status.classList.add("is-connected");
     status.innerHTML = "<i></i> Meta conectado";
 
-    document.getElementById("page-name").textContent = connection.page?.name || "Página Paluvi";
+    document.getElementById("page-name").textContent = connection.page?.name || "Página Peluvi";
     document.getElementById("page-followers").textContent = formatNumber(connection.page?.followers_count);
     document.getElementById("page-likes").textContent = formatNumber(connection.page?.fan_count);
     if (connection.page?.picture?.data?.url) {

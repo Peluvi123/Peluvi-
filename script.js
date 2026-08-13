@@ -1,6 +1,7 @@
 const preloader = document.querySelector("#preloader");
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-if (preloader && sessionStorage.getItem("peluviIntroSeen")) {
+if (preloader && (sessionStorage.getItem("peluviIntroSeen") || reduceMotion.matches)) {
   preloader.remove();
 } else if (preloader) {
   sessionStorage.setItem("peluviIntroSeen", "1");
@@ -44,6 +45,11 @@ const heroShell = document.querySelector(".hero-shell");
 const heroSearch = document.querySelector(".hero-search");
 const heroSearchInput = document.querySelector("#buscar");
 const searchHint = document.querySelector("#search-hint");
+
+if (reduceMotion.matches && heroVideo) {
+  heroVideo.pause();
+  heroVideo.removeAttribute("autoplay");
+}
 const adoptionTriggers = document.querySelectorAll(".adoption-trigger");
 const adoptionPanel = document.querySelector(".adoption-panel");
 const adoptionSurface = document.querySelector(".adoption-surface");

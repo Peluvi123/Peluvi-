@@ -9,6 +9,15 @@
       name="description"
       content="Peluvi conecta familias, mascotas y negocios con adopciones, veterinarias, peluquerías, tiendas y cuidadores."
     />
+    <link rel="canonical" href="https://peluvi.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Peluvi" />
+    <meta property="og:title" content="Peluvi | Todo para el bienestar de tu mascota" />
+    <meta property="og:description" content="Encuentra servicios, adopciones y ayuda para tu mascota en una sola experiencia." />
+    <meta property="og:url" content="https://peluvi.com/" />
+    <meta property="og:image" content="https://peluvi.com/assets/peluvi-hero-dark.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#7a45f3" />
     <link rel="icon" type="image/png" href="assets/favicon.png?v=1" />
     <link rel="apple-touch-icon" href="assets/favicon.png?v=1" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -66,7 +75,7 @@
         poster="assets/peluvi-hero-dark.png"
         aria-hidden="true"
       >
-        <source src="assets/peluvi-hero-video.mp4" type="video/mp4" />
+        <source src="assets/peluvi-hero-video.mp4" type="video/mp4" media="(min-width: 641px)" />
       </video>
       <header class="site-header">
         <a class="brand" href="#inicio" aria-label="Peluvi inicio">
@@ -95,10 +104,12 @@
         <div class="hero-copy">
           <p class="pill">💜 Todo para tu mascota, en un solo lugar</p>
           <h1>Tu mascota se merece lo <span>mejor, siempre</span></h1>
-          <p class="hero-text">
-            Encuentra veterinarias, cuidadores, tiendas, adopciones y alertas SOS
-            en segundos. Todo pensado para su bienestar.
-          </p>
+          <p class="hero-text">Encuentra servicios confiables, guarda tus favoritos y recibe ayuda para cuidar mejor a tu mascota desde una sola app.</p>
+
+          <div class="hero-primary-actions" aria-label="Acciones principales">
+            <a class="hero-download" href="/downloads/Peluvi-Android-debug.apk" download="Peluvi-Android-debug.apk">Descargar Peluvi <span>↓</span></a>
+            <a class="hero-explore" href="/servicios/">Explorar servicios</a>
+          </div>
 
           <form class="hero-search" id="mapa">
             <label class="sr-only" for="buscar">Buscar servicios</label>
@@ -158,11 +169,8 @@
       </main>
     </section>
 
-    <section class="pet-strip" aria-label="Galería de Peluvi">
+    <section class="pet-strip" aria-label="Mascotas de la comunidad Peluvi">
       <div class="pet-strip-track">
-        <div class="pet-strip-tile">
-          <video src="assets/showcase/peluvi-video-1.mp4" autoplay muted loop playsinline></video>
-        </div>
         <div class="pet-strip-tile">
           <img src="assets/showcase/peluvi-pet-1.png" alt="Gato con audífonos y gafas moradas" loading="lazy" />
         </div>
@@ -170,34 +178,10 @@
           <img src="assets/showcase/peluvi-pet-4.jpg" alt="Cachorro golden retriever con gafas y audífonos morados" loading="lazy" />
         </div>
         <div class="pet-strip-tile">
-          <video src="assets/showcase/peluvi-video-2.mp4" autoplay muted loop playsinline></video>
-        </div>
-        <div class="pet-strip-tile">
           <img src="assets/showcase/peluvi-pet-2.png" alt="Gato gris con gafas redondas moradas y audífonos" loading="lazy" />
         </div>
         <div class="pet-strip-tile">
           <img src="assets/showcase/peluvi-pet-5.jpg" alt="Bulldog francés con gafas moradas" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile">
-          <video src="assets/showcase/peluvi-video-3.mp4" autoplay muted loop playsinline></video>
-        </div>
-        <div class="pet-strip-tile">
-          <img src="assets/showcase/peluvi-pet-3.jpg" alt="Perro con audífonos morados y collar dorado" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile">
-          <img src="assets/showcase/peluvi-pet-6.jpg" alt="Conejo blanco con audífonos morados" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile">
-          <video src="assets/showcase/peluvi-video-4.mp4" autoplay muted loop playsinline></video>
-        </div>
-        <div class="pet-strip-tile">
-          <img src="assets/showcase/peluvi-pet-7.jpg" alt="Corgi con gafas y audífonos morados" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile">
-          <img src="assets/showcase/peluvi-pet-8.jpg" alt="Gato siamés con gafas moradas" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
-          <video src="assets/showcase/peluvi-video-1.mp4" autoplay muted loop playsinline></video>
         </div>
         <div class="pet-strip-tile" aria-hidden="true">
           <img src="assets/showcase/peluvi-pet-1.png" alt="" loading="lazy" />
@@ -206,31 +190,10 @@
           <img src="assets/showcase/peluvi-pet-4.jpg" alt="" loading="lazy" />
         </div>
         <div class="pet-strip-tile" aria-hidden="true">
-          <video src="assets/showcase/peluvi-video-2.mp4" autoplay muted loop playsinline></video>
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
           <img src="assets/showcase/peluvi-pet-2.png" alt="" loading="lazy" />
         </div>
         <div class="pet-strip-tile" aria-hidden="true">
           <img src="assets/showcase/peluvi-pet-5.jpg" alt="" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
-          <video src="assets/showcase/peluvi-video-3.mp4" autoplay muted loop playsinline></video>
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
-          <img src="assets/showcase/peluvi-pet-3.jpg" alt="" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
-          <img src="assets/showcase/peluvi-pet-6.jpg" alt="" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
-          <video src="assets/showcase/peluvi-video-4.mp4" autoplay muted loop playsinline></video>
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
-          <img src="assets/showcase/peluvi-pet-7.jpg" alt="" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
-          <img src="assets/showcase/peluvi-pet-8.jpg" alt="" loading="lazy" />
         </div>
       </div>
     </section>
@@ -254,7 +217,7 @@
           </div>
         </div>
         <div class="showcase-media">
-          <img src="assets/peluvi-app-wow.png" alt="Visual de la app Peluvi con mascotas y servicios" />
+          <img src="assets/peluvi-app-wow.png" alt="Visual de la app Peluvi con mascotas y servicios" loading="lazy" decoding="async" />
           <span class="floating-chip chip-vet">Vet</span>
           <span class="floating-chip chip-ai">IA</span>
           <span class="floating-chip chip-sos">SOS</span>
@@ -279,21 +242,6 @@
         </article>
       </div>
 
-      <div class="promo-grid" aria-label="Destacados Peluvi">
-        <article class="promo-card promo-adoption">
-          <img src="assets/promo-adoption-card.png" alt="Adopción: encuentra una historia nueva" />
-          <a class="adoption-trigger" href="#adopcion" aria-controls="adoption-panel"><span class="sr-only">Ver mascotas</span></a>
-        </article>
-        <article class="promo-card promo-store">
-          <img src="assets/promo-store-card.png" alt="Tiendas: productos y alimento cerca de ti" />
-          <a class="store-trigger" href="#tiendas" aria-controls="store-panel"><span class="sr-only">Explorar tiendas</span></a>
-        </article>
-        <article class="promo-card promo-care">
-          <img src="assets/promo-care-card.png" alt="Cuidadores: paseos y cuidado con confianza" />
-          <a class="caregivers-trigger" href="#cuidadores" aria-controls="caregivers-panel"><span class="sr-only">Ver cuidadores</span></a>
-        </article>
-      </div>
-
       <div class="download-panel">
         <div class="download-copy">
           <p class="pill dark">Peluvi app · Versión Android</p>
@@ -313,7 +261,7 @@
           </div>
         </div>
         <div class="download-visual" aria-label="Vista previa de Peluvi app">
-          <img src="assets/peluvi-app-banner-v2.png" alt="Perro y gato junto a una vista previa de la aplicación Peluvi" />
+          <img src="assets/peluvi-app-banner-v2.png" alt="Perro y gato junto a una vista previa de la aplicación Peluvi" loading="lazy" decoding="async" />
         </div>
       </div>
     </section>
