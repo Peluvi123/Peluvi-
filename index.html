@@ -18,15 +18,17 @@
     <meta property="og:image" content="https://peluvi.com/assets/peluvi-hero-dark.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#7a45f3" />
-    <link rel="icon" type="image/png" href="assets/favicon.png?v=1" />
-    <link rel="apple-touch-icon" href="assets/favicon.png?v=1" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/peluvi-symbol-32.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/peluvi-symbol-64.png" />
+    <link rel="shortcut icon" type="image/png" href="assets/peluvi-symbol-32.png" />
+    <link rel="apple-touch-icon" href="assets/peluvi-symbol-64.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Pacifico&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260806-1238" />
+    <link rel="stylesheet" href="styles.css?v=20260818-1426" />
     <script>
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -79,8 +81,7 @@
       </video>
       <header class="site-header">
         <a class="brand" href="#inicio" aria-label="Peluvi inicio">
-          <img class="brand-logo" src="assets/peluvi-logo.png" alt="" />
-          <span>Peluvi</span>
+          <img class="brand-logo brand-logo-horizontal" src="assets/peluvi-logo-horizontal.png" alt="Peluvi" />
         </a>
         <button
           class="nav-toggle"
@@ -171,29 +172,21 @@
 
     <section class="pet-strip" aria-label="Mascotas de la comunidad Peluvi">
       <div class="pet-strip-track">
-        <div class="pet-strip-tile">
-          <img src="assets/showcase/peluvi-pet-1.png" alt="Gato con audífonos y gafas moradas" loading="lazy" />
+        <div class="pet-strip-group">
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-1.png" alt="Gato con audífonos y gafas moradas" loading="lazy" /></div>
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-4.jpg" alt="Cachorro golden retriever con gafas y audífonos morados" loading="lazy" /></div>
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-2.png" alt="Gato gris con gafas redondas moradas y audífonos" loading="lazy" /></div>
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-5.jpg" alt="Bulldog francés con gafas moradas" loading="lazy" /></div>
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-3.jpg" alt="Perro con audífonos morados y collar dorado" loading="lazy" /></div>
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-7.jpg" alt="Corgi con gafas y audífonos morados" loading="lazy" /></div>
         </div>
-        <div class="pet-strip-tile">
-          <img src="assets/showcase/peluvi-pet-4.jpg" alt="Cachorro golden retriever con gafas y audífonos morados" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile">
-          <img src="assets/showcase/peluvi-pet-2.png" alt="Gato gris con gafas redondas moradas y audífonos" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile">
-          <img src="assets/showcase/peluvi-pet-5.jpg" alt="Bulldog francés con gafas moradas" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
-          <img src="assets/showcase/peluvi-pet-1.png" alt="" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
-          <img src="assets/showcase/peluvi-pet-4.jpg" alt="" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
-          <img src="assets/showcase/peluvi-pet-2.png" alt="" loading="lazy" />
-        </div>
-        <div class="pet-strip-tile" aria-hidden="true">
-          <img src="assets/showcase/peluvi-pet-5.jpg" alt="" loading="lazy" />
+        <div class="pet-strip-group" aria-hidden="true">
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-1.png" alt="" loading="lazy" /></div>
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-4.jpg" alt="" loading="lazy" /></div>
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-2.png" alt="" loading="lazy" /></div>
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-5.jpg" alt="" loading="lazy" /></div>
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-3.jpg" alt="" loading="lazy" /></div>
+          <div class="pet-strip-tile"><img src="assets/showcase/peluvi-pet-7.jpg" alt="" loading="lazy" /></div>
         </div>
       </div>
     </section>
@@ -244,11 +237,11 @@
 
       <div class="download-panel">
         <div class="download-copy">
-          <p class="pill dark">Peluvi app · Versión Android</p>
-          <h2>El cuidado de tu mascota, siempre contigo.</h2>
+          <p class="pill dark">Peluvi en tu celular</p>
+          <h2>Todo lo importante, a una pata de distancia.</h2>
           <p>
-            Encuentra ayuda, guarda tus favoritos y conecta con servicios de confianza
-            desde una sola experiencia.
+            Lleva tus favoritos, servicios cercanos y alertas contigo. Una experiencia
+            sencilla para actuar justo cuando tu mascota lo necesita.
           </p>
           <ul class="download-benefits" aria-label="Beneficios de la app Peluvi">
             <li><span>✓</span> Perfiles y favoritos</li>
@@ -256,8 +249,8 @@
             <li><span>✓</span> Ayuda y alertas SOS</li>
           </ul>
           <div class="download-actions">
-            <a href="/downloads/Peluvi-Android-debug.apk" download="Peluvi-Android-debug.apk">Descargar para Android <span>↓</span></a>
-            <a class="secondary" href="/portal/">Portal proveedores</a>
+            <a href="/downloads/Peluvi-Android-debug.apk" download="Peluvi-Android-debug.apk">Descargar Peluvi <span>↓</span></a>
+            <a class="secondary" href="/conoce/">Conocer la app</a>
           </div>
         </div>
         <div class="download-visual" aria-label="Vista previa de Peluvi app">
@@ -265,6 +258,20 @@
         </div>
       </div>
     </section>
+
+    <footer class="site-footer">
+      <div class="footer-main">
+        <div class="footer-brand-block">
+          <a class="footer-brand" href="/" aria-label="Peluvi inicio"><img src="assets/peluvi-logo.png" alt="" /><span>Peluvi</span></a>
+          <p>Una experiencia para encontrar servicios, organizar el cuidado y estar más cerca de lo que tu mascota necesita.</p>
+          <div class="footer-social"><a href="https://www.instagram.com/peluvi.pet/" target="_blank" rel="noreferrer" aria-label="Instagram de Peluvi">Instagram ↗</a><a href="https://www.facebook.com/" target="_blank" rel="noreferrer" aria-label="Facebook de Peluvi">Facebook ↗</a></div>
+        </div>
+        <nav class="footer-column" aria-label="Explorar Peluvi"><strong>Explora</strong><a href="/servicios/">Servicios</a><a href="/conoce/">Cómo funciona</a><a href="/#adopcion">Adopciones</a><a href="/#sos">Alertas SOS</a></nav>
+        <nav class="footer-column" aria-label="Peluvi para negocios"><strong>Negocios</strong><a href="/negocios/">Para proveedores</a><a href="/portal/?registro=1">Registrar negocio</a><a href="/portal/">Entrar al portal</a></nav>
+        <div class="footer-column"><strong>Soporte</strong><a href="mailto:soporte@peluvi.com">soporte@peluvi.com</a><a href="mailto:redes@peluvi.com">redes@peluvi.com</a><a class="footer-admin-link" href="/admin/">Administración →</a><span>Colombia</span></div>
+      </div>
+      <div class="footer-bottom"><span>© 2026 Peluvi. Bienestar para mascotas.</span><span>Hecho con cariño para mascotas y sus familias.</span></div>
+    </footer>
 
     <section class="adoption-panel" id="adoption-panel" aria-label="Adopción Peluvi" hidden>
       <div class="adoption-surface">
@@ -906,6 +913,7 @@
       </div>
     </section>
 
+    <script src="cat-walker.js?v=10"></script>
     <script src="script.js?v=20260806-1238"></script>
   </body>
 </html>

@@ -152,6 +152,57 @@
   border-color: var(--purple-bright);
 }
 
+.portal-phone-field {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.portal-phone-field:focus-within {
+  background: #fff;
+  border-color: var(--purple-bright);
+  box-shadow: 0 0 0 3px rgba(139, 78, 255, 0.1);
+}
+
+.portal-field .portal-phone-field select,
+.portal-field .portal-phone-field input {
+  min-width: 0;
+  height: 44px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.portal-field .portal-phone-field select {
+  border-right: 1px solid var(--line);
+  font-weight: 700;
+}
+
+.portal-field .portal-phone-field input:focus,
+.portal-field .portal-phone-field select:focus {
+  border-color: transparent;
+  outline: none;
+}
+
+.portal-field-help {
+  min-height: 15px;
+  color: #8a829c;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.portal-field-help.is-error {
+  color: #d1264f;
+  font-weight: 650;
+}
+
 .portal-password-wrap {
   display: block;
   position: relative;
@@ -520,10 +571,235 @@
   font-weight: 600;
 }
 
+.portal-success-toast {
+  position: fixed;
+  z-index: 2200;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  max-width: min(390px, calc(100vw - 32px));
+  margin: 0;
+  padding: 15px 18px;
+  border: 1px solid rgba(31, 157, 85, 0.2);
+  border-radius: 15px;
+  color: #176b3b;
+  background: rgba(245, 255, 249, 0.97);
+  box-shadow: 0 18px 48px rgba(31, 75, 51, 0.2);
+  backdrop-filter: blur(12px);
+  animation: portal-toast-in 260ms ease-out both;
+}
+
+.portal-success-toast::before {
+  content: "✓";
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: #fff;
+  background: #24b866;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+@keyframes portal-toast-in {
+  from { opacity: 0; transform: translate3d(0, -14px, 0) scale(0.97); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@media (max-width: 560px) {
+  .portal-success-toast {
+    top: 14px;
+    right: 16px;
+    left: 16px;
+    max-width: none;
+  }
+}
+
 /* Dashboard */
 .portal-welcome h1 {
   font-size: 26px;
   margin: 0 0 4px;
+}
+
+.portal-onboarding {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(360px, 1.35fr);
+  gap: 22px 34px;
+  margin-bottom: 24px;
+  padding: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(123, 66, 246, 0.2);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(166, 109, 255, 0.22), transparent 34%),
+    linear-gradient(135deg, #24113f 0%, #5b27a3 58%, #8449ef 100%);
+  color: #fff;
+  box-shadow: 0 18px 48px rgba(65, 32, 112, 0.18);
+}
+
+.portal-onboarding::after {
+  content: "";
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  right: -75px;
+  bottom: -105px;
+  border: 34px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+}
+
+.portal-onboarding-copy,
+.portal-onboarding-steps,
+.portal-onboarding-cta {
+  position: relative;
+  z-index: 1;
+}
+
+.portal-onboarding-eyebrow {
+  display: inline-flex;
+  margin-bottom: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.portal-onboarding h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(24px, 2.5vw, 34px);
+  line-height: 1.05;
+}
+
+.portal-onboarding-copy p {
+  max-width: 440px;
+  margin: 12px 0 18px;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.portal-onboarding-progress {
+  width: 100%;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.portal-onboarding-progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #fff, #d7c2ff);
+  transition: width 260ms ease;
+}
+
+#onboarding-progress-label {
+  display: block;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 11px;
+}
+
+.portal-onboarding-steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.portal-onboarding-step {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  min-height: 58px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.09);
+  text-align: left;
+  cursor: pointer;
+}
+
+.portal-onboarding-step:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.portal-onboarding-step-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.portal-onboarding-step strong,
+.portal-onboarding-step small {
+  display: block;
+}
+
+.portal-onboarding-step strong {
+  color: #fff;
+  font-size: 11.5px;
+}
+
+.portal-onboarding-step small {
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 10px;
+}
+
+.portal-onboarding-step.is-complete {
+  border-color: rgba(197, 255, 220, 0.34);
+  background: rgba(29, 183, 105, 0.15);
+}
+
+.portal-onboarding-step.is-complete .portal-onboarding-step-icon {
+  background: #30c878;
+}
+
+.portal-onboarding-cta {
+  justify-self: start;
+  align-self: end;
+  margin-top: -2px;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 12px;
+  color: #4d1d98;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+@media (max-width: 880px) {
+  .portal-onboarding {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .portal-onboarding {
+    padding: 22px 18px;
+  }
+
+  .portal-onboarding-steps {
+    grid-template-columns: 1fr;
+  }
 }
 
 .portal-stats-row {
@@ -946,6 +1222,122 @@
 .portal-rx-print:hover {
   border-color: var(--purple-bright);
   color: var(--purple);
+}
+
+.portal-prescription-modal[hidden] {
+  display: none;
+}
+
+.portal-prescription-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.portal-prescription-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 12, 45, 0.66);
+  backdrop-filter: blur(8px);
+}
+
+.portal-prescription-dialog {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(780px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 22px;
+  background: #f8f6fc;
+  box-shadow: 0 28px 80px rgba(31, 14, 62, 0.3);
+}
+
+.portal-prescription-dialog-head,
+.portal-prescription-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 22px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.portal-prescription-dialog-head {
+  border-bottom: 1px solid var(--line);
+}
+
+.portal-prescription-dialog-head h2 {
+  margin: 3px 0 0;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.portal-prescription-close {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.portal-prescription-preview-wrap {
+  min-height: 0;
+  overflow: auto;
+  padding: 22px;
+}
+
+#prescription-preview-frame {
+  display: block;
+  width: min(528px, 100%);
+  height: 680px;
+  margin: 0 auto;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(34, 18, 63, 0.13);
+}
+
+.portal-prescription-dialog-actions {
+  justify-content: flex-end;
+  border-top: 1px solid var(--line);
+}
+
+.portal-prescription-secondary,
+.portal-prescription-primary {
+  border-radius: 999px;
+  padding: 10px 18px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.portal-prescription-secondary {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+}
+
+.portal-prescription-primary {
+  border: 0;
+  background: linear-gradient(135deg, #6d38ee, #9c56ff);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(109, 56, 238, 0.22);
+}
+
+body.has-prescription-modal {
+  overflow: hidden;
 }
 
 .portal-pending-section {
@@ -1845,6 +2237,17 @@
   margin-top: 3px;
 }
 
+.portal-patient-card .portal-patient-pending {
+  display: inline-flex;
+  margin-top: 9px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #6f35dc;
+  background: #f0e8ff;
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
 .portal-clinica-layout {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -2329,6 +2732,336 @@
   }
 }
 
+/* Historia clínica premium */
+.portal-timeline {
+  padding-left: 34px;
+}
+
+.portal-timeline::before {
+  left: 6px;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(132, 73, 239, 0.55), rgba(132, 73, 239, 0.08));
+}
+
+.portal-timeline-dot {
+  left: -34px;
+  top: 25px;
+  width: 13px;
+  height: 13px;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px rgba(101, 55, 190, 0.28), 0 5px 14px rgba(91, 42, 172, 0.24);
+}
+
+.portal-visit.portal-timeline-card {
+  overflow: hidden;
+  padding: 0;
+  border-color: rgba(84, 53, 133, 0.15);
+  border-radius: 24px;
+  box-shadow: 0 16px 46px rgba(45, 25, 77, 0.09);
+}
+
+.portal-visit-head {
+  margin: 0;
+  padding: 21px 24px;
+  border-bottom: 1px solid rgba(91, 55, 145, 0.11);
+  background:
+    radial-gradient(circle at 96% 0%, rgba(145, 86, 255, 0.13), transparent 32%),
+    linear-gradient(180deg, #fff, #fcfbff);
+}
+
+.portal-visit-identity {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.portal-visit-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 43px;
+  height: 43px;
+  border-radius: 14px;
+  color: #fff;
+  background: linear-gradient(145deg, #2c174b, #7840d8 68%, #a978ff);
+  box-shadow: 0 9px 20px rgba(87, 42, 165, 0.22);
+  font-size: 18px;
+}
+
+.portal-visit-kicker {
+  display: block;
+  margin-bottom: 3px;
+  color: #8b7d9e !important;
+  font-size: 9.5px !important;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.portal-visit-head .portal-visit-identity strong {
+  display: block;
+  color: #211532;
+  font-size: 18px;
+  letter-spacing: -0.025em;
+}
+
+.portal-visit-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 13px;
+  margin-top: 5px;
+}
+
+.portal-visit-meta span {
+  color: #746886;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.portal-status-pill {
+  padding: 6px 11px;
+  border: 1px solid color-mix(in srgb, var(--pill-color, var(--purple)) 20%, transparent);
+  font-size: 10px !important;
+  letter-spacing: 0.02em;
+}
+
+.portal-clinical-workspace {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(380px, 1.1fr);
+  background: #fff;
+}
+
+.portal-clinical-block {
+  min-width: 0;
+  padding: 23px 24px 24px;
+}
+
+.portal-vitals-block {
+  border-right: 1px solid rgba(91, 55, 145, 0.11);
+  background: #fdfcff;
+}
+
+.portal-clinical-block-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 17px;
+}
+
+.portal-clinical-block-head strong,
+.portal-clinical-block-head small {
+  display: block;
+}
+
+.portal-clinical-block-head strong {
+  color: #251737;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+}
+
+.portal-clinical-block-head small {
+  margin-top: 2px;
+  color: #8a8098;
+  font-size: 10px;
+}
+
+.portal-clinical-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 11px;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.portal-clinical-icon.is-vitals {
+  color: #6e36d6;
+  background: #eee6ff;
+}
+
+.portal-clinical-icon.is-notes {
+  color: #176d5b;
+  background: #e5f8f2;
+}
+
+.portal-clinical-workspace .portal-vitals-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+  margin: 0;
+}
+
+.portal-clinical-workspace .portal-vitals-grid label {
+  gap: 6px;
+  color: #6f647e;
+  font-size: 10px;
+  letter-spacing: 0.01em;
+}
+
+.portal-vital-input {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid #e5deef;
+  border-radius: 11px;
+  background: #fff;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.portal-vital-input:focus-within {
+  border-color: #9a67f2;
+  box-shadow: 0 0 0 3px rgba(136, 76, 237, 0.1);
+}
+
+.portal-clinical-workspace .portal-vitals-grid input {
+  min-width: 0;
+  width: 100%;
+  padding: 10px 11px;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  color: #241537;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.portal-vital-input em {
+  padding-right: 10px;
+  color: #9a90a7;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.portal-notes-block textarea {
+  min-height: 132px;
+  padding: 13px 14px;
+  border: 1px solid #e5deef;
+  border-radius: 13px;
+  background: #fbfaff;
+  color: #28193b;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.portal-notes-block textarea:focus {
+  border-color: #9a67f2;
+  box-shadow: 0 0 0 3px rgba(136, 76, 237, 0.09);
+}
+
+.portal-clinical-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.portal-clinical-actions .portal-success {
+  font-size: 10.5px;
+}
+
+.portal-clinical-actions .portal-visit-save {
+  margin: 0;
+  padding: 8px 13px;
+  border-radius: 10px;
+  color: #5f2cbf;
+  background: #f4effd;
+  font-size: 10.5px;
+}
+
+.portal-clinical-actions .portal-visit-save.is-primary {
+  border-color: transparent;
+  color: #fff;
+  background: linear-gradient(135deg, #6631c7, #8e50ee);
+  box-shadow: 0 8px 18px rgba(111, 54, 211, 0.18);
+}
+
+.portal-clinical-modules {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 0 24px 24px;
+  background: #fff;
+}
+
+.portal-clinical-modules .portal-visit-section {
+  min-width: 0;
+  margin: 0;
+  padding: 17px;
+  border: 1px solid #e7e1f0;
+  border-radius: 16px;
+  background: #fcfbfe;
+}
+
+.portal-clinical-modules .portal-visit-section.is-prescriptions {
+  box-shadow: inset 3px 0 0 #e8b635;
+}
+
+.portal-clinical-modules .portal-visit-section.is-exams {
+  box-shadow: inset 3px 0 0 #35b987;
+}
+
+.portal-clinical-modules .portal-visit-section-head {
+  margin-bottom: 10px;
+}
+
+.portal-clinical-modules .portal-visit-toggle,
+.portal-clinical-modules .portal-file-btn {
+  padding: 7px 11px;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 10px;
+}
+
+@media (max-width: 980px) {
+  .portal-clinical-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-vitals-block {
+    border-right: 0;
+    border-bottom: 1px solid rgba(91, 55, 145, 0.11);
+  }
+}
+
+@media (max-width: 720px) {
+  .portal-timeline {
+    padding-left: 19px;
+  }
+
+  .portal-timeline-dot {
+    left: -19px;
+  }
+
+  .portal-visit-head {
+    align-items: flex-start;
+    padding: 18px;
+  }
+
+  .portal-clinical-block {
+    padding: 19px 18px;
+  }
+
+  .portal-clinical-modules {
+    grid-template-columns: 1fr;
+    padding: 0 18px 18px;
+  }
+}
+
+@media (max-width: 460px) {
+  .portal-clinical-workspace .portal-vitals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-visit-mark {
+    width: 38px;
+    height: 38px;
+  }
+}
+
 .portal-visit textarea {
   width: 100%;
   background: var(--soft);
@@ -2609,6 +3342,17 @@
   pointer-events: none;
 }
 
+.portal-upload-status {
+  margin: 10px 0 0;
+  color: #1f9d55;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.portal-upload-status.is-error {
+  color: #d1264f;
+}
+
 @media (max-width: 600px) {
   .portal-shell {
     padding: 16px 14px 60px;
@@ -2713,5 +3457,54 @@
 
   .portal-rx-row-top {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .portal-phone-field {
+    grid-template-columns: 116px minmax(0, 1fr);
+  }
+
+  .portal-prescription-modal {
+    padding: 0;
+  }
+
+  .portal-prescription-dialog {
+    width: 100%;
+    max-height: 100vh;
+    min-height: 100vh;
+    border-radius: 0;
+  }
+
+  .portal-prescription-preview-wrap {
+    padding: 12px;
+  }
+
+  #prescription-preview-frame {
+    height: calc(100vh - 174px);
+  }
+
+  .portal-prescription-dialog-actions {
+    padding: 14px;
+  }
+}
+
+/* Ajustes finales del registro clínico: deben prevalecer sobre los estilos heredados. */
+.portal-visit.portal-timeline-card {
+  padding: 0;
+}
+
+.portal-notes-block textarea {
+  min-height: 132px;
+  padding: 13px 14px;
+  border: 1px solid #e5deef;
+  border-radius: 13px;
+  background: #fbfaff;
+  color: #28193b;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+@media (max-width: 720px) {
+  .portal-visit.portal-timeline-card {
+    padding: 0;
   }
 }

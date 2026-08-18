@@ -115,6 +115,11 @@ const logoutBtn = document.getElementById("logout-btn");
 const portalBrandScope = document.getElementById("portal-brand-scope");
 const dashboardGreeting = document.getElementById("dashboard-greeting");
 const dashboardSub = document.getElementById("dashboard-sub");
+const providerOnboarding = document.getElementById("provider-onboarding");
+const onboardingSteps = document.getElementById("onboarding-steps");
+const onboardingProgressBar = document.getElementById("onboarding-progress-bar");
+const onboardingProgressLabel = document.getElementById("onboarding-progress-label");
+const onboardingCta = document.getElementById("onboarding-cta");
 
 const citasList = document.getElementById("citas-list");
 const citasEmpty = document.getElementById("citas-empty");
@@ -692,6 +697,95 @@ function toDateKey(year, month, day) {
 
 const clinicaForm = document.getElementById("clinica-form");
 const clinicaSuccess = document.getElementById("clinica-success");
+let clinicaSuccessTimer = null;
+
+const PHONE_COUNTRIES = {
+  CO: { dial: "+57", groups: [3, 3, 4], min: 10, max: 10, example: "300 123 4567" },
+  MX: { dial: "+52", groups: [3, 3, 4], min: 10, max: 10, example: "55 1234 5678" },
+  AR: { dial: "+54", groups: [2, 4, 4], min: 10, max: 11, example: "11 2345 6789" },
+  CL: { dial: "+56", groups: [1, 4, 4], min: 9, max: 9, example: "9 1234 5678" },
+  PE: { dial: "+51", groups: [3, 3, 3], min: 9, max: 9, example: "987 654 321" },
+  EC: { dial: "+593", groups: [2, 3, 4], min: 9, max: 9, example: "99 123 4567" },
+  VE: { dial: "+58", groups: [3, 3, 4], min: 10, max: 10, example: "412 123 4567" },
+  PA: { dial: "+507", groups: [4, 4], min: 8, max: 8, example: "6123 4567" },
+  CR: { dial: "+506", groups: [4, 4], min: 8, max: 8, example: "8888 7777" },
+  US: { dial: "+1", groups: [3, 3, 4], min: 10, max: 10, example: "305 555 0123" },
+  ES: { dial: "+34", groups: [3, 3, 3], min: 9, max: 9, example: "612 345 678" },
+};
+
+function phoneDigits(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function formatPhoneDigits(value, groups) {
+  const digits = phoneDigits(value);
+  const parts = [];
+  let offset = 0;
+  groups.forEach((size) => {
+    if (offset < digits.length) parts.push(digits.slice(offset, offset + size));
+    offset += size;
+  });
+  if (offset < digits.length) parts.push(digits.slice(offset));
+  return parts.join(" ");
+}
+
+function getPhoneConfig(countrySelect) {
+  return PHONE_COUNTRIES[countrySelect.value] || PHONE_COUNTRIES.CO;
+}
+
+function updatePhoneField(countrySelect, input, help, showError = false) {
+  const config = getPhoneConfig(countrySelect);
+  const digits = phoneDigits(input.value).slice(0, config.max);
+  input.value = formatPhoneDigits(digits, config.groups);
+  input.placeholder = config.example;
+  const invalid = digits.length > 0 && (digits.length < config.min || digits.length > config.max);
+  input.setCustomValidity(invalid ? `Ingresa un número válido de ${config.min}${config.max !== config.min ? ` a ${config.max}` : ""} dígitos.` : "");
+  help.classList.toggle("is-error", invalid && showError);
+  help.textContent = invalid && showError
+    ? `Revisa el número: debe tener ${config.min}${config.max !== config.min ? ` a ${config.max}` : ""} dígitos.`
+    : `Se guardará como ${config.dial}${digits ? ` ${formatPhoneDigits(digits, config.groups)}` : ` ${config.example}`}`;
+  return !invalid;
+}
+
+function setPhoneField(countrySelect, input, help, storedValue) {
+  const raw = String(storedValue || "").trim();
+  let country = countrySelect.value || "CO";
+  let digits = phoneDigits(raw);
+  if (raw.startsWith("+")) {
+    const match = Object.entries(PHONE_COUNTRIES)
+      .sort((a, b) => b[1].dial.length - a[1].dial.length)
+      .find(([, config]) => raw.startsWith(config.dial));
+    if (match) {
+      country = match[0];
+      digits = phoneDigits(raw.slice(match[1].dial.length));
+    }
+  }
+  countrySelect.value = country;
+  input.value = digits;
+  updatePhoneField(countrySelect, input, help);
+}
+
+function getInternationalPhone(countrySelect, input) {
+  const digits = phoneDigits(input.value);
+  return digits ? `${getPhoneConfig(countrySelect).dial}${digits}` : "";
+}
+
+function bindPhoneField(countrySelect, input, help) {
+  input.addEventListener("input", () => updatePhoneField(countrySelect, input, help));
+  input.addEventListener("blur", () => updatePhoneField(countrySelect, input, help, true));
+  countrySelect.addEventListener("change", () => updatePhoneField(countrySelect, input, help));
+}
+
+function showClinicaSuccess() {
+  window.clearTimeout(clinicaSuccessTimer);
+  clinicaSuccess.hidden = true;
+  void clinicaSuccess.offsetWidth;
+  clinicaSuccess.hidden = false;
+  clinicaSuccessTimer = window.setTimeout(() => {
+    clinicaSuccess.hidden = true;
+  }, 3600);
+}
+
 const clinicaFields = {
   business_name: document.getElementById("clinica-business-name"),
   address: document.getElementById("clinica-address"),
@@ -701,6 +795,13 @@ const clinicaFields = {
   description: document.getElementById("clinica-description"),
   emergency: document.getElementById("clinica-emergency"),
 };
+const clinicaPhoneCountry = document.getElementById("clinica-phone-country");
+const clinicaWhatsappCountry = document.getElementById("clinica-whatsapp-country");
+const clinicaPhoneHelp = document.getElementById("clinica-phone-help");
+const clinicaWhatsappHelp = document.getElementById("clinica-whatsapp-help");
+
+bindPhoneField(clinicaPhoneCountry, clinicaFields.phone, clinicaPhoneHelp);
+bindPhoneField(clinicaWhatsappCountry, clinicaFields.whatsapp, clinicaWhatsappHelp);
 
 const DAY_OPTIONS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const scheduleDaysList = document.getElementById("schedule-days-list");
@@ -967,6 +1068,8 @@ const doctorAvailableInput = document.getElementById("doctor-available");
 const doctorPhotoInput = document.getElementById("doctor-photo-input");
 const doctorSaveBtn = document.getElementById("doctor-save-btn");
 const clinicPhotoInput = document.getElementById("clinic-photo-input");
+const clinicPhotoButton = clinicPhotoInput.closest(".portal-file-btn");
+const clinicPhotoStatus = document.getElementById("clinic-photo-status");
 
 let currentDoctors = [];
 let currentImages = [];
@@ -975,23 +1078,48 @@ let currentProfile = null;
 async function persistVetProfile(patch) {
   if (isDemoSession) {
     saveLocalProviderProfile({ ...loadLocalProviderProfile(), ...patch });
-    return;
+    return { error: null };
   }
   const table = profileTable();
   if (!table) {
     saveLocalProviderProfile({ ...loadLocalProviderProfile(), ...patch });
-    return;
+    return { error: null };
   }
-  await supabase.from(table).upsert({ id: currentVetId, ...patch });
+  return supabase.from(table).upsert({ id: currentVetId, ...patch });
+}
+
+function optimizeImageAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("No pudimos leer la imagen seleccionada."));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error("El archivo no es una imagen válida."));
+      image.onload = () => {
+        const maxSide = 1200;
+        const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/webp", 0.78));
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 async function uploadClinicMedia(file) {
-  if (isDemoSession) return URL.createObjectURL(file);
+  if (!file?.type?.startsWith("image/")) throw new Error("Selecciona una imagen PNG, JPG o WebP.");
+  if (file.size > 8 * 1024 * 1024) throw new Error("La imagen debe pesar menos de 8 MB.");
+
+  if (isDemoSession) return optimizeImageAsDataUrl(file);
   const bucket = providerMeta().mediaBucket;
-  if (!bucket) return URL.createObjectURL(file);
+  if (!bucket) return optimizeImageAsDataUrl(file);
   const path = `${currentVetId}/${Date.now()}_${file.name}`;
   const { error } = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type });
-  if (error) return null;
+  if (error) return optimizeImageAsDataUrl(file);
   return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }
 
@@ -1013,6 +1141,80 @@ function showDashboard(profile) {
   dashboardSub.textContent = profile.address || "";
 }
 
+function openClinicSetup(targetSelector = "#clinica-form") {
+  clinicaTabBtn.click();
+  requestAnimationFrame(() => {
+    document.querySelector(targetSelector)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
+function renderProviderOnboarding() {
+  if (!isVet()) {
+    providerOnboarding.hidden = true;
+    return;
+  }
+
+  const basicComplete = Boolean(
+    clinicaFields.business_name.value.trim() &&
+    clinicaFields.address.value.trim() &&
+    clinicaFields.phone.value.trim() &&
+    clinicaFields.city.value.trim() &&
+    clinicaFields.description.value.trim()
+  );
+  const steps = [
+    {
+      label: "Información de la clínica",
+      detail: "Datos, contacto y descripción",
+      complete: basicComplete,
+      target: "#clinica-form",
+    },
+    {
+      label: "Servicios",
+      detail: "Qué atenciones ofreces",
+      complete: selectedServices.size > 0,
+      target: "#clinica-vet-services",
+    },
+    {
+      label: "Horarios",
+      detail: "Días y horas de atención",
+      complete: getScheduleData().length > 0,
+      target: "#schedule-toggle",
+    },
+    {
+      label: "Fotos de la clínica",
+      detail: "Muestra tus instalaciones",
+      complete: currentImages.length > 0,
+      target: "#clinic-photos-block",
+    },
+    {
+      label: "Equipo médico",
+      detail: "Agrega al menos un profesional",
+      complete: currentDoctors.length > 0,
+      target: "#clinica-doctors-block",
+    },
+  ];
+
+  const completed = steps.filter((step) => step.complete).length;
+  providerOnboarding.hidden = completed === steps.length;
+  onboardingProgressBar.style.width = `${(completed / steps.length) * 100}%`;
+  onboardingProgressLabel.textContent = `${completed} de ${steps.length} pasos completados`;
+  onboardingSteps.innerHTML = "";
+
+  steps.forEach((step) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `portal-onboarding-step${step.complete ? " is-complete" : ""}`;
+    button.innerHTML = `
+      <span class="portal-onboarding-step-icon">${step.complete ? "✓" : "○"}</span>
+      <span><strong>${step.label}</strong><small>${step.complete ? "Completado" : step.detail}</small></span>
+    `;
+    button.addEventListener("click", () => openClinicSetup(step.target));
+    onboardingSteps.appendChild(button);
+  });
+}
+
+onboardingCta.addEventListener("click", () => openClinicSetup());
+
 function loginDemoProvider(profile, email = "") {
   isDemoSession = true;
   if (email) sessionStorage.setItem(DEMO_SESSION_KEY, email.toLowerCase());
@@ -1027,6 +1229,7 @@ function loginDemoProvider(profile, email = "") {
   currentImages = providerProfile.images ?? [];
   renderDoctors();
   renderClinicImages();
+  renderProviderOnboarding();
   loadDemoTabData(profile.provider_type);
 }
 
@@ -1071,6 +1274,7 @@ async function requireProviderSession() {
   currentImages = vetProfile?.images ?? [];
   renderDoctors();
   renderClinicImages();
+  renderProviderOnboarding();
   return { session, profile, vetProfile };
 }
 
@@ -1228,7 +1432,7 @@ logoutBtn.addEventListener("click", async () => {
 });
 
 document.querySelectorAll(".portal-tab").forEach((btn) => {
-  btn.addEventListener("click", () => {
+  btn.addEventListener("click", async () => {
     document.querySelectorAll(".portal-tab").forEach((b) => b.classList.remove("is-active"));
     document.querySelectorAll(".portal-panel").forEach((p) => (p.hidden = true));
     btn.classList.add("is-active");
@@ -1236,15 +1440,18 @@ document.querySelectorAll(".portal-tab").forEach((btn) => {
     if (isCaretaker() && btn.dataset.careCategory) {
       renderCareSessions(btn.dataset.careCategory);
     }
+    if (btn.dataset.tab === "pacientes" && !isDemoSession && !isStore() && !isCaretaker()) {
+      await refreshPatientsFromServer();
+    }
   });
 });
 
 function fillClinicForm(profile, vetProfile) {
   clinicaFields.business_name.value = profile.business_name || "";
   clinicaFields.address.value = profile.address || "";
-  clinicaFields.phone.value = profile.phone || "";
+  setPhoneField(clinicaPhoneCountry, clinicaFields.phone, clinicaPhoneHelp, profile.phone || "");
   clinicaFields.city.value = profile.city || "";
-  clinicaFields.whatsapp.value = vetProfile?.whatsapp || "";
+  setPhoneField(clinicaWhatsappCountry, clinicaFields.whatsapp, clinicaWhatsappHelp, vetProfile?.whatsapp || "");
   const validDayEntries = (vetProfile?.schedule_details || []).filter(
     (e) => typeof e.day === "string" && e.open && e.close
   );
@@ -1282,6 +1489,7 @@ function renderDoctors() {
       currentDoctors.splice(index, 1);
       await persistVetProfile({ doctors: currentDoctors });
       renderDoctors();
+      renderProviderOnboarding();
     });
     doctorsList.appendChild(card);
   });
@@ -1301,6 +1509,7 @@ function renderClinicImages() {
       currentImages.splice(index, 1);
       await persistVetProfile({ images: currentImages });
       renderClinicImages();
+      renderProviderOnboarding();
     });
     imagesList.appendChild(item);
   });
@@ -1333,6 +1542,7 @@ doctorSaveBtn.addEventListener("click", async () => {
   });
   await persistVetProfile({ doctors: currentDoctors });
   renderDoctors();
+  renderProviderOnboarding();
 
   doctorNameInput.value = "";
   doctorSpecialtyInput.value = "";
@@ -1346,22 +1556,47 @@ doctorSaveBtn.addEventListener("click", async () => {
 clinicPhotoInput.addEventListener("change", async () => {
   const file = clinicPhotoInput.files[0];
   if (!file) return;
-  const url = await uploadClinicMedia(file);
-  if (url) {
+
+  clinicPhotoStatus.hidden = true;
+  clinicPhotoStatus.classList.remove("is-error");
+  clinicPhotoButton.classList.add("is-uploading");
+
+  try {
+    const url = await uploadClinicMedia(file);
     currentImages.push(url);
-    await persistVetProfile({ images: currentImages });
+    const { error } = await persistVetProfile({ images: currentImages });
+    if (error) {
+      currentImages.pop();
+      throw new Error(error.message || "No se pudo guardar la foto.");
+    }
     renderClinicImages();
+    renderProviderOnboarding();
+    clinicPhotoStatus.textContent = "Foto subida correctamente.";
+  } catch (error) {
+    clinicPhotoStatus.textContent = error.message || "No se pudo subir la foto. Intenta nuevamente.";
+    clinicPhotoStatus.classList.add("is-error");
+  } finally {
+    clinicPhotoStatus.hidden = false;
+    clinicPhotoButton.classList.remove("is-uploading");
+    clinicPhotoInput.value = "";
   }
-  clinicPhotoInput.value = "";
 });
 
 clinicaForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  const phoneValid = updatePhoneField(clinicaPhoneCountry, clinicaFields.phone, clinicaPhoneHelp, true);
+  const whatsappValid = updatePhoneField(clinicaWhatsappCountry, clinicaFields.whatsapp, clinicaWhatsappHelp, true);
+  if (!phoneValid || !whatsappValid) {
+    (!phoneValid ? clinicaFields.phone : clinicaFields.whatsapp).reportValidity();
+    return;
+  }
+  const phoneValue = getInternationalPhone(clinicaPhoneCountry, clinicaFields.phone);
+  const whatsappValue = getInternationalPhone(clinicaWhatsappCountry, clinicaFields.whatsapp);
   if (isDemoSession) {
     const scheduleData = getScheduleData();
     const scheduleSummaryText = buildScheduleSummary(scheduleData);
     await persistVetProfile({
-      whatsapp: clinicaFields.whatsapp.value.trim(),
+      whatsapp: whatsappValue,
       schedule: scheduleSummaryText,
       schedule_details: scheduleData,
       description: clinicaFields.description.value.trim(),
@@ -1369,8 +1604,9 @@ clinicaForm.addEventListener("submit", async (e) => {
       emergency: isVet() ? clinicaFields.emergency.checked : undefined,
     });
     scheduleSummary.textContent = scheduleSummaryText || "Sin definir";
-    clinicaSuccess.hidden = false;
+    showClinicaSuccess();
     dashboardGreeting.textContent = `Hola, ${clinicaFields.business_name.value.trim()}`;
+    renderProviderOnboarding();
     return;
   }
   const { data: { session } } = await supabase.auth.getSession();
@@ -1382,7 +1618,7 @@ clinicaForm.addEventListener("submit", async (e) => {
     .update({
       business_name: clinicaFields.business_name.value.trim(),
       address: clinicaFields.address.value.trim(),
-      phone: clinicaFields.phone.value.trim(),
+      phone: phoneValue,
       city: clinicaFields.city.value.trim(),
     })
     .eq("id", session.user.id);
@@ -1391,7 +1627,7 @@ clinicaForm.addEventListener("submit", async (e) => {
   const scheduleSummaryText = buildScheduleSummary(scheduleData);
   const patch = {
     id: session.user.id,
-    whatsapp: clinicaFields.whatsapp.value.trim(),
+    whatsapp: whatsappValue,
     schedule: scheduleSummaryText,
     schedule_details: scheduleData,
     description: clinicaFields.description.value.trim(),
@@ -1405,8 +1641,9 @@ clinicaForm.addEventListener("submit", async (e) => {
   await supabase.from(profileTable()).upsert(patch);
   scheduleSummary.textContent = scheduleSummaryText || "Sin definir";
 
-  clinicaSuccess.hidden = false;
+  showClinicaSuccess();
   dashboardGreeting.textContent = `Hola, ${clinicaFields.business_name.value.trim()}`;
+  renderProviderOnboarding();
 });
 
 function renderCalendar() {
@@ -2089,14 +2326,16 @@ function renderPacientes(appointments, linkedRecords = []) {
   const byPet = new Map();
   const patientAppointments = isStore() || isCaretaker()
     ? appointments
-    : appointments.filter((appointment) => !["pending", "cancelled"].includes(appointment.status));
+    : appointments.filter((appointment) => appointment.status !== "cancelled");
   patientAppointments.forEach((apt) => {
     const key = apt.pet_id || apt.pet_name;
     if (!key) return;
     if (!byPet.has(key)) {
-      byPet.set(key, { ...apt, visits: 0 });
+      byPet.set(key, { ...apt, visits: 0, pendingRequests: 0 });
     }
-    byPet.get(key).visits += 1;
+    const patient = byPet.get(key);
+    if (apt.status === "pending") patient.pendingRequests += 1;
+    else patient.visits += 1;
   });
 
   // Pacientes vinculados por código que todavía no tienen ninguna cita
@@ -2108,6 +2347,7 @@ function renderPacientes(appointments, linkedRecords = []) {
         pet_breed: rec.breed || "",
         pet_image: rec.pet_image_url || "",
         visits: 0,
+        pendingRequests: 0,
       });
     }
   });
@@ -2132,6 +2372,7 @@ function renderPatientCards(patients) {
       <span>${p.pet_breed || ""}</span>
       <span>${p.owner_name ? `Responsable: ${p.owner_name}` : "Responsable sin registrar"}</span>
       <span>${p.visits} cita${p.visits > 1 ? "s" : ""}</span>
+      ${p.pendingRequests ? `<span class="portal-patient-pending">${p.pendingRequests > 1 ? `${p.pendingRequests} solicitudes pendientes` : "Solicitud pendiente"}</span>` : ""}
     `;
     card.addEventListener("click", () => showPatientDetail(p.pet_id || p.pet_name, p));
     pacientesList.appendChild(card);
@@ -2304,25 +2545,40 @@ function createMedicationRow(rowsContainer) {
   return row;
 }
 
+function escapePrescriptionValue(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function buildPrescriptionHTML(rx, apt) {
   const meds = (rx.medications || [])
     .map(
       (m) => `
       <div class="med">
-        <div class="med-name">${m.name || ""}${m.dose ? ` — ${m.dose}` : ""}</div>
-        <div class="med-detail">${[m.frequency, m.duration].filter(Boolean).join(" · ")}</div>
-        ${m.instructions ? `<div class="med-instructions">${m.instructions}</div>` : ""}
+        <div class="med-name">${escapePrescriptionValue(m.name)}${m.dose ? ` — ${escapePrescriptionValue(m.dose)}` : ""}</div>
+        <div class="med-detail">${escapePrescriptionValue([m.frequency, m.duration].filter(Boolean).join(" · "))}</div>
+        ${m.instructions ? `<div class="med-instructions">${escapePrescriptionValue(m.instructions)}</div>` : ""}
       </div>`
     )
     .join("");
   const date = rx.created_at ? new Date(rx.created_at).toLocaleDateString("es-CO") : "";
+  const clinicName = escapePrescriptionValue(currentProfile?.business_name || currentProfile?.name);
+  const clinicContact = escapePrescriptionValue(
+    `${currentProfile?.address || ""}${currentProfile?.phone ? ` · ${currentProfile.phone}` : ""}`
+  );
+  const petName = escapePrescriptionValue(apt.pet_name);
+  const petBreed = escapePrescriptionValue(apt.pet_breed);
 
   return `
     <!doctype html>
     <html lang="es">
     <head>
       <meta charset="UTF-8" />
-      <title>Orden médica — ${apt.pet_name || ""}</title>
+      <title>Orden médica — ${petName}</title>
       <style>
         @page { size: 5.5in 8.5in; margin: 0; }
         * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -2362,33 +2618,25 @@ function buildPrescriptionHTML(rx, apt) {
         }
         .sign { margin-top: 50px; }
         .sign-line { border-top: 2px solid #6d38ee; width: 220px; padding-top: 6px; font-size: 11px; color: #6c6480; }
-        .print-bar { padding: 16px 24px 0; }
-        .print-bar button {
-          background: linear-gradient(135deg, #6d38ee, #9c56ff); border: none; color: #fff;
-          font-weight: 700; font-size: 13px; padding: 8px 18px; border-radius: 999px; cursor: pointer;
-        }
-        @media print { .no-print { display: none; } }
+        @media print { body { width: 100%; } }
       </style>
     </head>
     <body>
-      <div class="print-bar no-print">
-        <button onclick="window.print()">🖨️ Imprimir</button>
-      </div>
       <div class="header-band">
-        <h1>${currentProfile?.business_name || currentProfile?.name || ""}</h1>
-        <p>${currentProfile?.address || ""}${currentProfile?.phone ? " · " + currentProfile.phone : ""}</p>
+        <h1>${clinicName}</h1>
+        <p>${clinicContact}</p>
       </div>
       <div class="content">
         <div class="row">
-          <span><strong>Paciente:</strong> ${apt.pet_name || ""} (${apt.pet_breed || ""})</span>
+          <span><strong>Paciente:</strong> ${petName}${petBreed ? ` (${petBreed})` : ""}</span>
           <span><strong>Fecha:</strong> ${date}</span>
         </div>
 
         <div class="section-label">Medicamentos</div>
         ${meds}
 
-        ${rx.notes ? `<div class="section-label">Exámenes solicitados</div><div class="free-text-box">${rx.notes}</div>` : ""}
-        ${rx.recommendations ? `<div class="section-label">Recomendaciones</div><div class="free-text-box">${rx.recommendations}</div>` : ""}
+        ${rx.notes ? `<div class="section-label">Exámenes solicitados</div><div class="free-text-box">${escapePrescriptionValue(rx.notes)}</div>` : ""}
+        ${rx.recommendations ? `<div class="section-label">Recomendaciones</div><div class="free-text-box">${escapePrescriptionValue(rx.recommendations)}</div>` : ""}
 
         <div class="sign">
           <div class="sign-line">Firma del veterinario</div>
@@ -2399,20 +2647,51 @@ function buildPrescriptionHTML(rx, apt) {
   `;
 }
 
-function previewPrescription(rx, apt) {
-  const win = window.open("", "_blank");
-  win.document.write(buildPrescriptionHTML(rx, apt));
-  win.document.close();
-  win.focus();
+const prescriptionPreviewModal = document.getElementById("prescription-preview-modal");
+const prescriptionPreviewFrame = document.getElementById("prescription-preview-frame");
+const prescriptionPreviewPrint = document.getElementById("prescription-preview-print");
+let prescriptionPreviewReturnFocus = null;
+let prescriptionPrintTimer = null;
+
+function closePrescriptionPreview() {
+  window.clearTimeout(prescriptionPrintTimer);
+  prescriptionPreviewFrame.onload = null;
+  prescriptionPreviewModal.hidden = true;
+  document.body.classList.remove("has-prescription-modal");
+  prescriptionPreviewFrame.removeAttribute("srcdoc");
+  prescriptionPreviewReturnFocus?.focus();
 }
 
-function printPrescription(rx, apt) {
-  const win = window.open("", "_blank");
-  win.document.write(buildPrescriptionHTML(rx, apt));
-  win.document.close();
-  win.focus();
-  win.print();
+function printPrescriptionFrame() {
+  const printWindow = prescriptionPreviewFrame.contentWindow;
+  if (!printWindow) return;
+  printWindow.focus();
+  printWindow.print();
 }
+
+function openPrescriptionPreview(rx, apt, autoPrint = false) {
+  prescriptionPreviewReturnFocus = document.activeElement;
+  prescriptionPreviewModal.hidden = false;
+  document.body.classList.add("has-prescription-modal");
+  prescriptionPreviewFrame.onload = () => {
+    prescriptionPreviewFrame.contentWindow?.scrollTo(0, 0);
+    prescriptionPreviewModal.querySelector(".portal-prescription-close").focus();
+    if (autoPrint) {
+      prescriptionPrintTimer = window.setTimeout(() => {
+        if (!prescriptionPreviewModal.hidden) printPrescriptionFrame();
+      }, 80);
+    }
+  };
+  prescriptionPreviewFrame.srcdoc = buildPrescriptionHTML(rx, apt);
+}
+
+document.querySelectorAll("[data-prescription-close]").forEach((button) => {
+  button.addEventListener("click", closePrescriptionPreview);
+});
+prescriptionPreviewPrint.addEventListener("click", printPrescriptionFrame);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !prescriptionPreviewModal.hidden) closePrescriptionPreview();
+});
 
 function renderRxList(container, prescriptions, apt) {
   container.innerHTML = "";
@@ -2444,14 +2723,14 @@ function renderRxList(container, prescriptions, apt) {
     previewBtn.type = "button";
     previewBtn.className = "portal-rx-print";
     previewBtn.textContent = "👁️ Previsualizar";
-    previewBtn.addEventListener("click", () => previewPrescription(rx, apt));
+    previewBtn.addEventListener("click", () => openPrescriptionPreview(rx, apt));
     actions.appendChild(previewBtn);
 
     const printBtn = document.createElement("button");
     printBtn.type = "button";
     printBtn.className = "portal-rx-print";
     printBtn.textContent = "🖨️ Imprimir orden";
-    printBtn.addEventListener("click", () => printPrescription(rx, apt));
+    printBtn.addEventListener("click", () => openPrescriptionPreview(rx, apt, true));
     actions.appendChild(printBtn);
 
     card.appendChild(actions);
@@ -2461,7 +2740,7 @@ function renderRxList(container, prescriptions, apt) {
 
 function createRxSection(apt) {
   const section = document.createElement("div");
-  section.className = "portal-visit-section";
+  section.className = "portal-visit-section is-prescriptions";
 
   const head = document.createElement("div");
   head.className = "portal-visit-section-head";
@@ -2597,7 +2876,7 @@ function renderExamList(container, exams) {
 
 function createExamSection(apt) {
   const section = document.createElement("div");
-  section.className = "portal-visit-section";
+  section.className = "portal-visit-section is-exams";
 
   const head = document.createElement("div");
   head.className = "portal-visit-section-head";
@@ -3030,26 +3309,61 @@ async function showPatientDetail(key, petInfo) {
 
     const visit = document.createElement("div");
     visit.className = "portal-visit portal-timeline-card";
+    const visitDate = apt.date
+      ? new Date(`${apt.date}T12:00:00`).toLocaleDateString("es-CO", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
+      : "Fecha sin definir";
+    const caseNumber = String(apt.id || "consulta").slice(-6).toUpperCase();
     visit.innerHTML = `
       <div class="portal-visit-head">
-        <strong>${apt.service || "Consulta"}</strong>
+        <div class="portal-visit-identity">
+          <span class="portal-visit-mark" aria-hidden="true">✦</span>
+          <div>
+            <span class="portal-visit-kicker">Registro clínico · Caso ${caseNumber}</span>
+            <strong>${apt.service || "Consulta"}</strong>
+            <div class="portal-visit-meta">
+              <span>◷ ${visitDate}${apt.time ? ` · ${apt.time}` : ""}</span>
+              ${apt.doctor_name ? `<span>Atendido por ${apt.doctor_name}</span>` : ""}
+            </div>
+          </div>
+        </div>
         <span class="portal-status-pill" style="--pill-color:${STATUS_COLORS[apt.status] || "#8f53ff"}">${STATUS_LABELS[apt.status] || apt.status}</span>
       </div>
-      <span class="portal-visit-date">${apt.date || ""} ${apt.time || ""}${apt.doctor_name ? ` · Atendido por ${apt.doctor_name}` : ""}</span>
-      <span class="portal-visit-notes-label">Signos vitales de esta visita</span>
-      <div class="portal-vitals-grid">
-        <label>Peso (kg)<input type="number" step="0.1" class="vital-weight" value="${apt.weight_kg ?? ""}" /></label>
-        <label>Temp. (°C)<input type="number" step="0.1" class="vital-temp" value="${apt.temperature_c ?? ""}" /></label>
-        <label>Frec. cardíaca<input type="number" class="vital-hr" value="${apt.heart_rate ?? ""}" /></label>
-        <label>Frec. respiratoria<input type="number" class="vital-rr" value="${apt.respiratory_rate ?? ""}" /></label>
-      </div>
-      <button type="button" class="portal-visit-save vitals-save">Guardar signos vitales</button>
-      <span class="portal-success vitals-success" hidden>Guardado ✓</span>
 
-      <span class="portal-visit-notes-label">Notas clínicas</span>
-      <textarea placeholder="Diagnóstico, tratamiento, indicaciones...">${apt.notes || ""}</textarea>
-      <button type="button" class="portal-visit-save">Guardar nota</button>
-      <span class="portal-success" hidden>Guardado ✓</span>
+      <div class="portal-clinical-workspace">
+        <section class="portal-clinical-block portal-vitals-block">
+          <div class="portal-clinical-block-head">
+            <span class="portal-clinical-icon is-vitals">⌁</span>
+            <div><strong>Signos vitales</strong><small>Mediciones de esta consulta</small></div>
+          </div>
+          <div class="portal-vitals-grid">
+            <label><span>Peso</span><span class="portal-vital-input"><input type="number" step="0.1" class="vital-weight" value="${apt.weight_kg ?? ""}" placeholder="0.0" /><em>kg</em></span></label>
+            <label><span>Temperatura</span><span class="portal-vital-input"><input type="number" step="0.1" class="vital-temp" value="${apt.temperature_c ?? ""}" placeholder="0.0" /><em>°C</em></span></label>
+            <label><span>Frec. cardíaca</span><span class="portal-vital-input"><input type="number" class="vital-hr" value="${apt.heart_rate ?? ""}" placeholder="0" /><em>lpm</em></span></label>
+            <label><span>Frec. respiratoria</span><span class="portal-vital-input"><input type="number" class="vital-rr" value="${apt.respiratory_rate ?? ""}" placeholder="0" /><em>rpm</em></span></label>
+          </div>
+          <div class="portal-clinical-actions">
+            <button type="button" class="portal-visit-save vitals-save">Guardar mediciones</button>
+            <span class="portal-success vitals-success" hidden>Mediciones guardadas ✓</span>
+          </div>
+        </section>
+
+        <section class="portal-clinical-block portal-notes-block">
+          <div class="portal-clinical-block-head">
+            <span class="portal-clinical-icon is-notes">≡</span>
+            <div><strong>Evolución clínica</strong><small>Diagnóstico, tratamiento e indicaciones</small></div>
+          </div>
+          <textarea aria-label="Evolución clínica" placeholder="Escribe los hallazgos, diagnóstico, tratamiento e indicaciones para el paciente...">${apt.notes || ""}</textarea>
+          <div class="portal-clinical-actions">
+            <button type="button" class="portal-visit-save is-primary">Guardar evolución</button>
+            <span class="portal-success" hidden>Nota guardada ✓</span>
+          </div>
+        </section>
+      </div>
     `;
     const textarea = visit.querySelector("textarea");
     const saveBtn = visit.querySelector(".portal-visit-save:not(.vitals-save)");
@@ -3085,15 +3399,19 @@ async function showPatientDetail(key, petInfo) {
     });
 
     if (isVet()) {
+      const clinicalModules = document.createElement("div");
+      clinicalModules.className = "portal-clinical-modules";
+
       const { section: rxSection, listEl: rxListEl, rxState } = createRxSection(apt);
       rxState.push(...(rxByApt.get(apt.id) || []));
       renderRxList(rxListEl, rxState, apt);
-      visit.appendChild(rxSection);
+      clinicalModules.appendChild(rxSection);
 
       const { section: examSection, listEl: examListEl, examState } = createExamSection(apt);
       examState.push(...(examByApt.get(apt.id) || []));
       renderExamList(examListEl, examState);
-      visit.appendChild(examSection);
+      clinicalModules.appendChild(examSection);
+      visit.appendChild(clinicalModules);
     }
 
     item.appendChild(visit);
@@ -3118,6 +3436,22 @@ async function refetchLinkedPatientRecords() {
     .select("pet_key,pet_name,breed,pet_image_url")
     .eq("vet_id", currentVetId);
   linkedPatientRecords = data || [];
+}
+
+async function refreshPatientsFromServer() {
+  if (!currentVetId) return;
+  const { data, error } = await supabase
+    .from("appointments")
+    .select("*")
+    .eq("vet_id", currentVetId)
+    .order("date", { ascending: true });
+  if (error) return;
+
+  allAppointments = data || [];
+  await refetchLinkedPatientRecords();
+  renderPacientes(allAppointments, linkedPatientRecords);
+  renderPendingCitas();
+  renderDashboard();
 }
 
 async function loadTabData({ session }) {
@@ -3245,7 +3579,12 @@ function renderDashboard() {
   const todaysAppointments = scheduledAppointments.filter((a) => a.date === todayKey);
   const pendingCount = allAppointments.filter((a) => a.status === "pending").length;
   const monthCount = scheduledAppointments.filter((a) => (a.date || "").startsWith(monthPrefix)).length;
-  const patientKeys = new Set(scheduledAppointments.map((a) => a.pet_id || a.pet_name).filter(Boolean));
+  const patientKeys = new Set(
+    allAppointments
+      .filter((appointment) => appointment.status !== "cancelled")
+      .map((appointment) => appointment.pet_id || appointment.pet_name)
+      .filter(Boolean)
+  );
 
   statToday.textContent = todaysAppointments.length;
   statPending.textContent = pendingCount;

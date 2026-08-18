@@ -7,8 +7,10 @@
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#7a45f3" />
     <title>Portal de proveedores | Peluvi</title>
-    <link rel="icon" type="image/png" href="../assets/favicon.png?v=1" />
-    <link rel="apple-touch-icon" href="../assets/favicon.png?v=1" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/peluvi-symbol-32.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="../assets/peluvi-symbol-64.png" />
+    <link rel="shortcut icon" type="image/png" href="../assets/peluvi-symbol-32.png" />
+    <link rel="apple-touch-icon" href="../assets/peluvi-symbol-64.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,7 +18,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap"
     />
     <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="portal.css?v=8" />
+    <link rel="stylesheet" href="portal.css?v=15" />
   </head>
   <body class="portal-body">
     <div class="portal-shell">
@@ -120,6 +122,20 @@
           </nav>
 
           <div class="portal-panel" data-panel="inicio">
+            <section class="portal-onboarding" id="provider-onboarding" hidden>
+              <div class="portal-onboarding-copy">
+                <span class="portal-onboarding-eyebrow">Primeros pasos</span>
+                <h2>Configura tu veterinaria</h2>
+                <p>Completa tu perfil para que las familias puedan encontrarte, conocer tus servicios y reservar contigo.</p>
+                <div class="portal-onboarding-progress" aria-label="Progreso de configuración">
+                  <span id="onboarding-progress-bar"></span>
+                </div>
+                <strong id="onboarding-progress-label">0 de 5 pasos completados</strong>
+              </div>
+              <div class="portal-onboarding-steps" id="onboarding-steps"></div>
+              <button class="portal-onboarding-cta" id="onboarding-cta" type="button">Continuar configuración →</button>
+            </section>
+
             <div class="portal-stats-row">
               <div class="portal-stat-card">
                 <span id="stat-today">0</span>
@@ -244,7 +260,23 @@
                 <div class="portal-field-row">
                   <label class="portal-field">
                     <span>Teléfono</span>
-                    <input type="text" id="clinica-phone" />
+                    <span class="portal-phone-field">
+                      <select id="clinica-phone-country" aria-label="Código de país del teléfono">
+                        <option value="CO">🇨🇴 +57</option>
+                        <option value="MX">🇲🇽 +52</option>
+                        <option value="AR">🇦🇷 +54</option>
+                        <option value="CL">🇨🇱 +56</option>
+                        <option value="PE">🇵🇪 +51</option>
+                        <option value="EC">🇪🇨 +593</option>
+                        <option value="VE">🇻🇪 +58</option>
+                        <option value="PA">🇵🇦 +507</option>
+                        <option value="CR">🇨🇷 +506</option>
+                        <option value="US">🇺🇸 +1</option>
+                        <option value="ES">🇪🇸 +34</option>
+                      </select>
+                      <input type="tel" id="clinica-phone" inputmode="tel" autocomplete="tel-national" placeholder="300 123 4567" />
+                    </span>
+                    <small class="portal-field-help" id="clinica-phone-help">Se guardará como +57 300 123 4567</small>
                   </label>
                   <label class="portal-field">
                     <span>Ciudad</span>
@@ -253,7 +285,23 @@
                 </div>
                 <label class="portal-field">
                   <span>WhatsApp</span>
-                  <input type="text" id="clinica-whatsapp" placeholder="+57..." />
+                  <span class="portal-phone-field">
+                    <select id="clinica-whatsapp-country" aria-label="Código de país de WhatsApp">
+                      <option value="CO">🇨🇴 +57</option>
+                      <option value="MX">🇲🇽 +52</option>
+                      <option value="AR">🇦🇷 +54</option>
+                      <option value="CL">🇨🇱 +56</option>
+                      <option value="PE">🇵🇪 +51</option>
+                      <option value="EC">🇪🇨 +593</option>
+                      <option value="VE">🇻🇪 +58</option>
+                      <option value="PA">🇵🇦 +507</option>
+                      <option value="CR">🇨🇷 +506</option>
+                      <option value="US">🇺🇸 +1</option>
+                      <option value="ES">🇪🇸 +34</option>
+                    </select>
+                    <input type="tel" id="clinica-whatsapp" inputmode="tel" autocomplete="tel-national" placeholder="300 123 4567" />
+                  </span>
+                  <small class="portal-field-help" id="clinica-whatsapp-help">Se guardará como +57 300 123 4567</small>
                 </label>
 
                 <div class="portal-field">
@@ -292,7 +340,7 @@
                 </label>
                 <div class="portal-field-row portal-field-row-actions">
                   <button type="submit" id="clinica-save">Guardar cambios</button>
-                  <p class="portal-success" id="clinica-success" hidden>Guardado ✓</p>
+                  <p class="portal-success portal-success-toast" id="clinica-success" role="status" aria-live="polite" hidden>Tu información se actualizó correctamente</p>
                 </div>
               </form>
 
@@ -323,7 +371,7 @@
                   </div>
                 </div>
 
-                <div class="portal-side-block">
+                <div class="portal-side-block" id="clinic-photos-block">
                   <div class="portal-side-block-head">
                     <div>
                       <h3>Fotos de la clínica</h3>
@@ -334,6 +382,7 @@
                       <input type="file" id="clinic-photo-input" accept="image/png,image/jpeg,image/webp" hidden />
                     </label>
                   </div>
+                  <p id="clinic-photo-status" class="portal-upload-status" aria-live="polite" hidden></p>
                   <div id="clinica-images-empty" class="portal-empty" hidden>Aún no tienes fotos registradas.</div>
                   <div id="clinica-images-list" class="portal-photo-grid"></div>
                 </div>
@@ -400,6 +449,26 @@
       </main>
     </div>
 
-    <script type="module" src="portal.js?v=11"></script>
+    <div class="portal-prescription-modal" id="prescription-preview-modal" role="dialog" aria-modal="true" aria-labelledby="prescription-preview-title" hidden>
+      <div class="portal-prescription-backdrop" data-prescription-close></div>
+      <section class="portal-prescription-dialog">
+        <header class="portal-prescription-dialog-head">
+          <div>
+            <span class="portal-eyebrow">Documento clínico</span>
+            <h2 id="prescription-preview-title">Previsualización de la orden</h2>
+          </div>
+          <button type="button" class="portal-prescription-close" data-prescription-close aria-label="Cerrar previsualización">✕</button>
+        </header>
+        <div class="portal-prescription-preview-wrap">
+          <iframe id="prescription-preview-frame" title="Orden médica lista para imprimir"></iframe>
+        </div>
+        <footer class="portal-prescription-dialog-actions">
+          <button type="button" class="portal-prescription-secondary" data-prescription-close>Volver al historial</button>
+          <button type="button" class="portal-prescription-primary" id="prescription-preview-print">🖨️ Imprimir orden</button>
+        </footer>
+      </section>
+    </div>
+
+    <script type="module" src="portal.js?v=18"></script>
   </body>
 </html>
