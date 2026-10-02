@@ -109,6 +109,7 @@ const siteHeader = document.querySelector(".site-header");
 const navToggle = document.querySelector(".nav-toggle");
 const primaryNavAllLinks = [...document.querySelectorAll("#primary-navigation a")];
 const primaryNavLinks = [...document.querySelectorAll("#primary-navigation a[href^='#']")];
+const magneticTargets = document.querySelectorAll(".header-cta, .hero-download, .hero-search button, .business-actions a, .download-actions a, .showcase-actions a");
 
 const history = [];
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -201,8 +202,11 @@ if (!prefersReducedMotion && heroShell) {
 }
 
 if (!prefersReducedMotion && "IntersectionObserver" in window) {
-  const revealTargets = document.querySelectorAll(".download-panel");
-  revealTargets.forEach((el) => el.classList.add("reveal-on-scroll"));
+  const revealTargets = document.querySelectorAll(".app-showcase, .value-grid article, .download-panel, .business-card");
+  revealTargets.forEach((el, index) => {
+    el.classList.add("reveal-on-scroll");
+    el.style.setProperty("--reveal-delay", `${Math.min(index % 3, 2) * 90}ms`);
+  });
   const revealObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -214,6 +218,38 @@ if (!prefersReducedMotion && "IntersectionObserver" in window) {
     { threshold: 0.18 }
   );
   revealTargets.forEach((el) => revealObserver.observe(el));
+}
+
+function launchPeluviPulse(source) {
+  if (prefersReducedMotion || !source) return;
+  const rect = source.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+  const pulse = document.createElement("span");
+  pulse.className = "peluvi-pulse";
+  pulse.setAttribute("aria-hidden", "true");
+  pulse.style.setProperty("--pulse-x", `${x}px`);
+  pulse.style.setProperty("--pulse-y", `${y}px`);
+  pulse.innerHTML = "<i>🐾</i>";
+  document.body.appendChild(pulse);
+  pulse.addEventListener("animationend", () => pulse.remove(), { once: true });
+}
+
+if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
+  magneticTargets.forEach((target) => {
+    target.classList.add("is-magnetic");
+    target.addEventListener("pointermove", (event) => {
+      const rect = target.getBoundingClientRect();
+      const x = (event.clientX - rect.left - rect.width / 2) * 0.14;
+      const y = (event.clientY - rect.top - rect.height / 2) * 0.18;
+      target.style.setProperty("--magnetic-x", `${x.toFixed(2)}px`);
+      target.style.setProperty("--magnetic-y", `${y.toFixed(2)}px`);
+    });
+    target.addEventListener("pointerleave", () => {
+      target.style.setProperty("--magnetic-x", "0px");
+      target.style.setProperty("--magnetic-y", "0px");
+    });
+  });
 }
 
 const vetDetails = {
@@ -535,6 +571,7 @@ function setSosOpen(isOpen) {
 adoptionTriggers.forEach((trigger) => {
   trigger.addEventListener("click", (event) => {
     event.preventDefault();
+    launchPeluviPulse(trigger);
     setAdoptionOpen(true);
   });
 });
@@ -542,6 +579,7 @@ adoptionTriggers.forEach((trigger) => {
 vetTriggers.forEach((trigger) => {
   trigger.addEventListener("click", (event) => {
     event.preventDefault();
+    launchPeluviPulse(trigger);
     setVetOpen(true);
   });
 });
@@ -549,6 +587,7 @@ vetTriggers.forEach((trigger) => {
 groomingTriggers.forEach((trigger) => {
   trigger.addEventListener("click", (event) => {
     event.preventDefault();
+    launchPeluviPulse(trigger);
     setGroomingOpen(true);
   });
 });
@@ -556,6 +595,7 @@ groomingTriggers.forEach((trigger) => {
 storeTriggers.forEach((trigger) => {
   trigger.addEventListener("click", (event) => {
     event.preventDefault();
+    launchPeluviPulse(trigger);
     setStoreOpen(true);
   });
 });
@@ -563,6 +603,7 @@ storeTriggers.forEach((trigger) => {
 caregiversTriggers.forEach((trigger) => {
   trigger.addEventListener("click", (event) => {
     event.preventDefault();
+    launchPeluviPulse(trigger);
     setCaregiversOpen(true);
   });
 });
@@ -570,6 +611,7 @@ caregiversTriggers.forEach((trigger) => {
 sosTriggers.forEach((trigger) => {
   trigger.addEventListener("click", (event) => {
     event.preventDefault();
+    launchPeluviPulse(trigger);
     setSosOpen(true);
   });
 });

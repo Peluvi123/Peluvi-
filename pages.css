@@ -1014,3 +1014,199 @@
     justify-content: center;
   }
 }
+.about-page .about-product-hero .page-hero-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fff 0%, #faf7ff 100%);
+  border: 0;
+  box-shadow: none;
+}
+.about-page .about-product-hero .page-hero-grid::after,
+.about-page .about-product-hero .page-hero-media::after { display: none; }
+.about-product-hero .about-hero-copy { text-align: center; max-width: 820px; }
+.about-page .about-product-hero h1 {
+  max-width: 820px;
+  margin: 18px auto 0;
+  font-size: clamp(2.6rem, 5.2vw, 4.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+}
+.about-page .about-product-hero h1 span { white-space: normal; line-height: 1.12; }
+.about-page .about-product-hero .page-lead { margin: 22px auto 0; max-width: 620px; font-weight: 500; }
+.about-product-hero .page-actions { justify-content: center; }
+.about-page .about-product-hero .page-hero-media {
+  width: 100%; max-width: 1200px; margin: 0;
+  border: 0; border-radius: 24px 24px 0 0; box-shadow: none;
+  aspect-ratio: auto;
+}
+.about-page .about-product-hero .page-hero-media img {
+  position: static;
+  inset: auto;
+  display: block; width: 100%; height: auto; min-height: 0;
+  object-fit: contain; border-radius: 0; transform: none;
+}
+@media (max-width: 640px) {
+  .about-page .about-product-hero .page-hero-grid { padding: 0; gap: 0; }
+  .about-page .about-product-hero .page-lead { font-size: 0.95rem; }
+}
+
+/* Interactive product tour: coordinates follow the uncropped reference image. */
+.tour-hotspots { position: absolute; inset: 0; }
+.tour-hotspot { position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%); width: 44px; height: 44px; border: 3px solid white; border-radius: 50%; background: #722cf0; color: white; font: 800 16px Inter, sans-serif; cursor: pointer; box-shadow: 0 0 0 7px #ffffff70, 0 5px 20px #3e186b55; }
+.tour-hotspot span { position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%); padding: 6px 10px; border-radius: 20px; color: #321654; background: white; font-size: 12px; white-space: nowrap; }
+.tour-hotspot:hover, .tour-hotspot:focus-visible { background: #4913af; outline: 3px solid #b98aff; outline-offset: 6px; }
+.tour-intro { display: flex; align-items: center; justify-content: space-between; gap: 24px; width: 100%; padding: 0 24px 28px; }
+.tour-intro p { color: #655975; line-height: 1.6; margin: 0; }
+.tour-intro strong { display: block; color: #241333; }
+.tour-intro button { flex-shrink: 0; cursor: pointer; }
+.peluvi-tour { width: min(540px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 38px; border: 1px solid #e9dcff; border-radius: 28px; color: #241333; background: #fff; box-shadow: 0 30px 100px #1b083c55; }
+.peluvi-tour::backdrop { background: #180a35a6; backdrop-filter: blur(7px); }
+.tour-close { position: absolute; right: 16px; top: 12px; border: 0; background: #f3edff; color: #5620a1; border-radius: 50%; width: 36px; height: 36px; font-size: 26px; cursor: pointer; }
+.tour-step { color: #7936df; font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+.peluvi-tour h2 { font-size: 30px; margin: 14px 0; letter-spacing: -.04em; }
+.tour-description, .tour-instructions { color: #655975; line-height: 1.65; }
+.tour-instructions { padding-left: 22px; }
+.tour-instructions li { padding: 6px 0 6px 6px; }
+.tour-link { display: inline-block; color: #702ce0; font-weight: 700; margin: 12px 0 24px; }
+.tour-navigation { display: flex; justify-content: space-between; gap: 12px; padding-top: 20px; border-top: 1px solid #eee5fa; }
+.tour-navigation button { cursor: pointer; }
+.tour-prev { border: 0; background: none; color: #655975; font-weight: 700; }
+.tour-prev:disabled { opacity: .35; cursor: default; }
+@media (max-width: 640px) {
+  .tour-hotspot { width: 32px; height: 32px; font-size: 12px; border-width: 2px; box-shadow: 0 0 0 3px #ffffff80; }
+  .tour-hotspot span { display: none; }
+  .tour-intro { flex-direction: column; align-items: flex-start; padding: 20px; gap: 16px; }
+  .peluvi-tour { padding: 30px 24px; }
+}
+
+.immersive-tour { width: min(1180px, calc(100% - 40px)); padding: 0; border-radius: 28px; background: #faf8ff; }
+.immersive-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid #e9e1f4; }
+.immersive-brand { font-size: 24px; font-weight: 900; color: #6122c4; letter-spacing: -.05em; }
+.immersive-brand small { font-size: 12px; font-weight: 600; letter-spacing: 0; color: #82718f; margin-left: 16px; }
+.immersive-top > div { display: flex; gap: 8px; }
+.immersive-tour .tour-close, .tour-fullscreen { position: static; display: grid; place-items: center; border: 0; background: #eee6fc; color: #5620a1; border-radius: 50%; width: 36px; height: 36px; font-size: 24px; cursor: pointer; }
+.immersive-layout { display: grid; grid-template-columns: 1.15fr 1fr; }
+.tour-scene { position: relative; overflow: hidden; min-height: 540px; background: #e7dbfa; }
+.tour-scene-image { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; object-position: var(--focus-x, 49%) var(--focus-y, 48%); transform: scale(1.6); transform-origin: var(--focus-x, 49%) var(--focus-y, 48%); transition: transform-origin 900ms cubic-bezier(.2,.7,.2,1), object-position 900ms cubic-bezier(.2,.7,.2,1); }
+.tour-scene::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(0deg,#2b104cb0,transparent 38%); }
+.scene-caption { position: absolute; z-index: 1; bottom: 28px; left: 28px; right: 28px; display: flex; flex-direction: column; gap: 8px; color: white; }
+.scene-category { font-size: 40px; font-weight: 800; letter-spacing: -.05em; }
+.scene-caption > span:last-child { font-size: 12px; letter-spacing: .08em; }
+.tour-content { padding: 28px 32px; background: #fff; }
+.immersive-tour h2 { font-size: clamp(25px, 2.8vw, 36px); line-height: 1.1; }
+.immersive-tour .tour-description { font-size: 14px; }
+.immersive-tour .tour-instructions { font-size: 13px; margin: 18px 0 0; }
+.immersive-tour .tour-link { font-size: 13px; margin: 12px 0; }
+.immersive-tour .tour-navigation { padding-top: 14px; }
+.tour-demo { margin-top: 22px; border: 1px solid #e5d6ff; border-radius: 18px; padding: 16px; background: linear-gradient(145deg,#faf7ff,#f1eaff); }
+.demo-label { margin: 0 0 14px; color: #6830b1; font-size: 10px; font-weight: 800; letter-spacing: .08em; display: flex; justify-content: space-between; }
+.demo-label span { color: #9380a8; font-weight: 500; letter-spacing: 0; }
+.demo-options { display: flex; flex-wrap: wrap; gap: 7px; }
+.demo-options button { background: white; color: #664a86; border: 1px solid #e4d7f5; border-radius: 12px; padding: 10px 12px; font: 700 12px Inter,sans-serif; cursor: pointer; transition: background 160ms,color 160ms; }
+.demo-options button[aria-pressed=true] { background: #7636eb; color: white; border-color: #7636eb; }
+.demo-feedback { min-height: 62px; margin: 16px 0 0; font-size: 13px; line-height: 1.6; color: #59496c; }
+.tour-chapters { display: flex; gap: 8px; padding: 16px 24px; overflow-x: auto; }
+.tour-chapters button { flex: 1; white-space: nowrap; border: 1px solid #e6dcf3; border-radius: 12px; padding: 12px; background: white; color: #79658e; font: 700 12px Inter,sans-serif; cursor: pointer; }
+.tour-chapters button[aria-current=step] { color: #6c26d2; background: #eee3ff; border-color: #bd96fa; }
+.tour-progress { height: 4px; background: #e8ddf8; }
+.tour-progress div { height: 100%; background: linear-gradient(90deg,#7134ed,#bd7cff); transition: width 500ms ease; }
+.immersive-tour:fullscreen, .immersive-tour.expanded { width: 100%; height: 100%; max-height: 100%; max-width: 100%; border-radius: 0; }
+.immersive-tour:fullscreen .immersive-layout { min-height: calc(100dvh - 150px); }
+.tour-hotspot { animation: hotspot-glow 3s ease-in-out infinite; }
+@keyframes hotspot-glow { 50% { box-shadow: 0 0 0 12px #ffffff30, 0 5px 20px #3e186b55; } }
+@media (max-width: 760px) {
+  .immersive-tour { width: calc(100% - 16px); max-height: calc(100dvh - 16px); border-radius: 20px; }
+  .immersive-layout { grid-template-columns: 1fr; }
+  .tour-scene { min-height: 230px; }
+  .tour-content { padding: 22px; }
+  .immersive-brand small { display: none; }
+  .scene-category { font-size: 30px; }
+  .tour-chapters { padding: 14px; }
+  .tour-chapters button { flex: none; }
+  .immersive-tour:fullscreen .immersive-layout { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-hotspot { animation: none; }
+  .tour-scene-image, .tour-progress div { transition: none; }
+}
+
+/* Independent art assets and a working HTML phone interface. */
+.immersive-tour .tour-scene { display: grid; place-items: center; padding: 30px 20px 90px; min-height: 680px; }
+.immersive-tour .tour-scene-image { object-position: center; transform: none; opacity: .25; filter: blur(2px); }
+.live-phone { position: relative; z-index: 2; width: min(310px, 100%); height: 560px; display: flex; flex-direction: column; border: 8px solid #21182d; border-radius: 42px; background: #f7f4fc; box-shadow: 10px 16px 0 #39294825, 0 30px 60px #33135a40; overflow: hidden; }
+.live-phone::before { content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 78px; height: 20px; border-radius: 20px; background: #21182d; z-index: 3; }
+.phone-status { display: flex; justify-content: space-between; padding: 12px 22px 6px; font-size: 10px; font-weight: 800; }
+.phone-content { flex: 1; overflow-y: auto; padding: 16px; scrollbar-width: thin; }
+.phone-content h3 { font-size: 20px; margin: 0 0 6px; color: #271739; letter-spacing: -.04em; }
+.phone-demo-badge { display: block; font-size: 9px; color: #9278ac; margin-bottom: 12px; }
+.phone-illustration { width: 100%; height: 160px; object-fit: cover; object-position: center; border-radius: 20px; }
+.phone-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.phone-controls p { font-size: 12px; width: 100%; margin: 4px 0; font-weight: 700; color: #4d3566; }
+.phone-controls button { background: white; border: 1px solid #eadff4; padding: 12px 10px; border-radius: 13px; color: #62339a; font: 700 11px Inter,sans-serif; cursor: pointer; flex: 1 1 40%; }
+.phone-controls .phone-primary { background: #7834ec; color: white; flex-basis: 100%; }
+.phone-controls .phone-chip { padding: 9px; flex: 1; font-size: 10px; }
+.phone-filters { display: flex; gap: 5px; width: 100%; }
+.phone-chip[aria-pressed=true] { background: #7834ec; color: white; }
+.phone-controls input { width: 100%; border: 1px solid #e3d8ee; border-radius: 12px; padding: 12px; font: 11px Inter,sans-serif; }
+.phone-result { width: 100%; background: white; border-radius: 14px; padding: 16px 12px; font-size: 12px; line-height: 1.6; border: 1px solid #e9dff4; }
+.phone-message { background: #ede4fb; padding: 10px; border-radius: 12px; font-size: 10px; color: #5b4278; line-height: 1.6; }
+.phone-map { width: 100%; height: 100px; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 20px; color: #f24f64; font-size: 42px; background: repeating-linear-gradient(35deg,#e7def5 0 2px,#f2edf9 2px 28px); }
+.phone-map button { flex: none; }
+.phone-nav { display: flex; padding: 9px; background: #fff; border-top: 1px solid #eee4f8; }
+.phone-nav button { flex: 1; display: grid; gap: 4px; border: 0; background: none; color: #793ce1; font-size: 20px; cursor: pointer; }
+.phone-nav span { font-size: 9px; }
+.immersive-tour .scene-caption { bottom: 20px; }
+.immersive-tour .scene-category { font-size: 28px; }
+@media(max-width:760px) {
+  .immersive-tour .tour-scene { min-height: 650px; }
+  .live-phone { height: 540px; }
+}
+.immersive-tour .tour-scene { min-height: 560px; padding-top: 20px; padding-bottom: 75px; }
+.live-phone { height: 480px; }
+.phone-illustration { object-fit: contain; background: #eee4fb; height: 145px; }
+.immersive-top { position: sticky; top: 0; z-index: 5; background: #faf8ff; }
+.immersive-tour .tour-demo { display: none; }
+.immersive-tour .tour-content { display: flex; flex-direction: column; justify-content: center; }
+.immersive-tour .tour-chapters { position: sticky; bottom: 0; z-index: 5; background: #faf8ff; }
+@media(max-width:760px) { .immersive-tour .tour-scene { min-height: 555px; } }
+
+.about-page .inline-explorer { display: block; position: relative; width: 100%; max-width: none; max-height: none; margin: 0; box-shadow: 0 24px 80px #48216d14; }
+.inline-explorer .immersive-layout { grid-template-columns: 1.1fr 1fr; }
+.inline-explorer .immersive-top { position: relative; }
+.inline-explorer .tour-chapters { position: relative; }
+.inline-explorer .tour-scene { min-height: 620px; }
+.inline-explorer .live-phone { height: 530px; width: 310px; }
+.inline-explorer .tour-content { padding: clamp(24px, 4vw, 48px); }
+.inline-explorer .phone-illustration { height: 170px; }
+.inline-explorer .tour-step { margin-top: 0; }
+@media(max-width:760px) {
+  .inline-explorer .immersive-layout { grid-template-columns: 1fr; }
+  .inline-explorer .tour-scene { min-height: 600px; }
+  .inline-explorer .live-phone { height: 510px; }
+}
+
+.about-page .commercial-hero { padding: 24px 0 48px; }
+.commercial-player { overflow: hidden; border-radius: 28px; background: #170c24; box-shadow: 0 24px 64px #54298b20; }
+.commercial-player video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: contain; }
+@media(max-width:640px) { .commercial-player { border-radius: 18px; } .about-page .commercial-hero { padding: 16px 0 30px; } }
+
+.cinematic-page .site-header {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  background: rgba(255,255,255,.82);
+}
+.about-page.cinematic-page .commercial-hero { padding: 0; width: 100%; height: 100svh; min-height: 480px; }
+.cinematic-page .commercial-hero::before { display: none; }
+.cinematic-page .commercial-player { width: 100%; max-width: none; height: 100%; margin: 0; border-radius: 0; box-shadow: none; }
+.cinematic-page .commercial-player video { width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; object-position: center; }
+@media(max-width:640px) {
+  .cinematic-page .site-header { top: 10px; width: calc(100% - 20px); }
+  .about-page.cinematic-page .commercial-hero { min-height: 0; }
+}

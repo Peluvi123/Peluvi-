@@ -1,0 +1,1 @@
+Generadas con image_gen integrado. Seis ilustraciones independientes para perfil, servicios, inicio, adopción, SOS y tienda. Estudio blanco y lavanda, mascotas fotorrealistas y objetos 3D refinados, composición cuadrada, sin teléfonos, interfaces ni texto. Referencia: Peluvi_ Todo para tus mascotas.png. Las pantallas interactivas se construyen en HTML sobre estos recursos.
