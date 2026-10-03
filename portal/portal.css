@@ -3508,3 +3508,29 @@ body.has-prescription-modal {
     padding: 0;
   }
 }
+
+.portal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.portal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #e5ddef;
+  border-radius: 12px;
+  color: #6434c4;
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.portal-back:hover { background: #f0e9fc; }
+.portal-back:focus-visible { outline: 2px solid #7a45f3; outline-offset: 3px; }
+@media (max-width: 540px) {
+  .portal-header { flex-wrap: wrap; gap: 14px; }
+  .portal-header-actions { flex-wrap: wrap; }
+}

@@ -1058,3 +1058,31 @@ if (requestedPanel) {
 document.querySelectorAll(".pet-strip video").forEach((video) => {
   video.play().catch(() => {});
 });
+
+const downloadVideo = document.querySelector('#download-video');
+const videoAudioToggle = document.querySelector('.video-audio-toggle');
+if (downloadVideo && videoAudioToggle) {
+  const syncVideoAudio = () => {
+    const audible = !downloadVideo.muted;
+    videoAudioToggle.textContent = audible ? 'Silenciar audio' : 'Activar audio';
+    videoAudioToggle.setAttribute('aria-pressed', String(audible));
+  };
+  videoAudioToggle.addEventListener('click', () => {
+    downloadVideo.muted = !downloadVideo.muted;
+    downloadVideo.play().catch(() => {});
+    syncVideoAudio();
+  });
+  downloadVideo.addEventListener('volumechange', syncVideoAudio);
+  syncVideoAudio();
+}
+
+const floatingHeader = document.querySelector(".site-header");
+const headerShell = document.querySelector(".hero-shell");
+if (floatingHeader && headerShell && "ResizeObserver" in window) {
+  const syncHeaderSpace = () => {
+    if (floatingHeader.classList.contains("menu-open")) return;
+    headerShell.style.setProperty("--header-space", `${floatingHeader.offsetHeight + 24}px`);
+  };
+  new ResizeObserver(syncHeaderSpace).observe(floatingHeader);
+  syncHeaderSpace();
+}

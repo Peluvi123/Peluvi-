@@ -16,9 +16,9 @@
     <link rel="shortcut icon" type="image/png" href="../assets/peluvi-symbol-32.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="../styles.css?v=20260818-1426" />
-    <link rel="stylesheet" href="../pages.css?v=6" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css?v=20261003-tone2" />
+    <link rel="stylesheet" href="../pages.css?v=20261003-seated" />
   </head>
   <body class="inner-page business-page">
     <header class="site-header">
@@ -31,31 +31,83 @@
     </header>
 
     <main class="page-main">
-      <section class="page-hero">
-        <div class="page-wrap page-hero-grid">
-          <div><p class="page-eyebrow">Peluvi para negocios</p><h1>Haz visible tu servicio y <span>conecta con más familias.</span></h1><p class="page-lead">Crea el perfil de tu negocio, presenta tus servicios y gestiona la relación con clientes desde un portal pensado para el sector de mascotas.</p><div class="page-actions"><a class="page-button" href="/portal/?registro=1">Registrar mi negocio →</a><a class="page-button secondary" href="/portal/">Entrar al portal</a></div></div>
-          <div class="page-hero-media"><img src="../assets/negocios-hero-v2-real.png" alt="Veterinaria mostrando el portal de proveedores Peluvi" fetchpriority="high" /><span class="hero-media-badge">Portal para proveedores</span><span class="hero-media-badge bottom">Tu negocio, mejor conectado</span></div>
+      <section class="page-hero biz-hero">
+        <canvas class="hero-particles" aria-hidden="true"></canvas>
+        <div class="page-wrap biz-hero-inner">
+          <div class="biz-hero-copy">
+            <p class="page-eyebrow">Peluvi para <strong>negocios</strong></p>
+            <p class="services-overline">Crece con Peluvi</p>
+            <h1>Haz visible tu servicio y <span>conecta con más familias.</span></h1>
+            <p class="page-lead">Crea el perfil de tu negocio, presenta tus servicios y gestiona la relación con clientes desde un portal pensado para el sector de mascotas.</p>
+            <div class="page-actions"><a class="page-button" href="/portal/?registro=1">Registrar mi negocio →</a><a class="page-button secondary" href="/portal/">Entrar al portal</a></div>
+          </div>
+          <div class="biz-scene">
+            <img class="biz-scene-base" src="../assets/negocios-scene-base.png" alt="Veterinaria con un perro golden junto a la app Peluvi" fetchpriority="high" />
+            <a class="biz-tile biz-tile-adopt" href="/#adopcion" aria-label="Adopción: ver mascotas en adopción"><img src="../assets/business-tiles/tile-adopt.png" alt="" /></a>
+            <a class="biz-tile biz-tile-vet" href="/portal/?registro=1&amp;tipo=vet" aria-label="Registrar una veterinaria"><img src="../assets/business-tiles/tile-vet.png" alt="" /></a>
+            <a class="biz-tile biz-tile-groom" href="/portal/?registro=1&amp;tipo=grooming" aria-label="Registrar una peluquería"><img src="../assets/business-tiles/tile-groom.png" alt="" /></a>
+            <a class="biz-tile biz-tile-foundation" href="/portal/?registro=1" aria-label="Registrar una fundación"><img src="../assets/business-tiles/tile-foundation.png" alt="" /></a>
+            <a class="biz-tile biz-tile-food" href="/portal/?registro=1&amp;tipo=store" aria-label="Registrar una tienda de comida"><img src="../assets/business-tiles/tile-food.png" alt="" /></a>
+            <a class="biz-tile biz-tile-care" href="/portal/?registro=1&amp;tipo=caregiver" aria-label="Registrar un servicio de cuidadores"><img src="../assets/business-tiles/tile-care.png" alt="" /></a>
+          </div>
         </div>
       </section>
 
       <section class="page-section soft">
-        <div class="page-wrap"><div class="section-heading center"><p class="page-eyebrow">¿Para quién es?</p><h2>Un espacio para cada tipo de proveedor.</h2><p>Peluvi reúne los negocios que acompañan el bienestar de las mascotas en diferentes momentos.</p></div><div class="business-type-grid"><article class="detail-card"><div class="detail-card-icon"><img src="../assets/icon-vet-crop.png" alt="" /></div><h3>Veterinarias</h3><p>Presenta especialidades, horarios, profesionales y opciones de atención.</p></article><article class="detail-card"><div class="detail-card-icon"><img src="../assets/icon-grooming-tight.png" alt="" /></div><h3>Peluquerías</h3><p>Publica baños, cortes y cuidados especializados para cada mascota.</p></article><article class="detail-card"><div class="detail-card-icon"><img src="../assets/icon-food-tight.png" alt="" /></div><h3>Tiendas</h3><p>Muestra productos, novedades y medios de contacto de tu establecimiento.</p></article><article class="detail-card"><div class="detail-card-icon"><img src="../assets/icon-walkers-crop.png" alt="" /></div><h3>Cuidadores</h3><p>Ofrece paseos, visitas, guardería y acompañamiento personalizado.</p></article><article class="detail-card"><div class="detail-card-icon"><img src="../assets/icon-heart.png" alt="" /></div><h3>Fundaciones</h3><p>Da visibilidad a mascotas en adopción y conecta con posibles familias.</p></article><article class="detail-card"><div class="detail-card-icon">＋</div><h3>Otros aliados</h3><p>Si trabajas por el bienestar animal, Peluvi puede ayudarte a ser encontrado.</p></article></div></div>
+        <div class="page-wrap"><div class="section-heading center"><p class="page-eyebrow">¿Para quién es?</p><h2>Un espacio para <span class="tone">cada tipo de proveedor.</span></h2><p>Peluvi reúne los negocios que acompañan el bienestar de las mascotas en diferentes momentos.</p></div><div class="business-type-grid"><article class="detail-card"><div class="detail-card-icon"><img src="../assets/icon-vet-crop.png" alt="" /></div><h3>Veterinarias</h3><p>Presenta especialidades, horarios, profesionales y opciones de atención.</p></article><article class="detail-card"><div class="detail-card-icon"><img src="../assets/icon-grooming-tight.png" alt="" /></div><h3>Peluquerías</h3><p>Publica baños, cortes y cuidados especializados para cada mascota.</p></article><article class="detail-card"><div class="detail-card-icon"><img src="../assets/icon-food-tight.png" alt="" /></div><h3>Tiendas</h3><p>Muestra productos, novedades y medios de contacto de tu establecimiento.</p></article><article class="detail-card"><div class="detail-card-icon"><img src="../assets/icon-walkers-crop.png" alt="" /></div><h3>Cuidadores</h3><p>Ofrece paseos, visitas, guardería y acompañamiento personalizado.</p></article><article class="detail-card"><div class="detail-card-icon"><img src="../assets/icon-heart.png" alt="" /></div><h3>Fundaciones</h3><p>Da visibilidad a mascotas en adopción y conecta con posibles familias.</p></article><article class="detail-card"><div class="detail-card-icon">＋</div><h3>Otros aliados</h3><p>Si trabajas por el bienestar animal, Peluvi puede ayudarte a ser encontrado.</p></article></div></div>
       </section>
 
-      <section class="page-section" id="operacion">
-        <div class="page-wrap split-section"><div><p class="page-eyebrow">Tu operación en un solo lugar</p><div class="section-heading"><h2>Más que aparecer en un directorio.</h2><p>El portal está pensado para ayudarte a mantener organizada la información de tu negocio y atender oportunidades desde Peluvi.</p></div><ul class="check-list"><li><span>✓</span> Perfil con información, ubicación, horarios y servicios.</li><li><span>✓</span> Gestión de citas, solicitudes o contactos según tu categoría.</li><li><span>✓</span> Actualización de disponibilidad y datos visibles.</li><li><span>✓</span> Panel separado para administrar tu operación.</li></ul><div class="page-actions"><a class="page-button" href="/portal/">Conocer el portal →</a></div></div><div class="split-media"><img src="../assets/provider-operations-v2-real.png" alt="Profesional de mascotas gestionando su negocio desde el portal Peluvi junto a un perro" loading="lazy" decoding="async" /></div></div>
+      <section class="page-section biz-operation" id="operacion">
+        <div class="page-wrap split-section"><div><p class="services-label">TU OPERACIÓN EN UN SOLO LUGAR</p><div class="section-heading"><h2>Más que aparecer <span class="tone">en un directorio.</span></h2><p>El portal está pensado para ayudarte a mantener organizada la información de tu negocio y atender oportunidades desde Peluvi.</p></div><ul class="check-list"><li><span class="op-num">01</span><span class="op-text">Perfil con información, ubicación, horarios y servicios.</span></li><li><span class="op-num">02</span><span class="op-text">Gestión de citas, solicitudes o contactos según tu categoría.</span></li><li><span class="op-num">03</span><span class="op-text">Actualización de disponibilidad y datos visibles.</span></li><li><span class="op-num">04</span><span class="op-text">Panel separado para administrar tu operación.</span></li></ul><div class="op-actions"><a class="op-button" href="/portal/">Conocer el portal <span aria-hidden="true">↗</span></a><a class="services-text-link" href="/portal/?registro=1">Registrar mi negocio <span aria-hidden="true">→</span></a></div></div><div class="split-media"><img src="../assets/provider-operations-male-vet-seated.jpg" alt="Veterinario sentado abrazando a un gato junto a un teléfono con la app Peluvi" loading="lazy" decoding="async" /></div></div>
       </section>
 
       <section class="page-section soft">
-        <div class="page-wrap"><div class="section-heading"><p class="page-eyebrow">Empieza fácil</p><h2>Publica tu negocio en tres pasos.</h2></div><div class="steps-grid"><article class="step-card"><span>1</span><h3>Crea tu cuenta</h3><p>Elige tu tipo de negocio y registra la información básica del proveedor.</p></article><article class="step-card"><span>2</span><h3>Completa tu perfil</h3><p>Añade servicios, horarios, ubicación y datos que ayuden a decidir.</p></article><article class="step-card"><span>3</span><h3>Gestiona oportunidades</h3><p>Ingresa al portal para mantener tu información y actividad organizada.</p></article></div></div>
+        <div class="page-wrap"><div class="section-heading"><p class="page-eyebrow">Empieza fácil</p><h2>Publica tu negocio <span class="tone">en tres pasos.</span></h2></div><div class="steps-grid"><article class="step-card"><span>1</span><h3>Crea tu cuenta</h3><p>Elige tu tipo de negocio y registra la información básica del proveedor.</p></article><article class="step-card"><span>2</span><h3>Completa tu perfil</h3><p>Añade servicios, horarios, ubicación y datos que ayuden a decidir.</p></article><article class="step-card"><span>3</span><h3>Gestiona oportunidades</h3><p>Ingresa al portal para mantener tu información y actividad organizada.</p></article></div></div>
       </section>
 
-      <section class="page-section">
-        <div class="page-wrap page-cta"><div><h2>Tu próximo cliente puede estar buscando justo lo que ofreces.</h2><p>Crea la cuenta de tu negocio y empieza a construir presencia dentro de Peluvi.</p></div><div class="page-actions"><a class="page-button" href="/portal/?registro=1">Registrar negocio</a><a class="page-button secondary" href="/portal/">Ya tengo cuenta</a></div></div>
+      <section class="biz-closing">
+        <span class="biz-depth-tile biz-depth-tile--a" aria-hidden="true"><img src="../assets/business-tiles/tile-vet.png" alt="" loading="lazy" /></span>
+        <span class="biz-depth-tile biz-depth-tile--b" aria-hidden="true"><img src="../assets/business-tiles/tile-adopt.png" alt="" loading="lazy" /></span>
+        <span class="biz-depth-tile biz-depth-tile--c" aria-hidden="true"><img src="../assets/business-tiles/tile-foundation.png" alt="" loading="lazy" /></span>
+        <span class="biz-depth-tile biz-depth-tile--d" aria-hidden="true"><img src="../assets/business-tiles/tile-groom.png" alt="" loading="lazy" /></span>
+        <span class="biz-depth-tile biz-depth-tile--e" aria-hidden="true"><img src="../assets/business-tiles/tile-food.png" alt="" loading="lazy" /></span>
+        <span class="biz-depth-tile biz-depth-tile--f" aria-hidden="true"><img src="../assets/business-tiles/tile-care.png" alt="" loading="lazy" /></span>
+        <div class="page-wrap biz-closing-inner">
+          <p class="biz-closing-label">Empieza hoy</p>
+          <h2>Tu próximo cliente puede estar buscando <em>justo lo que ofreces.</em></h2>
+          <p class="biz-closing-lead">Crea la cuenta de tu negocio y empieza a construir presencia dentro de Peluvi.</p>
+          <div class="biz-closing-actions"><a class="op-button" href="/portal/?registro=1">Registrar negocio <span aria-hidden="true">↗</span></a><a class="services-text-link" href="/portal/">Ya tengo cuenta <span aria-hidden="true">→</span></a></div>
+        </div>
       </section>
     </main>
-    <footer class="site-footer inner-footer"><div class="footer-main"><div class="footer-brand-block"><a class="footer-brand" href="/"><img src="../assets/peluvi-logo.png" alt="" /><span>Peluvi</span></a><p>Conecta tu negocio con más familias y organiza tu operación.</p></div><nav class="footer-column" aria-label="Explorar"><strong>Explora</strong><a href="/servicios/">Servicios</a><a href="/conoce/">Cómo funciona</a><a href="/">Inicio</a></nav><nav class="footer-column" aria-label="Negocios"><strong>Negocios</strong><a href="/negocios/">Para proveedores</a><a href="/portal/?registro=1">Registrar negocio</a><a href="/portal/">Entrar al portal</a></nav><div class="footer-column"><strong>Contacto</strong><a href="mailto:soporte@peluvi.com">soporte@peluvi.com</a><a href="https://www.instagram.com/peluvi.pet/" target="_blank" rel="noreferrer">Instagram ↗</a><a class="footer-admin-link" href="/admin/">Administración →</a></div></div><div class="footer-bottom"><span>© 2026 Peluvi.</span><span>Plataforma para negocios de mascotas.</span></div></footer>
+    <footer class="site-footer footer-light">
+      <details class="footer-details">
+        <summary>Más información <span aria-hidden="true">⌃</span></summary>
+      <div class="footer-main">
+        <div class="footer-brand-block">
+          <a class="footer-brand" href="/" aria-label="Peluvi inicio"><img src="../assets/peluvi-logo.png" alt="" /><span>Peluvi</span></a>
+          <p>Una experiencia para encontrar servicios, organizar el cuidado y estar más cerca de lo que tu mascota necesita.</p>
+          <div class="footer-social"><a href="https://www.instagram.com/peluvi.pet/" target="_blank" rel="noreferrer" aria-label="Instagram de Peluvi">Instagram ↗</a><a href="https://www.facebook.com/" target="_blank" rel="noreferrer" aria-label="Facebook de Peluvi">Facebook ↗</a></div>
+        </div>
+        <nav class="footer-column" aria-label="Explorar Peluvi"><strong>Explora</strong><a href="/servicios/">Servicios</a><a href="/conoce/">Cómo funciona</a><a href="/#adopcion">Adopciones</a><a href="/#sos">Alertas SOS</a></nav>
+        <nav class="footer-column" aria-label="Peluvi para negocios"><strong>Negocios</strong><a href="/negocios/">Para proveedores</a><a href="/portal/?registro=1">Registrar negocio</a><a href="/portal/">Entrar al portal</a></nav>
+        <div class="footer-column"><strong>Soporte</strong><a href="mailto:soporte@peluvi.com">soporte@peluvi.com</a><a href="mailto:redes@peluvi.com">redes@peluvi.com</a><a class="footer-admin-link" href="/admin/">Administración →</a><span>Colombia</span></div>
+      </div>
+      </details>
+      <div class="footer-compact">
+        <nav class="footer-links" aria-label="Enlaces de Peluvi">
+          <a href="/conoce/">Conoce Peluvi</a>
+          <a href="/servicios/">Servicios para tu mascota</a>
+          <a href="/negocios/">Crece con Peluvi</a>
+          <a href="/portal/?registro=1">Registra tu negocio</a>
+          <a href="mailto:soporte@peluvi.com">Ayuda y contacto</a>
+          <a href="https://www.instagram.com/peluvi.pet/" target="_blank" rel="noreferrer">Instagram</a>
+        </nav>
+        <p>© 2026 Peluvi. Bienestar para mascotas.</p>
+        <p>Hecho con cariño para mascotas y sus familias · Colombia</p>
+      </div>
+    </footer>
     <script src="../cat-walker.js?v=10"></script>
-    <script src="../pages.js?v=2"></script>
+    <script src="../pages.js?v=6"></script>
   </body>
 </html>

@@ -178,3 +178,203 @@ if (tourDialog) {
   if (tourDialog.classList.contains('inline-explorer')) renderTour(2);
   tourDialog.addEventListener('close', () => { if (document.fullscreenElement === tourDialog) document.exitFullscreen().catch(() => {}); opener?.focus(); });
 }
+
+document.querySelectorAll(".services-layered, .biz-scene").forEach((tileScene) => {
+  const landTiles = () => {
+    tileScene.classList.add("tiles-in");
+    setTimeout(() => tileScene.classList.add("tiles-done"), 1800);
+  };
+  if (reducedMotion.matches || !("IntersectionObserver" in window)) {
+    tileScene.classList.add("tiles-in", "tiles-done");
+    return;
+  }
+  const tileObserver = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    tileObserver.disconnect();
+    requestAnimationFrame(() => requestAnimationFrame(landTiles));
+  }, { threshold: 0.35 });
+  tileObserver.observe(tileScene);
+});
+
+const particleCanvas = document.querySelector(".hero-particles");
+if (particleCanvas) {
+  const ctx = particleCanvas.getContext("2d");
+  const hero = particleCanvas.parentElement;
+  const palette = ["143, 83, 255", "178, 117, 255", "121, 64, 250", "255, 150, 205"];
+  const pointer = { x: -9999, y: -9999 };
+  let width = 0;
+  let height = 0;
+  let particles = [];
+  let running = false;
+  let frame = 0;
+
+  const random = (min, max) => min + Math.random() * (max - min);
+
+  function makeParticle(anywhere) {
+    const paw = Math.random() < 0.45;
+    return {
+      paw,
+      x: random(0, width),
+      y: anywhere ? random(0, height) : height + 30,
+      size: paw ? random(9, 22) : random(1.5, 4),
+      speed: paw ? random(0.12, 0.32) : random(0.18, 0.5),
+      sway: random(0.4, 1.2),
+      phase: random(0, Math.PI * 2),
+      angle: random(-0.6, 0.6),
+      spin: random(-0.004, 0.004),
+      alpha: paw ? random(0.07, 0.16) : random(0.12, 0.3),
+      color: palette[Math.floor(Math.random() * palette.length)],
+      ox: 0,
+      oy: 0,
+    };
+  }
+
+  function resize() {
+    const rect = hero.getBoundingClientRect();
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    width = rect.width;
+    height = rect.height;
+    particleCanvas.width = Math.round(width * ratio);
+    particleCanvas.height = Math.round(height * ratio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    const count = Math.round(Math.min(70, Math.max(26, (width * height) / 22000)));
+    particles = Array.from({ length: count }, () => makeParticle(true));
+  }
+
+  function drawPaw(p) {
+    const s = p.size;
+    ctx.save();
+    ctx.translate(p.x + p.ox, p.y + p.oy);
+    ctx.rotate(p.angle);
+    ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
+    ctx.beginPath();
+    ctx.ellipse(0, s * 0.28, s * 0.42, s * 0.34, 0, 0, Math.PI * 2);
+    ctx.fill();
+    [[-0.5, -0.12, -0.35], [-0.19, -0.42, -0.12], [0.19, -0.42, 0.12], [0.5, -0.12, 0.35]].forEach(([tx, ty, rot]) => {
+      ctx.beginPath();
+      ctx.ellipse(tx * s, ty * s, s * 0.15, s * 0.2, rot, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  function drawDot(p) {
+    ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
+    ctx.beginPath();
+    ctx.arc(p.x + p.ox, p.y + p.oy, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function step(time) {
+    ctx.clearRect(0, 0, width, height);
+    particles.forEach((p, index) => {
+      p.y -= p.speed;
+      p.x += Math.sin(time / 2400 + p.phase) * p.sway * 0.25;
+      p.angle += p.spin;
+      const dx = p.x - pointer.x;
+      const dy = p.y - pointer.y;
+      const dist = Math.hypot(dx, dy);
+      const push = dist < 140 ? (1 - dist / 140) * 26 : 0;
+      p.ox += ((dist ? (dx / dist) * push : 0) - p.ox) * 0.08;
+      p.oy += ((dist ? (dy / dist) * push : 0) - p.oy) * 0.08;
+      if (p.y < -30) particles[index] = makeParticle(false);
+      (p.paw ? drawPaw : drawDot)(p);
+    });
+    if (running) frame = requestAnimationFrame(step);
+  }
+
+  function start() {
+    if (running || reducedMotion.matches) return;
+    running = true;
+    frame = requestAnimationFrame(step);
+  }
+
+  function stop() {
+    running = false;
+    cancelAnimationFrame(frame);
+  }
+
+  resize();
+  if (reducedMotion.matches) step(0);
+  window.addEventListener("resize", () => {
+    resize();
+    if (!running) step(0);
+  });
+  hero.addEventListener("pointermove", (event) => {
+    const rect = hero.getBoundingClientRect();
+    pointer.x = event.clientX - rect.left;
+    pointer.y = event.clientY - rect.top;
+  });
+  hero.addEventListener("pointerleave", () => {
+    pointer.x = -9999;
+    pointer.y = -9999;
+  });
+  new IntersectionObserver((entries) => {
+    entries[0].isIntersecting ? start() : stop();
+  }).observe(hero);
+}
+
+const depthSection = document.querySelector(".biz-closing");
+if (depthSection) {
+  if (!("IntersectionObserver" in window)) {
+    depthSection.classList.add("is-in");
+  } else {
+    const depthObserver = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      depthObserver.disconnect();
+      depthSection.classList.add("is-in");
+    }, { threshold: 0.3 });
+    depthObserver.observe(depthSection);
+  }
+}
+
+const petTips = document.querySelector(".pet-tips");
+if (petTips) {
+  if (!("IntersectionObserver" in window)) {
+    petTips.classList.add("is-in");
+  } else {
+    const petObserver = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      petObserver.disconnect();
+      petTips.classList.add("is-in");
+    }, { threshold: 0.12 });
+    petObserver.observe(petTips);
+  }
+}
+
+const petPaws = document.querySelectorAll(".pet-tip-paw");
+if (petPaws.length) {
+  const setPetOpen = (paw, open) => {
+    const card = paw.closest(".pet-tip");
+    const bubble = document.getElementById(paw.getAttribute("aria-controls"));
+    card.classList.toggle("is-open", open);
+    paw.setAttribute("aria-expanded", String(open));
+    bubble?.setAttribute("aria-hidden", String(!open));
+    const video = card.querySelector(".pet-tip-video");
+    if (!video) return;
+    if (open) {
+      if (!video.src) video.src = video.dataset.src;
+      video.currentTime = 0;
+      video.play().then(() => card.classList.add("is-playing")).catch(() => {});
+      video.onended = () => setPetOpen(paw, false);
+    } else {
+      video.pause();
+      card.classList.remove("is-playing");
+    }
+  };
+  const closeAllPets = (except) => petPaws.forEach((paw) => { if (paw !== except) setPetOpen(paw, false); });
+  petPaws.forEach((paw) => {
+    paw.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const open = paw.getAttribute("aria-expanded") !== "true";
+      closeAllPets(paw);
+      setPetOpen(paw, open);
+    });
+  });
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".pet-tip-bubble")) closeAllPets();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeAllPets();
+  });
+}

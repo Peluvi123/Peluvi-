@@ -25,10 +25,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Pacifico&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260824-pulse" />
+    <link rel="stylesheet" href="styles.css?v=20261003-tone2" />
     <script>
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -158,7 +158,7 @@
             </svg>
           </div>
           <div>
-            <h2>¿Tienes un negocio para mascotas?</h2>
+            <h2>¿Tienes un negocio <span class="tone">para mascotas?</span></h2>
             <p>Gestiona tu perfil, pedidos, citas o sesiones desde el portal de proveedores.</p>
           </div>
           <div class="business-actions">
@@ -193,16 +193,14 @@
 
     <section class="content home-value" id="descarga" aria-label="Descarga y beneficios de Peluvi">
       <div class="section-kicker">
-        <p class="pill dark">Lo que puedes hacer en Peluvi</p>
-        <h2>Una app para cuidar, encontrar y actuar rápido.</h2>
+        <h2>Conoce <span class="tone">la app</span></h2>
       </div>
       <div class="app-showcase">
         <div class="showcase-copy">
-          <p class="showcase-eyebrow">Peluvi en acción</p>
-          <h3>Todo el cuidado de tu mascota se siente cerca, visual y fácil.</h3>
+          <h3>Encuentra lo que necesita tu mascota.</h3>
           <p>
-            Busca servicios, recibe ayuda con IA, guarda favoritos y conecta con
-            proveedores desde una experiencia pensada para moverse rápido.
+            Consulta veterinarias, peluquerías y tiendas. Guarda tus favoritos y
+            contacta a los negocios desde Peluvi.
           </p>
           <div class="showcase-actions">
             <a href="#servicios">Explorar servicios</a>
@@ -217,31 +215,13 @@
         </div>
       </div>
 
-      <div class="value-grid">
-        <article>
-          <span>✓</span>
-          <h2>Servicios verificados</h2>
-          <p>Veterinarias, peluquerías, tiendas y cuidadores organizados para encontrar ayuda rápido.</p>
-        </article>
-        <article>
-          <span>IA</span>
-          <h2>Asistente inteligente</h2>
-          <p>Pregunta por adopción, servicios, productos o emergencias y recibe una guía clara.</p>
-        </article>
-        <article>
-          <span>SOS</span>
-          <h2>Alertas comunitarias</h2>
-          <p>Reportes pensados para que más personas puedan ayudar cuando una mascota lo necesita.</p>
-        </article>
-      </div>
-
       <div class="download-panel">
         <div class="download-copy">
           <p class="pill dark">Peluvi en tu celular</p>
-          <h2>Todo lo importante, a una pata de distancia.</h2>
+          <h2>Descarga <span class="tone">Peluvi</span></h2>
           <p>
-            Lleva tus favoritos, servicios cercanos y alertas contigo. Una experiencia
-            sencilla para actuar justo cuando tu mascota lo necesita.
+            Encuentra servicios, consulta tus favoritos y recibe alertas
+            de mascotas desde tu celular.
           </p>
           <ul class="download-benefits" aria-label="Beneficios de la app Peluvi">
             <li><span>✓</span> Perfiles y favoritos</li>
@@ -254,12 +234,18 @@
           </div>
         </div>
         <div class="download-visual" aria-label="Vista previa de Peluvi app">
-          <img src="assets/peluvi-app-banner-v2-real.png" alt="Perro y gato junto a una vista previa de la aplicación Peluvi" loading="lazy" decoding="async" />
+          <video id="download-video" autoplay muted loop playsinline disablepictureinpicture disableremoteplayback preload="metadata" poster="assets/peluvi-app-banner-v2-real.png" aria-label="Video de Peluvi en tu celular">
+            <source src="assets/peluvi-app-demo.mp4" type="video/mp4" />
+            <a href="assets/peluvi-app-demo.mp4">Ver video de Peluvi</a>
+          </video>
+          <button class="video-audio-toggle" type="button" aria-controls="download-video" aria-pressed="false">Activar audio</button>
         </div>
       </div>
     </section>
 
-    <footer class="site-footer">
+    <footer class="site-footer footer-light">
+      <details class="footer-details">
+        <summary>Más información <span aria-hidden="true">⌃</span></summary>
       <div class="footer-main">
         <div class="footer-brand-block">
           <a class="footer-brand" href="/" aria-label="Peluvi inicio"><img src="assets/peluvi-logo.png" alt="" /><span>Peluvi</span></a>
@@ -270,7 +256,19 @@
         <nav class="footer-column" aria-label="Peluvi para negocios"><strong>Negocios</strong><a href="/negocios/">Para proveedores</a><a href="/portal/?registro=1">Registrar negocio</a><a href="/portal/">Entrar al portal</a></nav>
         <div class="footer-column"><strong>Soporte</strong><a href="mailto:soporte@peluvi.com">soporte@peluvi.com</a><a href="mailto:redes@peluvi.com">redes@peluvi.com</a><a class="footer-admin-link" href="/admin/">Administración →</a><span>Colombia</span></div>
       </div>
-      <div class="footer-bottom"><span>© 2026 Peluvi. Bienestar para mascotas.</span><span>Hecho con cariño para mascotas y sus familias.</span></div>
+      </details>
+      <div class="footer-compact">
+        <nav class="footer-links" aria-label="Enlaces de Peluvi">
+          <a href="/conoce/">Conoce Peluvi</a>
+          <a href="/servicios/">Servicios para tu mascota</a>
+          <a href="/negocios/">Crece con Peluvi</a>
+          <a href="/portal/?registro=1">Registra tu negocio</a>
+          <a href="mailto:soporte@peluvi.com">Ayuda y contacto</a>
+          <a href="https://www.instagram.com/peluvi.pet/" target="_blank" rel="noreferrer">Instagram</a>
+        </nav>
+        <p>© 2026 Peluvi. Bienestar para mascotas.</p>
+        <p>Hecho con cariño para mascotas y sus familias · Colombia</p>
+      </div>
     </footer>
 
     <section class="adoption-panel" id="adoption-panel" aria-label="Adopción Peluvi" hidden>
@@ -889,31 +887,31 @@
 
     <section class="chat-widget" aria-label="Chat de Peluvi IA">
       <button class="chat-toggle" type="button" aria-expanded="false" aria-controls="peluvi-chat">
-        <span>IA</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-8 8H5l-4 3v-11a8 8 0 0 1 8-8h3a8 8 0 0 1 8 8Z" transform="translate(1 -1) scale(.95)"/><path d="M7 9h9M7 13h6"/></svg>
         <strong class="sr-only">Pregúntale a Peluvi</strong>
       </button>
       <div class="chat-panel" id="peluvi-chat" hidden>
         <div class="chat-header">
           <div>
-            <p>Peluvi IA</p>
-            <strong>Asistente para mascotas</strong>
+            <strong>Peluvi</strong>
+            <p>Asistente virtual</p>
           </div>
           <button class="chat-close" type="button" aria-label="Cerrar chat">×</button>
         </div>
         <div class="chat-messages" aria-live="polite">
           <div class="chat-message bot">
-            Hola, soy Peluvi IA. Puedo ayudarte con adopciones, veterinarias, peluquerías, SOS, tienda, favoritos o cómo funcionaría tu perfil en la app.
+            Hola, ¿en qué puedo ayudarte? Pregúntame por servicios para tu mascota o sobre Peluvi.
           </div>
         </div>
         <form class="chat-form">
           <label class="sr-only" for="chat-input">Mensaje para Peluvi IA</label>
-          <input id="chat-input" type="text" placeholder="Ej: quiero adoptar un perro..." autocomplete="off" />
-          <button type="submit">Enviar</button>
+          <input id="chat-input" type="text" placeholder="Escribe tu mensaje…" autocomplete="off" />
+          <button type="submit" aria-label="Enviar mensaje"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button>
         </form>
       </div>
     </section>
 
     <script src="cat-walker.js?v=10"></script>
-    <script src="script.js?v=20260824-pulse"></script>
+    <script src="script.js?v=20261003-header"></script>
   </body>
 </html>
