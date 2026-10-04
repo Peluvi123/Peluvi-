@@ -1389,7 +1389,8 @@
 .biz-tile-care { left: 88.218%; top: 63.443%; width: 11.244%; height: 18.916%; --fx: 220%; --fy: 200%; --fr: 20deg; --d: 550ms; --fd: -2s; }
 @media (max-width: 900px) {
   .biz-hero-inner { grid-template-columns: 1fr; }
-  .biz-scene { width: 100%; margin: 8px 0 0; }
+  /* Offset the empty left side of the artwork so the subjects fill the mobile width. */
+  .biz-scene { width: 140%; margin: 8px 0 0 -40%; }
 }
 @media (prefers-reduced-motion: reduce) {
   .biz-tile { opacity: 1; transform: none; filter: none; transition: none; }
