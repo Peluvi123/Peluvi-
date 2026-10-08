@@ -1632,3 +1632,10 @@
 }
 .pet-tip .pet-tip-bubble::before { top: auto; bottom: 12px; left: -5px; width: 12px; height: 12px; border-radius: 2px; }
 @media (max-width: 560px) { .pet-tip .pet-tip-bubble { max-width: calc(100% - 100px); font-size: 12px; } }
+
+/* Clean floating cards without the baked-in cutout edges. */
+.biz-clean-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;aspect-ratio:1;background:#fff;border:1px solid #eee7fa;border-radius:20px;box-shadow:0 8px 20px rgba(57,36,84,.07);padding:12px}
+.biz-depth-tile .biz-clean-tile img{width:52%;height:auto;aspect-ratio:1;object-fit:contain;filter:none;animation:none!important}
+.biz-clean-tile>span{font-size:10px;font-weight:600;color:#38284b}
+.biz-closing.is-in .biz-clean-tile{animation:bizDepthFloat 7s ease-in-out calc(var(--d) + 1.6s) infinite}
+@media(prefers-reduced-motion:reduce){.biz-closing.is-in .biz-clean-tile{animation:none}}
