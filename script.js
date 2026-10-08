@@ -263,19 +263,19 @@ const vetDetails = {
     icon: "▦",
     title: "Agenda citas",
     text: "Reserva una cita sin llamadas largas: escoge fecha, hora, servicio y confirma desde Peluvi.",
-    items: ["Horarios disponibles en tiempo real.", "Recordatorios antes de la cita.", "Historial de reservas para tu mascota."],
+    items: ["Consulta de horarios para solicitar una cita.", "Recordatorios antes de la cita.", "Historial de reservas para tu mascota."],
   },
   services: {
     icon: "▤",
     title: "Historia médica",
     text: "Accede al historial, vacunas y tratamientos de tu mascota siempre que lo necesites.",
-    items: ["Registro de vacunas y tratamientos.", "Historial disponible desde cualquier veterinaria aliada.", "Recordatorios de próximas dosis o controles."],
+    items: ["Registro de vacunas y tratamientos.", "Consulta con tu veterinaria cómo compartir el historial.", "Recordatorios de próximas dosis o controles."],
   },
   trust: {
     icon: "◎",
     title: "Atención cercana",
     text: "Encuentra atención de calidad cerca de ti, cuando tu mascota más lo necesita.",
-    items: ["Clínicas verificadas por Peluvi.", "Calificaciones y reseñas de usuarios.", "Ubicación y disponibilidad en tiempo real."],
+    items: ["Perfiles publicados por las clínicas.", "Calificaciones y reseñas de usuarios.", "Ubicación y contacto del negocio."],
   },
 };
 
@@ -284,11 +284,11 @@ const groomingDetails = {
     icon: "▦",
     title: "Agenda citas",
     text: "Reserva baños, cortes y spa según disponibilidad del groomer o peluquería.",
-    items: ["Horarios disponibles.", "Servicios por tamaño y tipo de pelaje.", "Confirmación rápida desde Peluvi."],
+    items: ["Horarios disponibles.", "Servicios por tamaño y tipo de pelaje.", "Confirmación sujeta a la respuesta del negocio."],
   },
   certified: {
     icon: "✿",
-    title: "Groomers certificados",
+    title: "Peluquerías para mascotas",
     text: "Encuentra profesionales con experiencia en cuidado, belleza y trato amable para mascotas.",
     items: ["Perfiles con experiencia.", "Calificaciones de otros usuarios.", "Atención enfocada en bienestar."],
   },
@@ -309,15 +309,15 @@ const groomingDetails = {
 const storeDetails = {
   products: {
     icon: "▣",
-    title: "Catálogo aliado",
-    text: "Explora alimentos, juguetes y accesorios publicados por tiendas aliadas de Peluvi.",
+    title: "Catálogo de productos",
+    text: "Explora alimentos, juguetes y accesorios publicados por tiendas registradas de Peluvi.",
     items: ["Información organizada por tipo de mascota.", "Datos claros para comparar opciones.", "Contacto con la tienda responsable."],
   },
   offers: {
     icon: "%",
     title: "Novedades y promos",
-    text: "Revisa promociones, novedades y productos destacados que las tiendas aliadas quieran comunicar.",
-    items: ["Publicaciones de negocios aliados.", "Información actualizada por la tienda.", "Opciones destacadas para consultar directo."],
+    text: "Revisa promociones, novedades y productos destacados que las tiendas registradas quieran comunicar.",
+    items: ["Publicaciones de negocios registrados.", "Información actualizada por la tienda.", "Opciones destacadas para consultar directo."],
   },
   delivery: {
     icon: "▱",
@@ -327,17 +327,17 @@ const storeDetails = {
   },
   secure: {
     icon: "✓",
-    title: "Aliados verificados",
+    title: "Información del negocio",
     text: "Ayuda a elegir negocios con información clara, ubicación y datos de contacto visibles.",
-    items: ["Perfiles de tiendas aliadas.", "Ubicación, horarios y medios de contacto.", "Referencias para decidir con más confianza."],
+    items: ["Perfiles de tiendas registradas.", "Ubicación, horarios y medios de contacto.", "Referencias para decidir con más confianza."],
   },
 };
 
 const caregiversDetails = {
   verified: {
     icon: "✓",
-    title: "Cuidadores verificados",
-    text: "Conecta con personas y negocios aliados que ofrecen cuidado para mascotas.",
+    title: "Cuidadores de mascotas",
+    text: "Conecta con personas y negocios registrados que ofrecen cuidado para mascotas.",
     items: ["Perfiles con información clara.", "Contacto directo para coordinar el servicio.", "Opciones pensadas para la tranquilidad del dueño."],
   },
   walks: {
