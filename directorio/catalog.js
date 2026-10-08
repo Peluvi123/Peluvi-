@@ -17,6 +17,7 @@ export function normalize(row, category) {
     location: info.location || [row.address, row.city].filter(Boolean).join(' · ') || row.location || foundation.address || '',
     description: info.description || info.bio || row.description || '',
     image: info.images?.[0] || info.cover_photo || info.photo || row.images?.[0] || row.image || row.avatar_url,
+    gallery: (Array.isArray(info.images) ? info.images : Array.isArray(info.gallery) ? info.gallery : []).filter(value => typeof value === 'string'),
     phone: info.whatsapp || row.phone || foundation.phone || '',
     rating: info.rating ?? row.rating, reviews: info.review_count ?? row.review_count,
     schedule: info.schedule || '', emergency: info.emergency,
@@ -42,4 +43,15 @@ export async function fetchCategory(key, signal) {
     rows.push(...page.map(row => normalize(row, category)));
     if (page.length < 100) return rows;
   }
+}
+
+export async function fetchProvider(key, id, signal) {
+  const category = categories[key];
+  if (!category?.relation || !id) throw new Error('Perfil no disponible');
+  const params = new URLSearchParams({select:category.select, ...category.filters, id:`eq.${id}`, limit:'1'});
+  const response = await fetch(`${config.url}/rest/v1/${category.table}?${params}`, {headers:{apikey:config.key, Authorization:`Bearer ${config.key}`}, signal});
+  if (!response.ok) throw new Error('No pudimos cargar el perfil');
+  const rows = await response.json();
+  if (!rows.length) throw new Error('Este negocio ya no está disponible');
+  return normalize(rows[0],category);
 }

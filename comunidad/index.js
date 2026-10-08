@@ -3,6 +3,8 @@ import { el, picture, safeUrl, checked, date } from './shared/ui.js';
 const $ = selector => document.querySelector(selector);
 const status = $('#status'), feed = $('#feed'), more = $('#more');
 let client, user, before = null, generation = 0, busy = false;
+const authorFilter = new URLSearchParams(location.search).get('autor');
+if (authorFilter) { document.querySelector('h1').textContent = 'Comunidad del negocio'; document.querySelector('#access h2').textContent = 'Conoce su comunidad.'; }
 const seen = new Set();
 let toastTimer;
 function notify(message) { const toast = $('#toast'); toast.textContent = message; toast.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.hidden = true, 4200); }
@@ -45,7 +47,7 @@ function postCard(post, accountGeneration) {
 }
 async function loadFeed() {
   if (!user || busy) return; busy = true; more.hidden = true; status.textContent = 'Cargando publicaciones…'; const current = generation;
-  try { const posts = checked(await client.rpc('community_feed',{p_before:before,p_limit:10,p_author:null})); if (current !== generation) return;
+  try { const posts = checked(await client.rpc('community_feed',{p_before:before,p_limit:10,p_author:authorFilter || null})); if (current !== generation) return;
     posts.forEach(post => { if (!seen.has(post.id)) { const card = postCard(post,current); feed.append(card); seen.add(post.id); if (location.hash === `#${card.id}`) requestAnimationFrame(() => card.scrollIntoView({block:'center'})); } });
     if (posts.length) before = posts.at(-1).created_at;
     status.textContent = seen.size ? 'Las últimas historias de la comunidad.' : 'Aún no hay publicaciones para mostrar. Las nuevas historias aparecerán aquí.';

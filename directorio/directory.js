@@ -31,7 +31,9 @@ function render() {
   }
   matches.forEach(item => {
     const card = element('article', undefined, 'directory-card');
-    const cover = element('div', categories[active].icon, 'directory-cover');
+    const profileUrl = categories[active].relation ? `/directorio/perfil.html?categoria=${active}&proveedor=${encodeURIComponent(item.id)}` : null;
+    const cover = element(profileUrl ? 'a' : 'div', categories[active].icon, 'directory-cover');
+    if (profileUrl) { cover.href = profileUrl; cover.setAttribute('aria-label', `Ver perfil de ${item.name}`); }
     const imageUrl = safeImage(item.image);
     if (imageUrl) {
       const image = element('img'); image.src = imageUrl; image.alt = item.name; image.loading = 'lazy';
@@ -51,6 +53,10 @@ function render() {
     if (item.schedule) details.append(element('p', `Horarios: ${item.schedule}`));
     if (item.services.length) { const list = element('ul'); item.services.forEach(service => list.append(element('li', service))); details.append(list); }
     body.append(details);
+    if (profileUrl) {
+      const title = body.querySelector('h3'); const titleLink = element('a',item.name); titleLink.href = profileUrl; title.replaceChildren(titleLink);
+      const profile = element('a','Conocer el negocio →','directory-contact'); profile.href = profileUrl; body.append(profile);
+    }
     if (['vet', 'grooming'].includes(active)) {
       const book = element('a', 'Agendar cita →', 'directory-contact booking-link');
       book.href = `/directorio/citas.html?categoria=${active}&proveedor=${encodeURIComponent(item.id)}`;
