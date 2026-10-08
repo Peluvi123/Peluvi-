@@ -165,6 +165,13 @@ function buildPeluviFallback(messages) {
 }
 
 async function serveStatic(pathname, response, request) {
+  const decoded = decodeURIComponent(pathname);
+  const publicRoots = new Set(['assets', 'downloads', 'directorio', 'comunidad', 'pet-friendly', 'portal', 'admin', 'servicios', 'conoce', 'negocios', 'privacidad', 'terminos']);
+  const publicFiles = new Set(['index.html', 'styles.css', 'script.js', 'pages.css', 'pages.js', 'cat-walker.js', 'favicon.ico', 'robots.txt', 'sitemap.xml']);
+  const parts = decoded.split(/[\\/]+/).filter(Boolean);
+  if (parts.some(part => part.startsWith('.')) || (parts.length && !publicRoots.has(parts[0]) && !publicFiles.has(decoded.replace(/^\//, '')))) {
+    response.writeHead(404); response.end('Not found'); return;
+  }
   const safePath = normalize(decodeURIComponent(pathname)).replace(/^(\.\.[/\\])+/, "");
   const filePath = join(root, safePath === "/" ? "index.html" : safePath);
 
@@ -184,7 +191,8 @@ async function serveStatic(pathname, response, request) {
   if (existsSync(resolvedPath) && statSync(resolvedPath).isDirectory()) {
     resolvedPath = join(resolvedPath, "index.html");
   }
-  const finalPath = existsSync(resolvedPath) ? resolvedPath : join(root, "index.html");
+  if (!existsSync(resolvedPath)) { response.writeHead(404); response.end('Not found'); return; }
+  const finalPath = resolvedPath;
   const ext = extname(finalPath);
   const contentType = mimeTypes[ext] || "application/octet-stream";
 

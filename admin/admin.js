@@ -22,7 +22,7 @@ function showDashboard() {
   loginView.hidden = true;
   dashboardView.hidden = false;
   logoutBtn.hidden = false;
-  dashboardGreeting.textContent = "Hola, administrador";
+  dashboardGreeting.textContent = "Centro de administración";
 }
 
 async function trySession() {
@@ -454,7 +454,8 @@ async function loadResumen(token) {
       pixelStatus.innerHTML = `<p class="portal-muted">Aún no se ha registrado actividad del pixel, o falta configurar META_PIXEL_ID.</p>`;
     }
   } catch (err) {
-    errorBox.textContent = err.message;
+    document.getElementById("pixel-status").textContent = "No se pudo consultar el estado de marketing. Puedes seguir administrando la aplicación desde su pestaña.";
+    errorBox.textContent = err.message.includes("Falta configurar") ? "La conexión de anuncios está pendiente de configuración." : err.message;
     errorBox.hidden = false;
   }
 }
@@ -569,3 +570,15 @@ function loadAllPanels(token) {
 }
 
 trySession();
+
+const loginPassword = document.getElementById('login-password');
+const loginPasswordToggle = document.getElementById('login-password-toggle');
+function setLoginPasswordVisible(visible) {
+  loginPassword.type = visible ? 'text' : 'password';
+  loginPasswordToggle.setAttribute('aria-label', visible ? 'Ocultar clave' : 'Mostrar clave');
+  loginPasswordToggle.setAttribute('aria-pressed', String(visible));
+  loginPasswordToggle.querySelector('.eye-slash').toggleAttribute('hidden', !visible);
+}
+loginPasswordToggle.addEventListener('click', () => setLoginPasswordVisible(loginPassword.type === 'password'));
+loginForm.addEventListener('submit', () => setLoginPasswordVisible(false));
+logoutBtn.addEventListener('click', () => setLoginPasswordVisible(false));

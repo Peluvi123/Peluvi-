@@ -15,7 +15,7 @@
     />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../portal/portal.css" />
-    <link rel="stylesheet" href="admin.css?v=5" />
+    <link rel="stylesheet" href="admin.css?v=8" />
   </head>
   <body class="portal-body">
     <div class="portal-shell">
@@ -34,10 +34,13 @@
             <h1>Panel de administrador</h1>
             <p class="portal-muted">Ingresa la clave de administrador.</p>
             <form id="login-form">
-              <label class="portal-field">
-                <span>Clave</span>
-                <input type="password" id="login-password" required autocomplete="current-password" />
-              </label>
+              <div class="portal-field">
+                <label for="login-password">Clave</label>
+                <div class="login-password-wrap">
+                  <input type="password" id="login-password" required autocomplete="current-password" />
+                  <button type="button" id="login-password-toggle" aria-label="Mostrar clave" aria-controls="login-password" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path class="eye-slash" d="m3 3 18 18" hidden/></svg></button>
+                </div>
+              </div>
               <button type="submit" id="login-submit">Ingresar</button>
               <p class="portal-error" id="login-error" hidden></p>
             </form>
@@ -47,19 +50,39 @@
         <!-- Dashboard -->
         <section class="portal-dashboard" id="dashboard-view" hidden>
           <div class="portal-welcome">
-            <h1 id="dashboard-greeting">Hola</h1>
-            <p class="portal-muted">Datos de Meta para peluvi.com, sin salir de tu web.</p>
+            <h1 id="dashboard-greeting">Centro de administración</h1>
+            <p class="portal-muted">Tu comunidad, tu operación y tus redes, en un solo lugar.</p>
           </div>
 
           <nav class="portal-tabs" role="tablist">
-            <button class="portal-tab is-active" data-tab="resumen" type="button">Resumen</button>
+            <button class="portal-tab is-active" data-tab="app" type="button">Aplicación Peluvi</button>
+            <button class="portal-tab" data-tab="resumen" type="button">Marketing · Resumen</button>
             <button class="portal-tab" data-tab="redes" type="button">Peluvi Social</button>
             <button class="portal-tab" data-tab="anuncios" type="button">Anuncios</button>
             <button class="portal-tab" data-tab="whatsapp" type="button">WhatsApp</button>
           </nav>
 
+<section class="portal-panel" data-panel="app">
+  <div class="app-banner"><div><span class="app-eyebrow">CENTRO DE CONTROL</span><h2>Una comunidad bien cuidada.</h2><p>Supervisa la actividad de Peluvi y gestiona lo que necesita atención.</p></div><span class="app-badge" id="app-connection">Cuenta de la app sin conectar</span></div>
+  <form id="app-login" class="app-connect">
+    <div><h3>Conecta tu cuenta administradora</h3><p>Usa el correo y la contraseña con los que administras la aplicación Peluvi.</p></div>
+    <label>Correo<input name="email" type="email" autocomplete="username" required placeholder="tu@correo.com"></label>
+    <div class="app-password-field"><label for="app-password">Contraseña</label><div class="app-password-wrap"><input id="app-password" name="password" type="password" autocomplete="current-password" required><button id="app-password-toggle" type="button" aria-label="Mostrar contraseña" aria-controls="app-password" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path class="eye-slash" d="m3 3 18 18" hidden/></svg></button></div></div>
+    <button class="app-primary" type="submit">Conectar aplicación</button>
+  </form>
+  <p id="app-message" role="status" aria-live="polite"></p>
+  <div id="app-workspace" hidden>
+    <div class="app-toolbar"><nav class="app-nav" aria-label="Administración de la aplicación">
+      <button data-view="summary" class="selected">Vista general</button><button data-view="users">Usuarios</button><button data-view="content">Contenido</button><button data-view="community">Comunidad</button><button data-view="activity">Actividad</button>
+    </nav><div><button id="app-refresh">Actualizar</button><button id="app-disconnect">Desconectar app</button></div></div>
+    <form id="app-filters" class="app-toolbar" hidden><label>Buscar<input id="app-search" placeholder="Nombre, correo o contenido"></label><label id="app-kind-label" hidden>Categoría<select id="app-kind"><option value="sos">Alertas SOS</option><option value="adoption">Adopciones</option><option value="product">Productos</option><option value="review">Reseñas</option></select></label><button type="submit">Buscar</button></form>
+    <div id="app-results" aria-live="polite"></div>
+  </div>
+  <dialog id="app-detail"><div id="app-detail-body"></div><button id="app-detail-close">Cerrar</button></dialog>
+</section>
+
           <!-- Resumen -->
-          <div class="portal-panel" data-panel="resumen">
+          <div class="portal-panel" data-panel="resumen" hidden>
             <div class="portal-panel-head">
               <h2>Últimos 30 días</h2>
               <p class="portal-muted">Gasto, resultados y estado del pixel de anuncios.</p>
@@ -286,6 +309,7 @@
       </main>
     </div>
 
-    <script type="module" src="admin.js?v=5"></script>
+    <script type="module" src="admin.js?v=7"></script>
+    <script type="module" src="app-admin.js?v=2"></script>
   </body>
 </html>

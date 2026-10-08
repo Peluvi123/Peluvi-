@@ -616,12 +616,27 @@ sosTriggers.forEach((trigger) => {
   });
 });
 
-adoptionClose?.addEventListener("click", () => setAdoptionOpen(false));
-vetClose?.addEventListener("click", () => setVetOpen(false));
-groomingClose?.addEventListener("click", () => setGroomingOpen(false));
-storeClose?.addEventListener("click", () => setStoreOpen(false));
-caregiversClose?.addEventListener("click", () => setCaregiversOpen(false));
-sosClose?.addEventListener("click", () => setSosOpen(false));
+// Service links open these shared panels on the home document. Return to the
+// originating services history entry so the browser restores its scroll position.
+function closeServicePanel(setOpen) {
+  if (new URLSearchParams(window.location.search).get("from") === "servicios") {
+    const source = document.referrer ? new URL(document.referrer) : null;
+    if (source?.origin === window.location.origin && source.pathname === "/servicios/" && window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.replace("/servicios/");
+    }
+    return;
+  }
+  setOpen(false);
+}
+
+adoptionClose?.addEventListener("click", () => closeServicePanel(setAdoptionOpen));
+vetClose?.addEventListener("click", () => closeServicePanel(setVetOpen));
+groomingClose?.addEventListener("click", () => closeServicePanel(setGroomingOpen));
+storeClose?.addEventListener("click", () => closeServicePanel(setStoreOpen));
+caregiversClose?.addEventListener("click", () => closeServicePanel(setCaregiversOpen));
+sosClose?.addEventListener("click", () => closeServicePanel(setSosOpen));
 
 function closeAllServicePanels() {
   setAdoptionOpen(false);
@@ -749,37 +764,37 @@ vetDetailModal?.addEventListener("click", (event) => {
 
 adoptionPanel?.addEventListener("click", (event) => {
   if (event.target === adoptionPanel) {
-    setAdoptionOpen(false);
+    closeServicePanel(setAdoptionOpen);
   }
 });
 
 vetPanel?.addEventListener("click", (event) => {
   if (event.target === vetPanel) {
-    setVetOpen(false);
+    closeServicePanel(setVetOpen);
   }
 });
 
 groomingPanel?.addEventListener("click", (event) => {
   if (event.target === groomingPanel) {
-    setGroomingOpen(false);
+    closeServicePanel(setGroomingOpen);
   }
 });
 
 storePanel?.addEventListener("click", (event) => {
   if (event.target === storePanel) {
-    setStoreOpen(false);
+    closeServicePanel(setStoreOpen);
   }
 });
 
 caregiversPanel?.addEventListener("click", (event) => {
   if (event.target === caregiversPanel) {
-    setCaregiversOpen(false);
+    closeServicePanel(setCaregiversOpen);
   }
 });
 
 sosPanel?.addEventListener("click", (event) => {
   if (event.target === sosPanel) {
-    setSosOpen(false);
+    closeServicePanel(setSosOpen);
   }
 });
 
@@ -925,41 +940,41 @@ sosDetailModal?.addEventListener("click", (event) => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && adoptionPanel?.classList.contains("is-open")) {
-    setAdoptionOpen(false);
+    closeServicePanel(setAdoptionOpen);
   }
   if (event.key === "Escape" && vetPanel?.classList.contains("is-open")) {
     if (vetDetailModal && !vetDetailModal.hidden) {
       setVetDetailClosed();
     } else {
-      setVetOpen(false);
+      closeServicePanel(setVetOpen);
     }
   }
   if (event.key === "Escape" && groomingPanel?.classList.contains("is-open")) {
     if (groomingDetailModal && !groomingDetailModal.hidden) {
       setGroomingDetailClosed();
     } else {
-      setGroomingOpen(false);
+      closeServicePanel(setGroomingOpen);
     }
   }
   if (event.key === "Escape" && storePanel?.classList.contains("is-open")) {
     if (storeDetailModal && !storeDetailModal.hidden) {
       setStoreDetailClosed();
     } else {
-      setStoreOpen(false);
+      closeServicePanel(setStoreOpen);
     }
   }
   if (event.key === "Escape" && caregiversPanel?.classList.contains("is-open")) {
     if (caregiversDetailModal && !caregiversDetailModal.hidden) {
       setCaregiversDetailClosed();
     } else {
-      setCaregiversOpen(false);
+      closeServicePanel(setCaregiversOpen);
     }
   }
   if (event.key === "Escape" && sosPanel?.classList.contains("is-open")) {
     if (sosDetailModal && !sosDetailModal.hidden) {
       setSosDetailClosed();
     } else {
-      setSosOpen(false);
+      closeServicePanel(setSosOpen);
     }
   }
 });

@@ -646,8 +646,9 @@ button,
 }
 
 .shop-visual svg {
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
+  color: #fff;
   filter: drop-shadow(0 3px 8px rgba(37, 8, 77, 0.35));
 }
 
@@ -6192,3 +6193,51 @@ body:not(.inner-page):not(.portal-body) .hero-shell { z-index: 60; }
   .module-tile, :is(.vet-panel.is-open, .grooming-panel.is-open, .store-panel.is-open, .caregivers-panel.is-open, .sos-panel.is-open) .module-tile { animation: none; opacity: 1; transform: rotate(var(--r)); filter: none; }
 }
 .module-scene .module-tile img { width: 62% !important; height: auto !important; max-height: 62%; object-fit: contain; mix-blend-mode: normal !important; -webkit-mask-image: none !important; mask-image: none !important; border-radius: 0 !important; box-shadow: none !important; filter: drop-shadow(0 8px 10px rgba(80,40,160,.18)) !important; }
+
+/* Open app presentation, matching the clean pets-and-phone composition. */
+.home-value .app-showcase{background:#fff;border:0;border-radius:0;box-shadow:none;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:24px;padding:20px 0;min-height:0;overflow:hidden}
+.home-value .app-showcase::before{display:none}
+.home-value .showcase-copy{padding:24px 0 24px 24px}
+.home-value .showcase-copy h3{font-size:clamp(30px,3.1vw,46px);font-weight:500;line-height:1.12;letter-spacing:-.045em}
+.home-value .showcase-copy>p{font-size:15px;line-height:1.8;max-width:430px}
+.home-value .showcase-media{max-width:none;aspect-ratio:1315 / 1196}
+.home-value .showcase-media img{object-fit:contain;object-position:center;border:0;border-radius:0;box-shadow:none}
+.home-value .showcase-actions a{border-radius:30px;box-shadow:none;font-weight:500}
+@media(max-width:760px){.home-value .app-showcase{grid-template-columns:1fr;gap:0;padding:10px 0}.home-value .showcase-copy{padding:20px}.home-value .showcase-copy h3{max-width:480px}.home-value .showcase-media{width:100%;max-width:620px}.home-value .showcase-actions{gap:10px}}
+
+.home-value .showcase-media{aspect-ratio:1}.home-value .showcase-media img{border-radius:24px}
+
+/* Keep the full artwork visible without cropping at any screen size. */
+.home-value .showcase-media img{position:static;display:block;width:100%;height:auto;object-fit:contain;transform:none;border-radius:0}
+
+/* Decorative movement stays in the white space around the product. */
+.showcase-orbit{position:absolute;inset:0;pointer-events:none;z-index:2}
+.orbit-icon{position:absolute;display:grid;place-items:center;width:clamp(38px,4.8vw,66px);aspect-ratio:1;background:#fff;border:1px solid #eee5fa;border-radius:20px;box-shadow:0 9px 24px #7940bd16;animation:showcase-float 6s ease-in-out infinite;transform:rotate(var(--tilt,0deg))}
+.home-value .showcase-media .orbit-icon img{position:static;width:68%;height:68%;object-fit:contain;border:0;border-radius:0;background:none;box-shadow:none}
+.orbit-vet{left:20%;top:18%;--tilt:-12deg;animation-delay:-1s}
+.orbit-groom{right:4%;top:26%;--tilt:12deg;animation-delay:-3s}
+.orbit-food{left:17%;bottom:9%;--tilt:8deg;animation-delay:-2s}
+.orbit-care{right:12%;bottom:9%;--tilt:-9deg;animation-delay:-4s}
+.orbit-adopt{right:16%;top:5%;--tilt:10deg;animation-delay:-.5s}
+.orbit-paw{position:absolute;width:23px;height:23px;color:#b992ed;opacity:.3;animation:showcase-paw-drift 7s ease-in-out infinite}
+.orbit-paw-1{left:7%;top:34%;animation-delay:-2s;--tilt:-25deg}
+.orbit-paw-2{left:37%;top:7%;width:17px;height:17px;--tilt:20deg}
+.orbit-paw-3{right:6%;top:49%;animation-delay:-4s;--tilt:25deg}
+.orbit-paw-4{left:41%;bottom:5%;animation-delay:-1s;--tilt:-15deg}
+.orbit-paw-5{right:2%;bottom:16%;width:16px;height:16px;animation-delay:-3s;--tilt:35deg}
+@keyframes showcase-float{0%,100%{transform:translateY(0) rotate(var(--tilt))}50%{transform:translateY(-10px) rotate(calc(var(--tilt) + 4deg))}}
+@keyframes showcase-paw-drift{0%,100%{transform:translateY(0) rotate(var(--tilt));opacity:.2}50%{transform:translateY(-13px) rotate(calc(var(--tilt) + 12deg));opacity:.4}}
+@media(max-width:760px){.orbit-icon{width:42px;border-radius:13px}.orbit-paw{width:17px;height:17px}}
+@media(prefers-reduced-motion:reduce){.orbit-icon,.orbit-paw{animation:none}}
+
+/* Extend the floating details into the copy side, away from readable content. */
+.showcase-copy-orbit{position:absolute;inset:0 56% 0 0;pointer-events:none;z-index:1}
+.showcase-copy-orbit .copy-orbit-vet{top:8%;left:12%;--tilt:-10deg;animation-delay:-2s;width:45px}
+.showcase-copy-orbit .copy-orbit-groom{bottom:7%;right:18%;--tilt:12deg;animation-delay:-4s;width:45px}
+.showcase-copy-orbit .orbit-icon img{display:block;width:68%;height:68%;object-fit:contain}
+.showcase-copy-orbit .orbit-paw-1{left:45%;top:13%}
+.showcase-copy-orbit .orbit-paw-2{left:84%;top:22%}
+.showcase-copy-orbit .orbit-paw-3{right:87%;top:auto;bottom:12%}
+.showcase-copy-orbit .orbit-paw-4{left:46%;bottom:7%}
+.showcase-copy-orbit .orbit-paw-5{right:5%;bottom:29%}
+@media(max-width:760px){.showcase-copy-orbit{display:none}}
