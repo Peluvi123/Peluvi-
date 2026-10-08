@@ -217,3 +217,13 @@ try {
   });
   await showAccount();
 } catch { message('No pudimos conectar con Peluvi. Revisa tu conexión y recarga esta página.'); }
+
+const passwordToggle = document.querySelector('#toggle-password');
+passwordToggle.addEventListener('click', () => {
+  const input = document.querySelector('#login-password');
+  const visible = input.type === 'password';
+  input.type = visible ? 'text' : 'password';
+  passwordToggle.setAttribute('aria-pressed', String(visible));
+  passwordToggle.setAttribute('aria-label', visible ? 'Ocultar contraseña' : 'Mostrar contraseña');
+  passwordToggle.querySelector('.eye-slash').toggleAttribute('hidden', !visible);
+});
