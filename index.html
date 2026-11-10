@@ -29,6 +29,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css?v=20261003-modscenes2" />
+    <link rel="stylesheet" href="assets/home-reference.css?v=20261110" />
     <script>
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -48,37 +49,10 @@
         style="display: none"
         src="https://www.facebook.com/tr?id=1046599457792879&ev=PageView&noscript=1"
     /></noscript>
-  </head>
-  <body>
-    <div class="preloader" id="preloader" aria-hidden="true">
-      <video
-        class="preloader-video"
-        autoplay
-        muted
-        playsinline
-        webkit-playsinline
-      >
-        <source
-          src="assets/loading-intro-mobile.mp4"
-          type="video/mp4"
-          media="(max-width: 640px)"
-        />
-        <source src="assets/loading-intro.mp4" type="video/mp4" />
-      </video>
-      <img class="preloader-logo" src="assets/preloader-logo.png" alt="" />
-    </div>
+  <link rel="stylesheet" href="/assets/site-layout.css?v=20261110" />
+</head>
+  <body class="home-reference">
     <section class="hero-shell" id="inicio">
-      <video
-        class="hero-video"
-        autoplay
-        muted
-        loop
-        playsinline
-        poster="assets/peluvi-hero-dark.png"
-        aria-hidden="true"
-      >
-        <source src="assets/peluvi-hero-video.mp4" type="video/mp4" media="(min-width: 641px)" />
-      </video>
       <header class="site-header">
         <a class="brand" href="#inicio" aria-label="Peluvi inicio">
           <img class="brand-logo brand-logo-horizontal" src="assets/peluvi-logo-horizontal.png" alt="Peluvi" />
@@ -98,75 +72,35 @@
           <a href="/comunidad/">Comunidad</a><a href="/pet-friendly/">Pet friendly</a><a href="/conoce/">Conoce Peluvi</a>
           <a href="/negocios/">Para negocios</a>
         </nav>
-        <a class="header-cta" href="/directorio/citas.html" aria-label="Iniciar sesión en Peluvi">Iniciar sesión <span aria-hidden="true">→</span></a>
+        <div class="reference-account"><a class="reference-login" href="/directorio/citas.html">Iniciar sesión</a><a class="reference-button" href="#descarga">Obtener la app <span aria-hidden="true">→</span></a></div>
       </header>
 
-      <main class="hero-content">
-        <div class="hero-copy">
-          <p class="pill">💜 Todo para tu mascota, en un solo lugar</p>
-          <h1>Tu mascota se merece lo <span>mejor, siempre</span></h1>
-          <p class="hero-text">Encuentra servicios confiables, guarda tus favoritos y recibe ayuda para cuidar mejor a tu mascota desde una sola app.</p>
-
-          <div class="hero-primary-actions" aria-label="Acciones principales">
-            <a class="hero-download" href="/downloads/Peluvi-Android-debug.apk" download="Peluvi-Android-debug.apk">Descargar Peluvi <span>↓</span></a>
-            <a class="hero-explore" href="/servicios/">Explorar servicios</a>
+      <main class="reference-main">
+        <div class="reference-hero">
+          <div class="reference-copy">
+            <p class="reference-pill"><span aria-hidden="true">♥</span> Todo para tu mascota, en un solo lugar</p>
+            <h1>Su mundo.<br>Tu tranquilidad.<br><span>Todo en Peluvi.</span></h1>
+            <p class="reference-description">Adopta, encuentra veterinarias, agenda servicios, compra lo que necesita y recibe ayuda cuando más la necesites.</p>
+            <div class="reference-actions"><a class="reference-button" href="/downloads/Peluvi-Android-debug.apk" download>Descargar Peluvi <span aria-hidden="true">↓</span></a><a class="reference-outline" href="/servicios/">Explorar servicios</a></div>
+            <p class="reference-availability"><span aria-hidden="true">◉</span> Disponible para Android <span class="availability-dot">·</span> Hecho con amor por las mascotas</p>
           </div>
-
-          <form class="hero-search" id="mapa">
-            <label class="sr-only" for="buscar">Buscar servicios</label>
-            <input id="buscar" type="search" placeholder="¿Qué necesitas hoy?" />
-            <button type="submit">Buscar</button>
-          </form>
-          <p class="search-hint" id="search-hint" hidden></p>
-
-          <div class="quick-services" id="servicios" aria-label="Servicios principales">
-            <a class="adoption-trigger" href="#adopcion" aria-controls="adoption-panel">
-              <span class="service-icon image-icon"><img src="assets/icon-heart.png" alt="" /></span>
-              Adopción
-            </a>
-            <a class="vet-trigger" href="#veterinarias" aria-controls="vet-panel">
-              <span class="service-icon image-icon"><img src="assets/icon-vet-crop.png" alt="" /></span>
-              Veterinarias
-            </a>
-            <a class="grooming-trigger" href="#peluquerias" aria-controls="grooming-panel">
-              <span class="service-icon image-icon"><img src="assets/icon-grooming-tight.png" alt="" /></span>
-              Peluquerías
-            </a>
-            <a class="store-trigger" href="#tiendas" aria-controls="store-panel">
-              <span class="service-icon image-icon"><img src="assets/icon-food-tight.png" alt="" /></span>
-              Tiendas
-            </a>
-            <a class="caregivers-trigger" href="#cuidadores" aria-controls="caregivers-panel">
-              <span class="service-icon image-icon"><img src="assets/icon-walkers-crop.png" alt="" /></span>
-              Cuidadores
-            </a>
-            <a class="sos-trigger" href="#sos" aria-controls="sos-panel">
-              <span class="service-icon image-icon"><img src="assets/icon-map-tight.png" alt="" /></span>
-              SOS
-            </a>
+          <div class="reference-art">
+            <div class="reference-blob blob-one"></div><div class="reference-blob blob-two"></div><div class="reference-blob blob-three"></div>
+            <img class="reference-pets" src="assets/peluvi-hero-reference.png" alt="Perro y gato con gafas moradas; el perro lleva audífonos de Peluvi" fetchpriority="high" width="1536" height="1024" />
+            <a class="hero-orbit orbit-vet vet-trigger" href="#veterinarias" aria-label="Veterinarias" aria-controls="vet-panel"><img src="assets/icon-vet-crop.png" alt="" /></a>
+            <a class="hero-orbit orbit-heart adoption-trigger" href="#adopcion" aria-label="Adopción" aria-controls="adoption-panel"><img src="assets/icon-heart.png" alt="" /></a>
+            <a class="hero-orbit orbit-groom grooming-trigger" href="#peluquerias" aria-label="Peluquerías" aria-controls="grooming-panel"><img src="assets/icon-grooming-tight.png" alt="" /></a>
+            <a class="hero-orbit orbit-sos sos-trigger" href="#sos" aria-label="SOS Mascotas" aria-controls="sos-panel"><img src="assets/icon-map-tight.png" alt="" /></a>
+            <span class="reference-heart" aria-hidden="true">♡</span><span class="reference-spark" aria-hidden="true">✦</span>
           </div>
         </div>
-
-        <aside class="business-card" id="empresas">
-          <div class="shop-visual" aria-hidden="true">
-            <svg viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="20" cy="39" rx="10" ry="14" transform="rotate(-28 20 39)" />
-              <ellipse cx="39" cy="24" rx="10" ry="14" transform="rotate(-10 39 24)" />
-              <ellipse cx="62" cy="24" rx="10" ry="14" transform="rotate(10 62 24)" />
-              <ellipse cx="81" cy="39" rx="10" ry="14" transform="rotate(28 81 39)" />
-              <path d="M50 48C40 48 36 56 30 63C24 69 20 75 23 82C26 90 35 91 43 88C48 86 52 86 57 88C65 91 74 90 77 82C80 75 76 69 70 63C64 56 60 48 50 48Z" />
-            </svg>
-          </div>
-          <div>
-            <h2>¿Tienes un negocio <span class="tone">para mascotas?</span></h2>
-            <p>Gestiona tu perfil, pedidos, citas o sesiones desde el portal de proveedores.</p>
-          </div>
-          <div class="business-actions">
-            <a href="/portal/">Entrar al portal <span>→</span></a>
-            <a class="is-secondary" href="/portal/?tipo=vet">Registrar negocio</a>
-          </div>
-        </aside>
-
+        <form class="reference-search" action="/directorio/" id="mapa">
+          <label><span class="search-pin" aria-hidden="true">⌖</span><span class="sr-only">¿Qué necesita tu mascota?</span><select name="categoria" aria-label="¿Qué necesita tu mascota?"><option value="vet">¿Qué necesita tu mascota?</option><option value="vet">Veterinarias</option><option value="grooming">Peluquerías</option><option value="products">Tiendas</option><option value="caretaker">Cuidadores</option><option value="adoption">Adopción</option></select></label>
+          <label><span class="search-pin" aria-hidden="true">⌖</span><span class="sr-only">Ciudad o zona</span><input name="q" placeholder="¿En dónde?" aria-label="Ciudad o zona" /></label>
+          <button class="reference-button" type="submit"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="m15 15 6 6"/></svg> Buscar</button>
+        </form>
+        <div class="reference-services" id="servicios" aria-label="Servicios principales"><a class="ref-service adoption-trigger" href="#adopcion" aria-controls="adoption-panel"><img src="assets/icon-heart.png" alt="" width="80" height="80" /><strong>Adopción</strong><span>Dales un hogar</span><i aria-hidden="true">→</i></a><a class="ref-service vet-trigger" href="#veterinarias" aria-controls="vet-panel"><img src="assets/icon-vet-crop.png" alt="" width="80" height="80" /><strong>Veterinarias</strong><span>Cuida su salud</span><i aria-hidden="true">→</i></a><a class="ref-service grooming-trigger" href="#peluquerias" aria-controls="grooming-panel"><img src="assets/icon-grooming-tight.png" alt="" width="80" height="80" /><strong>Peluquerías</strong><span>Baño, corte y estética</span><i aria-hidden="true">→</i></a><a class="ref-service store-trigger" href="#tiendas" aria-controls="store-panel"><img src="assets/icon-food-tight.png" alt="" width="80" height="80" /><strong>Tiendas</strong><span>Todo lo que necesita</span><i aria-hidden="true">→</i></a><a class="ref-service caregivers-trigger" href="#cuidadores" aria-controls="caregivers-panel"><img src="assets/icon-walkers-crop.png" alt="" width="80" height="80" /><strong>Cuidadores</strong><span>Confianza y bienestar</span><i aria-hidden="true">→</i></a><a class="ref-service sos-trigger" href="#sos" aria-controls="sos-panel"><img src="assets/icon-map-tight.png" alt="" width="80" height="80" /><strong>SOS</strong><span>Ayuda inmediata</span><i aria-hidden="true">→</i></a></div>
+        <aside class="reference-business" id="empresas"><span class="business-mark" aria-hidden="true">♧</span><div><h2>¿Tienes un negocio para mascotas?</h2><p>Únete a Peluvi y conecta con familias pet friendly.</p></div><div class="reference-business-actions"><a href="/portal/">Entrar al portal</a><a href="/portal/?registro=1">Registrar negocio <span aria-hidden="true">→</span></a></div><span class="business-paw" aria-hidden="true">🐾</span></aside>
       </main>
     </section>
 
@@ -272,7 +206,7 @@
         </div>
         <nav class="footer-column" aria-label="Explorar Peluvi"><strong>Explora</strong><a href="/servicios/">Servicios</a><a href="/conoce/">Cómo funciona</a><a href="/#adopcion">Adopciones</a><a href="/#sos">Alertas SOS</a></nav>
         <nav class="footer-column" aria-label="Peluvi para negocios"><strong>Negocios</strong><a href="/negocios/">Para proveedores</a><a href="/portal/?registro=1">Registrar negocio</a><a href="/portal/">Entrar al portal</a></nav>
-        <div class="footer-column"><strong>Soporte</strong><a href="mailto:soporte@peluvi.com">soporte@peluvi.com</a><a href="mailto:redes@peluvi.com">redes@peluvi.com</a><a class="footer-admin-link" href="/admin/">Administración →</a><span>Colombia</span></div>
+        <div class="footer-column"><strong>Soporte</strong><a href="mailto:soporte@peluvi.com">soporte@peluvi.com</a><a href="mailto:redes@peluvi.com">redes@peluvi.com</a><span>Colombia</span></div>
       </div>
       </details>
       <div class="footer-compact">
@@ -768,7 +702,7 @@
             </div>
           </div>
           <div class="sos-photo module-scene" aria-hidden="true">
-            <img class="module-scene-img" src="assets/module-scenes/sos.jpg" alt="" />
+            <img class="module-scene-img" src="assets/module-scenes/sos-reunion-v2.png" alt="" />
             <span class="module-tile module-tile--0"><img src="assets/module-icons/bell.png" alt="" /><b>Alertas</b></span>
             <span class="module-tile module-tile--1"><img src="assets/icon-map-tight.png" alt="" /><b>Mapa</b></span>
             <span class="module-tile module-tile--2"><img src="assets/module-icons/megaphone.png" alt="" /><b>Difundir</b></span>

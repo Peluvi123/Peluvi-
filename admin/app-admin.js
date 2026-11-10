@@ -5,6 +5,7 @@ const number = value => Number(value || 0).toLocaleString('es-CO');
 const date = value => value ? new Date(value).toLocaleString('es-CO') : '—';
 const types = {client:'Cliente',provider:'Proveedor',vet:'Veterinaria',grooming:'Peluquería',foundation:'Fundación',food:'Tienda',caretaker:'Cuidador'};
 const actions = {suspend:'Suspensión',unsuspend:'Reactivación',delete_user:'Cuenta eliminada',delete_content:'Contenido eliminado',resolve_sos:'SOS resuelto'};
+let usesSharedSession = false;
 let session = null, view = 'summary', rows = [], requestId = 0, busy = false;
 function message(text, error = false) { $('app-message').textContent = text; $('app-message').classList.toggle('app-error', error); }
 function disconnect() {
@@ -30,9 +31,12 @@ async function rpc(name, args = {}) {
   if (!session) throw new Error('Conecta tu cuenta administradora.');
   if (Date.now() / 1000 > session.expires_at - 60) {
     const previous = session;
-    const renewed = await request('/auth/v1/token?grant_type=refresh_token', {refresh_token:session.refresh_token});
+    const renewed = usesSharedSession
+      ? await (await import('./shared-session.js')).getAppSession()
+      : await request('/auth/v1/token?grant_type=refresh_token', {refresh_token:session.refresh_token});
+    if (!renewed) { disconnect(); throw new Error('La sesión expiró. Inicia sesión de nuevo.'); }
     if (session !== previous) throw new Error('La sesión se cerró.');
-    session = {...renewed, expires_at: Date.now()/1000 + renewed.expires_in};
+    session = {...renewed, expires_at: renewed.expires_at || Date.now()/1000 + renewed.expires_in};
   }
   return request(`/rest/v1/rpc/${name}`, args);
 }
@@ -43,6 +47,7 @@ $('app-login').addEventListener('submit', async event => {
     const auth = await request('/auth/v1/token?grant_type=password', {email:data.get('email'),password:data.get('password')});
     const allowed = await request('/rest/v1/rpc/is_admin', {}, auth.access_token);
     if (!allowed) throw new Error('Esta cuenta no tiene permisos de administrador en Peluvi.');
+    usesSharedSession = false;
     session = {...auth, expires_at:Date.now()/1000 + auth.expires_in};
     event.target.reset(); $('app-login').hidden = true; $('app-workspace').hidden = false;
     $('app-connection').textContent = 'Conectado · ' + auth.user.email; await load();
@@ -133,3 +138,21 @@ passwordToggle.addEventListener('click', () => {
 $('app-login').addEventListener('submit', hidePassword);
 $('logout-btn').addEventListener('click', hidePassword);
 $('app-disconnect').addEventListener('click', hidePassword);
+
+
+async function restoreAppSession() {
+  try {
+    const { getAppSession } = await import('./shared-session.js');
+    const saved = await getAppSession();
+    if (!saved) return;
+    const allowed = await request('/rest/v1/rpc/is_admin', {}, saved.access_token);
+    if (allowed !== true) return;
+    usesSharedSession = true;
+    session = saved;
+    $('app-login').hidden = true;
+    $('app-workspace').hidden = false;
+    $('app-connection').textContent = 'Conectado · ' + saved.user.email;
+    await load();
+  } catch (error) { message(error.message, true); }
+}
+await restoreAppSession();

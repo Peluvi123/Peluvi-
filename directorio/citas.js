@@ -112,6 +112,9 @@ async function showAccount() {
   if (!user) return;
   message('Cargando tu cuenta…');
   try {
+    const isAdmin = checked(await client.rpc('is_admin'));
+    if (version !== accountVersion) return;
+    if (isAdmin === true) { location.replace('/admin/'); return; }
     profile = checked(await client.from('profiles').select('name,phone').eq('id',user.id).maybeSingle());
     if (version !== accountVersion) return;
     if (!providerId) {

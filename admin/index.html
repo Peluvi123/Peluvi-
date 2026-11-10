@@ -16,7 +16,9 @@
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../portal/portal.css" />
     <link rel="stylesheet" href="admin.css?v=8" />
-  </head>
+      <link rel="stylesheet" href="commercial.css" />
+  <link rel="stylesheet" href="/assets/site-layout.css?v=20261110" />
+</head>
   <body class="portal-body">
     <div class="portal-shell">
       <header class="portal-header">
@@ -56,6 +58,8 @@
 
           <nav class="portal-tabs" role="tablist">
             <button class="portal-tab is-active" data-tab="app" type="button">Aplicación Peluvi</button>
+            <button class="portal-tab" data-tab="campaigns" type="button">Campañas</button>
+            <button class="portal-tab" data-tab="commercial-calendar" type="button">Calendario comercial</button>
             <button class="portal-tab" data-tab="resumen" type="button">Marketing · Resumen</button>
             <button class="portal-tab" data-tab="redes" type="button">Peluvi Social</button>
             <button class="portal-tab" data-tab="anuncios" type="button">Anuncios</button>
@@ -80,6 +84,21 @@
   </div>
   <dialog id="app-detail"><div id="app-detail-body"></div><button id="app-detail-close">Cerrar</button></dialog>
 </section>
+
+          <section class="portal-panel cm" data-panel="campaigns" hidden>
+            <div class="cm-heading"><div><span class="app-eyebrow">CRECIMIENTO / PELUVI</span><h2>Ideas que se convierten en resultados.</h2><p>Organiza tus campañas y sigue cada avance, día a día.</p></div><button class="cm-primary" id="cm-new">＋ Nueva campaña</button></div>
+            <p class="cm-storage" id="cm-storage"></p>
+            <p role="status" aria-live="polite" id="cm-message"></p>
+            <div class="cm-metrics" id="cm-metrics"></div>
+            <div class="cm-card"><form class="cm-filters" id="cm-filters"><label>Buscar<input name="search" placeholder="Campaña o responsable"></label><label>Objetivo<select name="objective"><option value="">Todos los objetivos</option><option value="registrations">Usuarios</option><option value="providers">Negocios</option><option value="appointments">Citas</option><option value="sales">Ventas</option><option value="messages">Mensajes</option></select></label><label>Estado<select name="status"><option value="">Todos los estados</option><option value="active">Activas</option><option value="paused">Pausadas</option><option value="completed">Finalizadas</option><option value="archived">Archivadas</option></select></label><label>Desde<input type="date" name="from"></label><label>Hasta<input type="date" name="to"></label><button type="button" id="cm-refresh">Actualizar</button><button type="button" id="cm-export">Exportar CSV</button></form><div id="cm-list"></div></div>
+            <details class="cm-audit"><summary>Historial de cambios</summary><div id="cm-audit"></div></details>
+          </section>
+          <section class="portal-panel cm" data-panel="commercial-calendar" hidden>
+            <div class="cm-heading"><div><span class="app-eyebrow">SEGUIMIENTO / PELUVI</span><h2>Cada día cuenta.</h2><p>Revisa resultados y confirma el cierre diario de cada responsable.</p></div><button id="cm-config-open">Configurar calendario</button></div>
+            <p class="cm-storage" id="cm-calendar-storage"></p><p id="cm-calendar-message" role="status"></p>
+            <div class="cm-card"><div class="cm-calendar-tools"><button id="cm-prev" aria-label="Mes anterior">←</button><h3 id="cm-month-label"></h3><button id="cm-next" aria-label="Mes siguiente">→</button><button id="cm-today">Hoy</button><label>Responsable<select id="cm-owner"></select></label></div><div class="cm-legend"><span class="closed">Cerrado</span><span class="partial">En progreso</span><span class="overdue">Sin cierre</span><span class="pending">Pendiente</span><span class="off">No laborable</span></div><div id="cm-calendar"></div><p class="cm-hint">Selecciona un día para revisar el reporte y cerrar la jornada. El cierre confirma que los datos fueron revisados, incluso si no hubo resultados.</p></div>
+          </section>
+          <dialog class="cm-dialog" id="cm-dialog"><div class="cm-dialog-head"><h2 id="cm-dialog-title"></h2><button id="cm-dialog-close" aria-label="Cerrar ventana">×</button></div><div id="cm-dialog-body"></div><p id="cm-dialog-message" role="status"></p></dialog>
 
           <!-- Resumen -->
           <div class="portal-panel" data-panel="resumen" hidden>
@@ -311,5 +330,6 @@
 
     <script type="module" src="admin.js?v=7"></script>
     <script type="module" src="app-admin.js?v=2"></script>
+      <script type="module" src="commercial.js"></script>
   </body>
 </html>

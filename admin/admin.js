@@ -26,7 +26,20 @@ function showDashboard() {
 }
 
 async function trySession() {
-  const token = localStorage.getItem(TOKEN_KEY);
+  let token = localStorage.getItem(TOKEN_KEY);
+  try {
+    const { getAppSession } = await import('./shared-session.js');
+    const session = await getAppSession();
+    if (session) {
+      const response = await fetch('/api/admin/app-session', { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } });
+      if (!response.ok) throw new Error('No se pudo validar el acceso administrativo de tu cuenta.');
+      token = (await response.json()).token;
+      localStorage.setItem(TOKEN_KEY, token);
+    }
+  } catch (error) {
+    showLogin(error.message);
+    return;
+  }
   if (!token) {
     showLogin();
     return;
@@ -76,7 +89,9 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
-logoutBtn.addEventListener("click", () => {
+logoutBtn.addEventListener("click", async () => {
+  const { signOutApp } = await import("./shared-session.js");
+  await signOutApp();
   localStorage.removeItem(TOKEN_KEY);
   showLogin();
 });
@@ -133,17 +148,18 @@ async function loadSocialCapabilities(token) {
   setReadiness("ready-storage", capabilities.persistentStorage, capabilities.storageProvider || "Persistente", "Modo temporal");
   setReadiness("ready-scheduler", capabilities.schedulerConfigured, "Protegido", "Sin cron");
   const missing = [];
-  if (!capabilities.canPublishInstagram) missing.push("instagram_content_publish");
-  if (!capabilities.canPublishFacebook) missing.push("pages_manage_posts");
+  if (capabilities.metaConnectionError) missing.push(capabilities.metaConnectionError);
+  if (!capabilities.canPublishInstagram) missing.push("Conectar Instagram y autorizar publicaciones");
+  if (!capabilities.canPublishFacebook) missing.push("Conectar Facebook y autorizar publicaciones");
   if (!capabilities.persistentStorage) missing.push("Supabase para conservar agenda y borradores");
   if (!capabilities.mediaStorage) missing.push("Vercel Blob para subir archivos");
-  if (!capabilities.schedulerConfigured) missing.push("CRON_SECRET y un cron para ejecutar la agenda");
+  if (!capabilities.schedulerConfigured) missing.push(capabilities.environment === "local" ? "La agenda automática solo se ejecuta en el sitio desplegado" : "Configurar la agenda automática en Vercel");
   if (missing.length) {
     banner.classList.add("is-warning");
-    banner.innerHTML = `<strong>El centro está operativo con límites</strong><span>Falta: ${escapeHtml(missing.join(" · "))}</span>`;
+    banner.innerHTML = `<strong>Conexión pendiente</strong><span>Falta: ${escapeHtml(missing.join(" · "))}</span>`;
   } else {
     banner.classList.remove("is-warning");
-    banner.innerHTML = "<strong>Peluvi Social está listo</strong><span>Publicación y agenda persistente habilitadas.</span>";
+    banner.innerHTML = "<strong>Peluvi Social está listo</strong><span>Publicación habilitada. La agenda se ejecuta diariamente a las 8:00 a. m. de Colombia.</span>";
   }
   const uploadLabel = document.getElementById("social-upload-label");
   uploadLabel.classList.toggle("is-disabled", !capabilities.mediaStorage);

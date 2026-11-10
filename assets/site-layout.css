@@ -1,0 +1,19 @@
+/* One moderate desktop width shared by the site's page layouts. */
+:root{--site-content-width:1440px;--site-desktop-width:min(var(--site-content-width),88vw)}
+@media(min-width:1101px){
+  body .page-wrap,body .page-footer,body.inner-page .site-header,
+  body .wrap,body.directory-page .wrap,body.client-dashboard .booking-shell,
+  body.home-reference .reference-main,body.home-reference .content,
+  body.home-reference:not(.inner-page):not(.portal-body) .site-header{
+    width:var(--site-desktop-width);max-width:var(--site-content-width);margin-inline:auto;
+  }
+  body .portal-shell{width:var(--site-desktop-width);max-width:var(--site-content-width);padding-inline:0}
+  body.client-dashboard .site-nav{width:var(--site-desktop-width);max-width:var(--site-content-width);padding-inline:0;margin-inline:auto}
+  body.home-reference .reference-hero{min-height:480px}
+  body.home-reference .reference-art{width:62%;height:100%;right:0;bottom:0}
+  body.home-reference .reference-copy h1{font-size:clamp(52px,4vw,64px)}
+  body.home-reference .reference-description{max-width:400px;font-size:15px}
+  body.home-reference .reference-search{width:82%}
+  body.home-reference .ref-service strong{font-size:15px}
+  body.home-reference .ref-service>span{font-size:11px}
+}

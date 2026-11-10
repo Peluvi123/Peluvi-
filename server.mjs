@@ -1,3 +1,5 @@
+import { createCommercialStore } from './lib/commercial.mjs';
+import appConfig from './admin/app-config.js';
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
@@ -8,6 +10,7 @@ const root = process.cwd();
 const port = Number(process.env.PORT || 8000);
 
 loadLocalEnv();
+const commercialStore = createCommercialStore({ config: supabaseConfig(), production: !!process.env.VERCEL || process.env.NODE_ENV === "production" });
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -43,6 +46,18 @@ const server = createServer(async (request, response) => {
       return;
     }
 
+    if (request.method === "POST" && url.pathname === "/api/admin/app-session") {
+      if (!process.env.ADMIN_PASSWORD) return sendJson(response, 503, { error: "Administración no configurada." });
+      const authorization = request.headers.authorization;
+      if (!authorization?.startsWith('Bearer ')) return sendJson(response, 401, { error: "Falta iniciar sesión." });
+      const verification = await fetch(`${appConfig.url}/rest/v1/rpc/is_admin`, {
+        method: 'POST', headers: { apikey: appConfig.key, Authorization: authorization, 'Content-Type': 'application/json' },
+        body: '{}', signal: AbortSignal.timeout(15000),
+      });
+      if (!verification.ok || await verification.json() !== true) return sendJson(response, 403, { error: "Esta cuenta no tiene permisos de administrador." });
+      return sendJson(response, 200, { token: issueAdminToken() });
+    }
+
     if (request.method === "POST" && url.pathname === "/api/admin/login") {
       await handleAdminLogin(request, response);
       return;
@@ -51,6 +66,19 @@ const server = createServer(async (request, response) => {
     if (url.pathname === "/api/cron/social-publisher") {
       await handleSocialCron(request, response);
       return;
+    }
+
+    if (url.pathname === '/api/admin/commercial') {
+      const auth = requireAdminAuth(request);
+      if (auth.error) return sendJson(response, auth.error, { error: auth.message });
+      response.setHeader('Cache-Control', 'no-store');
+      try {
+        if (request.method === 'GET') return sendJson(response, 200, { state: await commercialStore.read(), storage: commercialStore.storage });
+        if (request.method !== 'POST') return sendJson(response, 405, { error: 'Método no permitido.' });
+        let raw = ''; for await (const chunk of request) { raw += chunk; if (Buffer.byteLength(raw) > 32768) return sendJson(response, 413, { error: 'Solicitud demasiado grande.' }); }
+        let input; try { input = JSON.parse(raw); } catch { return sendJson(response, 400, { error: 'Solicitud inválida.' }); }
+        return sendJson(response, 200, { state: await commercialStore.update(input), storage: commercialStore.storage });
+      } catch (error) { return sendJson(response, error.status || 500, { error: error.status ? error.message : 'No se pudieron guardar o consultar las campañas.' }); }
     }
 
     if (url.pathname.startsWith("/api/admin/social")) {
@@ -560,6 +588,7 @@ async function processSocialItem(id) {
   const items = await readSocialItems();
   const index = items.findIndex((item) => item.id === id);
   if (index === -1) throw new Error("Publicación no encontrada.");
+  if (items[index].status === "published") return items[index];
   if (items[index].status === "processing") throw new Error("La publicación ya se está procesando.");
   items[index] = { ...items[index], status: "processing", updatedAt: new Date().toISOString(), error: null };
   await writeSocialItems(items);
@@ -579,20 +608,28 @@ async function handleSocialApi(url, request, response) {
   try {
     if (url.pathname === "/api/admin/social-capabilities" && request.method === "GET") {
       let permissions = [];
+      let metaConnectionError = null;
       try {
         const data = await callGraphApi("me/permissions", {
           accessToken: process.env.META_SOCIAL_ACCESS_TOKEN, cacheNamespace: "permissions", ttlMs: 60_000,
         });
         permissions = (data.data || []).filter((p) => p.status === "granted").map((p) => p.permission);
-      } catch {}
+      } catch { metaConnectionError = process.env.META_SOCIAL_ACCESS_TOKEN ? 'No se pudo verificar la conexión con Meta. Revisa la vigencia del acceso.' : 'Las cuentas de Facebook e Instagram aún no están conectadas.'; }
+      let storageReady = false;
+      if (supabaseConfig() || redisConfig()) {
+        try { if (supabaseConfig()) await supabaseSocialRequest('?select=id&limit=1'); else await redisCommand('PING'); storageReady = true; } catch {}
+      }
       return sendJson(response, 200, {
-        persistentStorage: Boolean(supabaseConfig() || redisConfig()),
+        metaConnectionError,
+        environment: process.env.VERCEL ? 'production' : 'local',
+        schedulerNote: 'La agenda configurada se ejecuta una vez al día, a las 8:00 a. m. de Colombia.',
+        persistentStorage: storageReady,
         storageProvider: supabaseConfig() ? "Supabase" : redisConfig() ? "Redis" : null,
         mediaStorage: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
-        schedulerConfigured: Boolean(process.env.CRON_SECRET),
+        schedulerConfigured: Boolean(process.env.CRON_SECRET && process.env.VERCEL && storageReady),
         permissions,
-        canPublishInstagram: permissions.includes("instagram_content_publish"),
-        canPublishFacebook: permissions.includes("pages_manage_posts"),
+        canPublishInstagram: Boolean(process.env.META_IG_USER_ID) && permissions.includes("instagram_content_publish"),
+        canPublishFacebook: Boolean(process.env.META_PAGE_ID) && permissions.includes("pages_manage_posts"),
       });
     }
 
@@ -648,6 +685,9 @@ async function handleSocialApi(url, request, response) {
       const status = requestedStatus === "scheduled" ? "scheduled" : "draft";
       if (status === "scheduled" && !supabaseConfig() && !redisConfig()) {
         throw new Error("Conecta Supabase antes de programar publicaciones. Así la parrilla no se perderá al desplegar.");
+      }
+      if (status === "scheduled" && (!process.env.CRON_SECRET || !process.env.VERCEL)) {
+        throw new Error('La programación requiere un despliegue en Vercel con CRON_SECRET configurado. Puedes guardar un borrador.');
       }
       if (status === "scheduled" && (!payload.scheduledAt || new Date(payload.scheduledAt) <= new Date())) {
         throw new Error("Selecciona una fecha futura para programar.");

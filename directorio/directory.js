@@ -71,14 +71,14 @@ function render() {
     card.append(cover, body); results.append(card);
   });
 }
-async function openCategory(key) {
+async function openCategory(key, searchTerm = '') {
   const url = new URL(location.href); url.searchParams.set('categoria', key); history.replaceState(null, '', url);
   document.title = `${categories[key].title} | Peluvi`;
   document.querySelector('#hero-title').replaceChildren(document.createTextNode(categories[key].title), element('span', '.'));
   document.querySelector('.hero-description').textContent = categoryCopy[key];
   document.querySelector('.current-category').textContent = categories[key].title;
   emergency.checked = false; document.querySelector('.emergency-filter').hidden = key !== 'vet';
-  active = key; records = []; loading = true; input.value = ''; results.replaceChildren();
+  active = key; records = []; loading = true; input.value = searchTerm; results.replaceChildren();
   dialog.querySelector('#directory-title').textContent = categories[key].title;
   tabs.querySelectorAll('button').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.category === key)));
   status.textContent = 'Cargando publicaciones de Peluvi…';
@@ -106,5 +106,6 @@ Object.entries(categories).forEach(([key, category]) => {
 });
 input.addEventListener('input', render);
 emergency.addEventListener('change', render);
-const initialCategory = new URLSearchParams(location.search).get('categoria');
-openCategory(categories[initialCategory] ? initialCategory : 'vet');
+const initialParams = new URLSearchParams(location.search);
+const initialCategory = initialParams.get('categoria');
+openCategory(categories[initialCategory] ? initialCategory : 'vet', initialParams.get('q') || '');
