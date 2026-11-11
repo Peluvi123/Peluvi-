@@ -35,7 +35,7 @@
   // Menu preview: the photo on the right swaps to match the hovered link.
   const preview = menu?.querySelector(".pv-menu-preview");
   menu?.querySelectorAll(".pv-menu-links a").forEach((a) => {
-    a.addEventListener("pointerenter", () => {
+    const showPreview = () => {
       if (!preview || preview.dataset.img === a.dataset.img) return;
       preview.dataset.img = a.dataset.img;
       const frame = preview.querySelector(".pv-menu-frame");
@@ -48,7 +48,9 @@
         gsap.fromTo(img, { clipPath: "inset(100% 0 0 0)", scale: 1.15 }, { clipPath: "inset(0% 0 0 0)", scale: 1, duration: 0.8, ease: "expo.out",
           onComplete: () => { while (frame.children.length > 1) frame.firstElementChild.remove(); } });
       } else while (frame.children.length > 1) frame.firstElementChild.remove();
-    });
+    };
+    a.addEventListener("pointerenter", showPreview);
+    a.addEventListener("focus", showPreview);
   });
   addEventListener("keydown", (e) => { if (e.key === "Escape" && body.classList.contains("pv-menu-open")) setMenu(false); });
 
