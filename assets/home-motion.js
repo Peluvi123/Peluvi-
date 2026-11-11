@@ -219,7 +219,8 @@
       if (now - lastMove < 2200) return;
       t0 += 0.012;
       tx = w * (0.5 + 0.24 * Math.sin(t0 * 0.9) + 0.06 * Math.sin(t0 * 2.3));
-      ty = h * (0.48 + 0.2 * Math.sin(t0 * 1.4 + 1));
+      // on narrow screens the pets sit in the lower half, so keep the blob over them
+      ty = h * (w < 700 ? 0.66 + 0.12 * Math.sin(t0 * 1.4 + 1) : 0.48 + 0.2 * Math.sin(t0 * 1.4 + 1));
       if (!started) { [main, echo].forEach((b) => b.nodes.forEach((n) => { n.x = tx; n.y = ty; })); started = true; }
     };
 
@@ -551,22 +552,26 @@
       });
     });
   };
-  layoutCollage();
-  ScrollTrigger.addEventListener("refreshInit", layoutCollage);
+  // On phones the strip becomes a simple two-column grid (see CSS), so skip the sideways drift.
+  const stripMode = !matchMedia("(max-width: 800px)").matches;
+  if (stripMode) {
+    layoutCollage();
+    ScrollTrigger.addEventListener("refreshInit", layoutCollage);
+  }
   // One timeline with explicit values: the colour depends only on scroll position,
   // whatever direction or position you arrive from.
   gsap.timeline({ scrollTrigger: { trigger: ".pv-collage", start: "top 85%", end: "top -55%", scrub: true } })
     .fromTo(shift, { backgroundColor: "#2d1463", color: "#f4f1f8" }, { backgroundColor: "#a594d6", color: "#2d1463", ease: "none", duration: 1, immediateRender: true })
     .to(shift, { backgroundColor: "#f4f1f8", color: "#2d1463", ease: "none", duration: 1 });
   ScrollTrigger.create({ trigger: ".pv-collage", start: "top 40px", end: "bottom 40px", onToggle: (s) => s.isActive && header.classList.remove("on-dark") });
-  const slide = gsap.to(track, {
+  const slide = stripMode && gsap.to(track, {
     x: () => -distance(), ease: "none",
     scrollTrigger: { trigger: ".pv-collage", start: "top bottom", end: "bottom bottom", scrub: 1, invalidateOnRefresh: true },
   });
   // The contour texture lags behind the photos a little, so it reads as a deeper layer.
 
   // Each photo drifts at its own speed while the strip moves → depth.
-  gsap.utils.toArray(".pv-collage figure").forEach((fig) => {
+  if (slide) gsap.utils.toArray(".pv-collage figure").forEach((fig) => {
     const speed = parseFloat(fig.dataset.speed || "1");
     gsap.fromTo(fig, { x: (speed - 1) * 220, y: (speed - 1) * -90 }, { x: (1 - speed) * 220, y: (speed - 1) * 90, ease: "none", scrollTrigger: { trigger: fig, containerAnimation: slide, start: "left right", end: "right left", scrub: true } });
   });
@@ -574,13 +579,13 @@
     const path = note.querySelector(".pv-mini-sign path");
     if (!path) return;
     const len = path.getTotalLength();
-    gsap.fromTo(path, { strokeDasharray: len, strokeDashoffset: len }, { strokeDashoffset: 0, ease: "none", scrollTrigger: { trigger: note, containerAnimation: slide, start: "left 75%", end: "left 35%", scrub: true } });
+    gsap.fromTo(path, { strokeDasharray: len, strokeDashoffset: len }, { strokeDashoffset: 0, ease: "none", scrollTrigger: slide ? { trigger: note, containerAnimation: slide, start: "left 75%", end: "left 35%", scrub: true } : { trigger: note, start: "top 80%", end: "top 45%", scrub: true } });
   });
 
   /* ---------- text reveals: each line slides up softly ---------- */
   document.querySelectorAll("[data-blocks]").forEach((el) => {
     const lines = el.querySelectorAll(":scope > span");
-    const inStrip = el.closest(".pv-collage-track");
+    const inStrip = slide && el.closest(".pv-collage-track");
     gsap.from(lines, {
       y: 40, opacity: 0, duration: 1, ease: "expo.out", stagger: 0.08,
       scrollTrigger: inStrip ? { trigger: el, containerAnimation: slide, start: "left 82%" } : { trigger: el, start: "top 85%" },
@@ -610,7 +615,7 @@
   });
   mm.add("(max-width: 800px)", () => {
     drawPhone({ trigger: ".pv-expand", start: "top 90%", end: "center 55%", scrub: 1 })
-      .to(".pv-expand img", { clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "power2.inOut", duration: 0.3 });
+      .to(".pv-expand img", { clipPath: "inset(0% 0% 0% 0% round 14px)", ease: "power2.inOut", duration: 0.3 });
   });
 
   /* ---------- hall cards ---------- */

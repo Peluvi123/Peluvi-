@@ -554,3 +554,62 @@ body.pv-menu-open .pv-header{transform:none!important}
 .pv-menu-intro>p:last-child,.pv-menu-foot>div a{color:#f0e8f9}
 @media(max-width:800px){.pv-menu-inner{grid-template-columns:1fr}.pv-menu-preview{display:block}.pv-menu-frame img{object-position:65% center}.pv-menu-preview::after{background:linear-gradient(90deg,rgba(24,8,53,.92),rgba(24,8,53,.6)),linear-gradient(0deg,rgba(24,8,53,.8),transparent)}}
 .pv-menu .pv-menu-preview{grid-area:auto;align-self:auto;justify-self:auto}
+
+/* paths on mobile: full-width photo, then the two paths side by side as compact cards */
+@media(max-width:800px){
+  .pv-paths-pin{grid-template-columns:1fr 1fr;align-items:stretch;gap:12px;padding:64px var(--pv-gutter) 72px}
+  .pv-expand{grid-column:1/-1;width:100%;max-width:560px;aspect-ratio:1100/772;margin:0 auto 12px}
+  .pv-expand img{border-radius:14px;object-position:center}
+  .pv-path{justify-content:flex-start;padding:18px 12px 20px;border-radius:14px;background:#fff;box-shadow:0 10px 30px rgba(45,20,90,.08)}
+  .pv-path .pv-serif{font-size:clamp(22px,6.4vw,40px)}
+  .pv-path .pv-sans{font-size:clamp(26px,7.6vw,48px)}
+  .pv-path small{margin-top:10px;font-size:12px;line-height:1.4}
+}
+
+/* footer on mobile: title, then links in two columns, button, and the pets photo at the bottom */
+@media(max-width:800px){
+  .pv-footer-inner{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto auto;align-items:start;gap:28px 16px;padding:72px 20px 0}
+  .pv-footer h2{grid-row:1;font-size:clamp(40px,12vw,72px)}
+  .pv-foot-col{font-size:clamp(16px,4.6vw,20px);gap:8px}
+  .pv-foot-col--l{grid-column:1;grid-row:2}
+  .pv-foot-col--r{grid-column:2;grid-row:2}
+  .pv-footer-cta{position:static;transform:none;grid-column:1/-1;grid-row:3;justify-self:center}
+  .pv-footer-pet{grid-column:1/-1;grid-row:4;width:min(420px,100%);margin:0 auto}
+}
+
+/* collage on mobile: a calm two-column grid instead of the sideways strip */
+@media(max-width:800px){
+  .pv-collage{--ch:auto;height:auto;padding:72px var(--pv-gutter) 88px}
+  .pv-collage-track{width:auto;height:auto;display:grid;grid-template-columns:1fr 1fr;gap:28px 14px;align-items:start;transform:none!important}
+  .pv-collage figure,.pv-collage .pv-note{position:relative;left:auto;top:auto!important;width:auto;max-width:none;transform:none!important}
+  .pv-collage figure:not(.pv-talk){display:none}
+  .pv-collage figure.pv-m-alt{margin-top:44px}
+  .pv-collage figure.pv-m-center{grid-column:1/-1;justify-self:center;width:calc(50% - 7px)}
+  .pv-collage .pv-talk-media{aspect-ratio:4/5;border-radius:10px}
+  .pv-collage figcaption{white-space:normal;font-size:10px}
+  .pv-collage .pv-note{grid-column:1/-1;margin:24px 0;text-align:center}
+  .pv-collage .pv-note p{font-size:clamp(22px,6.4vw,30px);text-wrap:balance}
+  .pv-collage .pv-note p>span{display:inline}
+  .pv-collage .pv-note p>span:not(:last-child)::after{content:" "}
+  .pv-collage .pv-mini-sign{margin-inline:auto;display:block}
+  .pv-collage .pv-bubble{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-width:none;font-size:11px}
+}
+@media(max-width:800px){.pv-footer{padding-bottom:76px}}
+
+/* hero on phones: shorter, so the pets fill the screen instead of floating at the bottom; ticket moves up out of their way */
+@media(max-width:700px){
+  .pv-hero{height:76svh;min-height:520px}
+  .pv-ticket{bottom:auto;top:96px}
+}
+
+/* menu on phones: the account column keeps only "Iniciar sesión" (business links live under "Para negocios") */
+@media(max-width:800px){
+  .pv-menu-foot{align-items:flex-start}
+  .pv-menu-foot>div:first-child a:not(:first-of-type){display:none}
+}
+
+/* login shortcut next to the menu button, same outline style */
+.pv-login{display:inline-grid;place-items:center;width:38px;height:38px;box-sizing:border-box;border-radius:9px;border:1.5px solid currentColor;color:inherit;transition:background .3s,color .3s,border-color .3s}
+.pv-login:hover{background:var(--pv-violet);border-color:var(--pv-violet);color:#fff}
+.pv-header.on-dark .pv-login{color:var(--pv-cream)}
+body.pv-menu-open .pv-login{color:var(--pv-cream)}
