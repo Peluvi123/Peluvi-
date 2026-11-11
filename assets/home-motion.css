@@ -366,3 +366,133 @@ body.pv .chat-toggle{background:var(--pv-violet);color:#fff}
 /* Lenis already smooths scrolling here; the native smooth behaviour from styles.css
    would animate GSAP's measuring jumps and corrupt trigger positions. */
 html:has(body.pv){scroll-behavior:auto!important}
+
+/* trio hero stage */
+.pv-hero-stage{aspect-ratio:16/9;width:min(1500px,150vh,112vw)}
+/* base = trio without gear; the cursor blob reveals the Peluvi gear */
+.pv-sign-photo img{object-position:50% 35%}
+
+@media(max-width:700px){.pv-hero-stage{width:150vw}}
+
+/* first-visit loading video (original Peluvi intro) inside the curtain */
+.pv-curtain-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+.pv-curtain.has-video .pv-curtain-video{display:block}
+.pv-curtain.has-video img{position:relative;z-index:1;width:min(220px,40vw);filter:drop-shadow(0 12px 32px rgba(0,0,0,.35))}
+.pv-curtain.has-video span{display:none}
+
+/* message: the trio floats over the marquee as a full-colour cut-out, no box */
+.pv-message .pv-sign-photo{width:min(820px,64vw);aspect-ratio:1672/941;margin-top:-12vw;background:none;overflow:visible}
+.pv-message .pv-sign-photo::before{content:"";position:absolute;inset:18% 12% 0;z-index:-1;background:radial-gradient(closest-side,rgba(122,69,243,.55),transparent);filter:blur(30px)}
+.pv-message .pv-sign-photo img{object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 30px 40px rgba(10,0,30,.45));transform-origin:50% 100%}
+@media(max-width:700px){.pv-message .pv-sign-photo{width:96vw;margin-top:-18vw}}
+
+/* collage: bigger photos on desktop (whole layout scales so they keep their spacing) */
+@media(min-width:801px){
+  .pv-collage{--k:1.5;--ch:420svh}
+  .pv-collage figcaption{font-size:11px}
+  .pv-note{width:calc(20vw * var(--k))}
+}
+
+/* paths: line-art phone that draws itself before the photo opens */
+.pv-expand{overflow:visible;border-radius:0}
+.pv-expand img{z-index:0}
+.pv-phone{position:absolute;inset:0;z-index:1;width:100%;height:100%;stroke:var(--pv-violet);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;pointer-events:none;transform-origin:50% 50%}
+@media(prefers-reduced-motion:reduce){.pv-phone{display:none}}
+
+/* live lines always stay behind the download video and copy */
+.pv-download{isolation:isolate}
+.pv-download-media,.pv-download-copy{position:relative;z-index:1}
+
+/* ===== Service panels in the new editorial style (home only) ===== */
+body.pv .vet-panel,body.pv .grooming-panel,body.pv .store-panel,body.pv .caregivers-panel,body.pv .sos-panel,body.pv .adoption-panel{background:rgba(29,10,66,.55)!important;padding:14px!important}
+body.pv .vet-surface,body.pv .grooming-surface,body.pv .store-surface,body.pv .caregivers-surface,body.pv .sos-surface,body.pv .adoption-surface{background:url(topo-light.svg) center/cover,var(--pv-cream)!important;color:var(--pv-ink)!important;border:0!important;border-radius:14px!important;box-shadow:0 40px 120px rgba(10,0,30,.35)!important;font-family:Inter,system-ui,sans-serif}
+body.pv .vet-surface::before,body.pv .grooming-surface::before,body.pv .store-surface::before,body.pv .caregivers-surface::before,body.pv .sos-surface::before,body.pv .adoption-surface::before,body.pv .vet-surface::after,body.pv .grooming-surface::after,body.pv .store-surface::after,body.pv .caregivers-surface::after,body.pv .sos-surface::after,body.pv .adoption-surface::after{display:none!important}
+body.pv .vet-brand img,body.pv .grooming-brand img,body.pv .store-brand img,body.pv .caregivers-brand img,body.pv .sos-brand img,body.pv .adoption-brand img{filter:none}
+body.pv .vet-brand span,body.pv .grooming-brand span,body.pv .store-brand span,body.pv .caregivers-brand span,body.pv .sos-brand span,body.pv .adoption-brand span{color:var(--pv-ink)!important;font-weight:800;letter-spacing:-.03em}
+body.pv .vet-close,body.pv .grooming-close,body.pv .store-close,body.pv .caregivers-close,body.pv .sos-close,body.pv .adoption-close{color:#fff!important;background:var(--pv-ink)!important;border:0!important;border-radius:999px!important;padding:12px 22px!important;font-size:11px!important;font-weight:800!important;letter-spacing:.14em;text-transform:uppercase;box-shadow:none!important;transition:background .3s}
+body.pv .vet-close:hover,body.pv .grooming-close:hover,body.pv .store-close:hover,body.pv .caregivers-close:hover,body.pv .sos-close:hover,body.pv .adoption-close:hover{background:var(--pv-violet)!important}
+body.pv .vet-provider-link,body.pv .grooming-provider-link,body.pv .store-provider-link,body.pv .caregivers-provider-link,body.pv .sos-provider-link{color:var(--pv-ink)!important;background:transparent!important;border:1.5px solid var(--pv-ink)!important;border-radius:999px!important;font-size:12px;box-shadow:none!important}
+body.pv .vet-pill,body.pv .grooming-pill,body.pv .store-pill,body.pv .caregivers-pill,body.pv .sos-pill,body.pv .adoption-pill{display:inline-flex!important;align-items:center;gap:8px;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;color:var(--pv-violet)!important;font-size:11px!important;font-weight:800!important;letter-spacing:.16em!important;text-transform:uppercase!important}
+body.pv .vet-pill::before,body.pv .grooming-pill::before,body.pv .store-pill::before,body.pv .caregivers-pill::before,body.pv .sos-pill::before,body.pv .adoption-pill::before{content:"";width:28px;height:3px;border-radius:2px;background:var(--pv-violet)}
+body.pv .vet-copy h2,body.pv .grooming-copy h2,body.pv .store-copy h2,body.pv .caregivers-copy h2,body.pv .sos-copy h2,body.pv .adoption-copy h2{font-family:Inter,system-ui,sans-serif!important;font-weight:800!important;font-size:clamp(52px,7vw,112px)!important;line-height:.86!important;letter-spacing:-.045em!important;text-transform:uppercase;color:var(--pv-ink)!important;margin:18px 0 6px!important}
+body.pv .vet-subtitle,body.pv .grooming-subtitle,body.pv .store-subtitle,body.pv .caregivers-subtitle,body.pv .sos-subtitle{font-family:Inter,system-ui,sans-serif!important;font-weight:300!important;font-size:clamp(34px,4.4vw,72px)!important;line-height:.9!important;letter-spacing:-.04em!important;text-transform:uppercase;color:var(--pv-violet)!important;margin:0 0 22px!important}
+body.pv .vet-text,body.pv .grooming-text,body.pv .store-text,body.pv .caregivers-text,body.pv .sos-text{color:#5b5368!important;font-size:15px!important;line-height:1.6!important;max-width:420px}
+body.pv .vet-cta-primary,body.pv .grooming-cta-primary,body.pv .store-cta-primary,body.pv .caregivers-cta-primary,body.pv .sos-cta-primary,body.pv .adoption-main-cta{border-radius:999px!important;background:var(--pv-violet)!important;color:#fff!important;border:0!important;box-shadow:none!important;padding:16px 26px!important;font-size:12px!important;font-weight:800!important;letter-spacing:.12em;text-transform:uppercase;transition:background .3s,transform .4s cubic-bezier(.16,1,.3,1)}
+body.pv .vet-cta-primary:hover,body.pv .grooming-cta-primary:hover,body.pv .store-cta-primary:hover,body.pv .caregivers-cta-primary:hover,body.pv .sos-cta-primary:hover,body.pv .adoption-main-cta:hover{background:var(--pv-ink)!important;transform:translateY(-2px)}
+body.pv .vet-cta-secondary,body.pv .grooming-cta-secondary,body.pv .store-cta-secondary,body.pv .caregivers-cta-secondary,body.pv .sos-cta-secondary{border-radius:999px!important;background:transparent!important;color:var(--pv-ink)!important;border:1.5px solid var(--pv-ink)!important;box-shadow:none!important;padding:15px 24px!important;font-size:12px!important;font-weight:800!important;letter-spacing:.12em;text-transform:uppercase;transition:background .3s,color .3s}
+body.pv .vet-cta-secondary:hover,body.pv .grooming-cta-secondary:hover,body.pv .store-cta-secondary:hover,body.pv .caregivers-cta-secondary:hover,body.pv .sos-cta-secondary:hover{background:var(--pv-ink)!important;color:#fff!important}
+body.pv .vet-stat,body.pv .grooming-stat,body.pv .store-stat,body.pv .caregivers-stat,body.pv .sos-stat{background:transparent!important;border:1px dashed rgba(45,20,99,.35)!important;border-radius:999px!important;box-shadow:none!important}
+body.pv .vet-stat p,body.pv .grooming-stat p,body.pv .store-stat p,body.pv .caregivers-stat p,body.pv .sos-stat p,body.pv .vet-stat strong,body.pv .grooming-stat strong,body.pv .store-stat strong,body.pv .caregivers-stat strong,body.pv .sos-stat strong{color:var(--pv-ink)!important}
+body.pv .vet-photo img.module-scene-img,body.pv .grooming-photo img.module-scene-img,body.pv .store-photo img.module-scene-img,body.pv .caregivers-photo img.module-scene-img,body.pv .sos-photo img.module-scene-img{mix-blend-mode:multiply;filter:none!important}
+body.pv .module-scene .module-tile{background:rgba(244,241,248,.82)!important;border:1.5px solid var(--pv-ink)!important;border-radius:12px!important;box-shadow:none!important;backdrop-filter:blur(6px)}
+body.pv .module-scene .module-tile b{color:var(--pv-ink)!important;font-size:10px!important;font-weight:800!important;letter-spacing:.12em;text-transform:uppercase}
+body.pv .vet-actions,body.pv .grooming-actions,body.pv .store-actions,body.pv .caregivers-actions,body.pv .sos-actions{gap:0!important;border-top:1.5px solid var(--pv-ink)}
+body.pv .vet-actions article,body.pv .grooming-actions article,body.pv .store-actions article,body.pv .caregivers-actions article,body.pv .sos-actions article{background:transparent!important;border:0!important;border-right:1px solid rgba(45,20,99,.2)!important;border-radius:0!important;box-shadow:none!important;padding:26px 22px!important;transition:background .35s,color .35s!important}
+body.pv .vet-actions article:last-child,body.pv .grooming-actions article:last-child,body.pv .store-actions article:last-child,body.pv .caregivers-actions article:last-child,body.pv .sos-actions article:last-child{border-right:0!important}
+body.pv .vet-actions article:hover,body.pv .grooming-actions article:hover,body.pv .store-actions article:hover,body.pv .caregivers-actions article:hover,body.pv .sos-actions article:hover,body.pv .vet-actions article:focus-visible,body.pv .grooming-actions article:focus-visible,body.pv .store-actions article:focus-visible,body.pv .caregivers-actions article:focus-visible,body.pv .sos-actions article:focus-visible{background:var(--pv-ink)!important;transform:none!important}
+body.pv .vet-actions h3,body.pv .grooming-actions h3,body.pv .store-actions h3,body.pv .caregivers-actions h3,body.pv .sos-actions h3{font-size:15px!important;font-weight:800!important;letter-spacing:-.02em;text-transform:uppercase;color:var(--pv-ink)!important}
+body.pv .vet-actions p,body.pv .grooming-actions p,body.pv .store-actions p,body.pv .caregivers-actions p,body.pv .sos-actions p{color:#5b5368!important;font-size:13px!important}
+body.pv .vet-actions article:hover h3,body.pv .grooming-actions article:hover h3,body.pv .store-actions article:hover h3,body.pv .caregivers-actions article:hover h3,body.pv .sos-actions article:hover h3,body.pv .vet-actions article:hover p,body.pv .grooming-actions article:hover p,body.pv .store-actions article:hover p,body.pv .caregivers-actions article:hover p,body.pv .sos-actions article:hover p{color:#f4f1f8!important}
+body.pv .vet-action-icon,body.pv .grooming-action-icon,body.pv .store-action-icon,body.pv .caregivers-action-icon,body.pv .sos-action-icon{background:transparent!important;color:var(--pv-violet)!important;border:1.5px solid currentColor!important;box-shadow:none!important}
+body.pv .vet-actions article:hover .vet-action-icon,body.pv .grooming-actions article:hover .grooming-action-icon,body.pv .store-actions article:hover .store-action-icon,body.pv .caregivers-actions article:hover .caregivers-action-icon,body.pv .sos-actions article:hover .sos-action-icon{color:var(--pv-lilac)!important}
+body.pv .vet-banner,body.pv .grooming-banner,body.pv .store-banner,body.pv .caregivers-banner,body.pv .sos-banner{border-top:0!important;color:var(--pv-ink)!important;font-size:11px!important;font-weight:800!important;letter-spacing:.16em;text-transform:uppercase}
+body.pv .vet-detail-card,body.pv .grooming-detail-card,body.pv .store-detail-card,body.pv .caregivers-detail-card,body.pv .sos-detail-card{border-radius:14px!important;font-family:Inter,system-ui,sans-serif}
+body.pv .vet-detail-card h3,body.pv .grooming-detail-card h3,body.pv .store-detail-card h3,body.pv .caregivers-detail-card h3,body.pv .sos-detail-card h3{font-weight:800!important;letter-spacing:-.03em;text-transform:uppercase;color:var(--pv-ink)!important}
+body.pv .vet-subtitle,body.pv .grooming-subtitle,body.pv .store-subtitle,body.pv .caregivers-subtitle,body.pv .sos-subtitle{font-size:clamp(26px,3vw,46px)!important;max-width:560px}
+body.pv .sos-copy h2 .sos-title-mark,body.pv .sos-copy h2 .sos-title-script{font:inherit!important;color:var(--pv-ink)!important;-webkit-text-fill-color:var(--pv-ink)!important;background:none!important;padding:0!important}
+body.pv .sos-copy h2 .sos-title-mark{color:#e5322d!important;-webkit-text-fill-color:#e5322d!important}
+body.pv .sos-photo img.module-scene-img{mix-blend-mode:normal;filter:drop-shadow(0 24px 30px rgba(45,20,99,.18))!important}
+
+/* panels: keep the contour texture soft and clear it behind the copy so the text reads cleanly */
+body.pv .vet-surface,body.pv .grooming-surface,body.pv .store-surface,body.pv .caregivers-surface,body.pv .sos-surface,body.pv .adoption-surface{background:linear-gradient(90deg,var(--pv-cream) 0,var(--pv-cream) 38%,rgba(244,241,248,.6) 62%,rgba(244,241,248,.35) 100%),url(topo-light.svg) center/cover,var(--pv-cream)!important}
+@media(max-width:800px){body.pv .vet-surface,body.pv .grooming-surface,body.pv .store-surface,body.pv .caregivers-surface,body.pv .sos-surface,body.pv .adoption-surface{background:linear-gradient(rgba(244,241,248,.8),rgba(244,241,248,.8)),url(topo-light.svg) center/cover,var(--pv-cream)!important}}
+
+/* ===== Menu v2: numbered links, live photo preview, grouped footer ===== */
+.pv-menu-inner{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);grid-template-rows:auto 1fr auto;align-items:end;column-gap:clamp(24px,5vw,90px);row-gap:28px;padding:96px var(--pv-gutter) 32px}
+.pv-menu-inner>.pv-menu-label{grid-column:1;grid-row:1;align-self:start}
+.pv-menu-label{margin:0 0 12px;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--pv-lilac);display:flex;align-items:center;gap:10px}
+.pv-menu-label::before{content:"";width:24px;height:2px;background:currentColor}
+.pv-menu-links{grid-column:1;grid-row:2;align-self:end}
+.pv-menu-links li{border-bottom:1px solid rgba(255,255,255,.1)}
+.pv-menu-links a{display:flex!important;align-items:baseline;gap:18px;width:100%;padding:4px 0;font:800 clamp(38px,5.6vw,92px)/.95 Inter,system-ui,sans-serif!important;letter-spacing:-.045em;text-transform:uppercase;color:var(--pv-cream);transition:color .35s,opacity .35s,transform .5s cubic-bezier(.16,1,.3,1)}
+.pv-menu-links a small{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--pv-lilac);transform:translateY(-1.6em);min-width:22px}
+.pv-menu-links a span{position:relative}
+.pv-menu-links a::after{content:"↗";margin-left:auto;font-size:.42em;font-weight:400;opacity:0;transform:translate(-14px,10px);transition:opacity .35s,transform .5s cubic-bezier(.16,1,.3,1);align-self:center}
+.pv-menu-links:hover a{opacity:.32}
+.pv-menu-links a:hover,.pv-menu-links a:focus-visible{opacity:1;color:var(--pv-lilac);font-weight:300!important;transform:translateX(12px)}
+.pv-menu-links a:hover::after,.pv-menu-links a:focus-visible::after{opacity:1;transform:none}
+.pv-menu-links a[aria-current] span::after{content:"";position:absolute;right:-.32em;bottom:.12em;width:.16em;height:.16em;border-radius:50%;background:var(--pv-violet)}
+.pv-menu-preview{grid-column:2;grid-row:1/3;align-self:end;justify-self:end;width:min(100%,420px);margin:0}
+.pv-menu-frame{position:relative;aspect-ratio:4/5;overflow:hidden;border-radius:10px;background:var(--pv-violet)}
+.pv-menu-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pv-menu-frame img.is-cutout,.pv-menu-frame img[src*="cutout"]{object-fit:contain;object-position:50% 100%;padding:12% 4% 0;box-sizing:border-box}
+.pv-menu-preview figcaption{margin-top:12px;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--pv-lilac)}
+.pv-menu-foot{grid-column:1/-1;grid-row:3;display:flex;flex-wrap:wrap;align-items:flex-end;gap:clamp(24px,5vw,80px);padding-top:22px;border-top:1px solid rgba(255,255,255,.14)}
+.pv-menu-foot>div{display:flex;flex-direction:column;gap:6px}
+.pv-menu-foot>div a{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;transition:color .3s}
+.pv-menu-foot a:hover{color:var(--pv-lilac)}
+.pv-menu-app{margin-left:auto;display:inline-flex;align-items:center;gap:10px;padding:16px 26px;border-radius:999px;background:var(--pv-violet);color:#fff;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;transition:background .3s,color .3s}
+.pv-menu-app:hover{background:var(--pv-cream);color:var(--pv-ink)!important}
+.pv-menu-side{display:none}
+@media(max-width:800px){
+  .pv-menu-inner{grid-template-columns:1fr;grid-template-rows:auto auto auto;align-content:end;overflow-y:auto}
+  .pv-menu-preview{display:none}
+  .pv-menu-links a{font-size:10.5vw!important}
+  .pv-menu-foot{gap:22px}.pv-menu-app{margin-left:0;width:100%;justify-content:center}
+}
+.pv-menu .pv-menu-links a[aria-current]{color:var(--pv-cream);font-weight:800!important}
+.pv-menu .pv-menu-links a:hover,.pv-menu .pv-menu-links a:focus-visible{color:var(--pv-lilac);font-weight:300!important}
+
+/* header: section links always visible on desktop (burger stays for mobile) */
+.pv-nav{display:flex;gap:clamp(14px,2vw,30px);justify-self:center;align-items:center}
+.pv-nav a{position:relative;padding:8px 0;font-size:13px;font-weight:700;letter-spacing:-.01em;transition:color .3s}
+.pv-nav a::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:2px;border-radius:2px;background:var(--pv-violet);transform:scaleX(0);transform-origin:right;transition:transform .45s cubic-bezier(.16,1,.3,1)}
+.pv-nav a:hover::after{transform:scaleX(1);transform-origin:left}
+.pv-header.on-dark .pv-nav a::after{background:var(--pv-lilac)}
+.pv-header .pv-nav{padding:6px 18px;border-radius:999px;background:rgba(244,241,248,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.pv-header.on-dark .pv-nav{background:rgba(45,20,99,.45)}
+.pv-chip-short{display:none}
+body.pv-menu-open .pv-nav{opacity:0;pointer-events:none}
+@media(max-width:1000px){.pv-nav{display:none}.pv-chip-long{display:none}.pv-chip-short{display:inline}}
+/* walking cat: on the home the sections are opaque, so it walks in front (never blocks clicks) */
+body.pv .ambient-cat{z-index:95}

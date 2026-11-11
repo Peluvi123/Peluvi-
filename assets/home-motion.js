@@ -21,7 +21,9 @@
       lenis?.stop();
       if (hasGsap && !reduce) {
         gsap.fromTo(menu, { clipPath: "circle(0% at calc(100% - 60px) 34px)" }, { clipPath: "circle(150% at calc(100% - 60px) 34px)", duration: 0.9, ease: "expo.inOut" });
-        gsap.fromTo(".pv-menu ul a", { yPercent: 110 }, { yPercent: 0, duration: 0.9, ease: "expo.out", stagger: 0.05, delay: 0.35 });
+        gsap.fromTo(".pv-menu-links a", { yPercent: 110 }, { yPercent: 0, duration: 0.9, ease: "expo.out", stagger: 0.05, delay: 0.35 });
+        gsap.fromTo(".pv-menu-preview", { clipPath: "inset(100% 0 0 0)" }, { clipPath: "inset(0% 0 0 0)", duration: 1.1, ease: "expo.out", delay: 0.45 });
+        gsap.fromTo(".pv-menu-foot > *, .pv-menu-inner > .pv-menu-label", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "expo.out", stagger: 0.06, delay: 0.6 });
       } else menu.style.clipPath = "none";
     } else {
       lenis?.start();
@@ -30,6 +32,24 @@
     }
   };
   burger?.addEventListener("click", () => setMenu(burger.getAttribute("aria-expanded") !== "true"));
+  // Menu preview: the photo on the right swaps to match the hovered link.
+  const preview = menu?.querySelector(".pv-menu-preview");
+  menu?.querySelectorAll(".pv-menu-links a").forEach((a) => {
+    a.addEventListener("pointerenter", () => {
+      if (!preview || preview.dataset.img === a.dataset.img) return;
+      preview.dataset.img = a.dataset.img;
+      const frame = preview.querySelector(".pv-menu-frame");
+      const img = new Image();
+      img.src = a.dataset.img; img.alt = "";
+      img.classList.toggle("is-cutout", /cutout/.test(a.dataset.img));
+      frame.append(img);
+      preview.querySelector("figcaption").textContent = a.dataset.cap || "";
+      if (hasGsap && !reduce) {
+        gsap.fromTo(img, { clipPath: "inset(100% 0 0 0)", scale: 1.15 }, { clipPath: "inset(0% 0 0 0)", scale: 1, duration: 0.8, ease: "expo.out",
+          onComplete: () => { while (frame.children.length > 1) frame.firstElementChild.remove(); } });
+      } else while (frame.children.length > 1) frame.firstElementChild.remove();
+    });
+  });
   addEventListener("keydown", (e) => { if (e.key === "Escape" && body.classList.contains("pv-menu-open")) setMenu(false); });
 
   /* ---------- hero: a liquid blob follows the cursor. Inside it the background
@@ -125,7 +145,8 @@
       gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       gctx.clearRect(0, 0, w, h);
       if (!gearImg.complete || !gearImg.naturalWidth) return;
-      const hr = hero.getBoundingClientRect(), sr = stage.getBoundingClientRect();
+      // measure against the canvas itself: both share the scroll parallax, so it cancels out
+      const hr = canvas.getBoundingClientRect(), sr = stage.getBoundingClientRect();
       const iw = gearImg.naturalWidth, ih = gearImg.naturalHeight;
       const s = Math.min(sr.width / iw, sr.height / ih);
       const dw = iw * s, dh = ih * s;
@@ -315,6 +336,8 @@
   });
   sizeLive();
   addEventListener("resize", sizeLive);
+  // the menu is display:none until opened, so size its canvas when it appears
+  if (window.ResizeObserver) { const mi = document.querySelector(".pv-menu-inner"); mi && new ResizeObserver(() => sizeLive()).observe(mi); }
   addEventListener("load", sizeLive);
   const lineColorFor = (el) => {
     const m = getComputedStyle(el).backgroundColor.match(/\d+(\.\d+)?/g);
@@ -436,15 +459,41 @@
     gsap.from(".pv-hero-stage", { yPercent: 12, opacity: 0, duration: 1.6, ease: "expo.out", onComplete: () => dispatchEvent(new Event("resize")) });
     gsap.from(".pv-header > *, .pv-ticket, .pv-hero-hint", { y: -20, opacity: 0, duration: 1, ease: "expo.out", stagger: 0.08, delay: 0.2 });
   };
-  gsap.timeline()
-    .from(".pv-curtain img", { scale: 0.5, opacity: 0, duration: 0.6, ease: "back.out(2)" })
-    .to(".pv-curtain img", { rotate: -8, scale: 1.08, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 3 })
-    // the bubble turns into a hole and grows until the whole page shows through
+  // the bubble turns into a hole and grows until the whole page shows through
+  const openCurtain = (tl = gsap.timeline()) => tl
     .add(() => { curtain.classList.add("is-opening"); curtain.style.setProperty("--hole", "40px"); })
     .to(".pv-curtain img, .pv-curtain span", { opacity: 0, duration: 0.15 })
     .to(curtain, { "--hole": "520vmax", duration: 1.15, ease: "expo.in" }, "<")
-    .add(() => { finishCurtain(); curtain.classList.remove("is-opening"); curtain.style.removeProperty("--hole"); gsap.set(".pv-curtain img, .pv-curtain span", { clearProps: "all" }); })
+    .add(() => {
+      finishCurtain(); curtain.classList.remove("is-opening", "has-video"); curtain.style.removeProperty("--hole");
+      gsap.set(".pv-curtain img, .pv-curtain span", { clearProps: "all" });
+      introVideo?.remove();
+    })
     .add(intro, "-=0.45");
+
+  // the original Peluvi loading video (the white cat), then the bubble opens
+  const introVideo = curtain.querySelector(".pv-curtain-video");
+  // The white-cat intro plays every time the home is opened (click or any key skips it).
+  if (introVideo && !reduce) {
+    curtain.classList.add("has-video");
+    const logo = curtain.querySelector("img");
+    let opened = false;
+    const done = () => { if (opened) return; opened = true; openCurtain(); };
+    introVideo.addEventListener("timeupdate", () => {
+      if (introVideo.duration) logo.style.opacity = Math.max(0, 1 - introVideo.currentTime / introVideo.duration / 0.65);
+    });
+    introVideo.addEventListener("ended", done, { once: true });
+    introVideo.addEventListener("error", done, { once: true });
+    setTimeout(done, 8000);
+    introVideo.play().catch(done);
+    curtain.addEventListener("click", done, { once: true });
+    addEventListener("keydown", done, { once: true });
+  } else {
+    introVideo?.remove();
+    openCurtain(gsap.timeline()
+      .from(".pv-curtain img", { scale: 0.5, opacity: 0, duration: 0.6, ease: "back.out(2)" })
+      .to(".pv-curtain img", { rotate: -8, scale: 1.08, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 3 }));
+  }
 
   document.querySelectorAll("a[href]").forEach((a) => {
     const href = a.getAttribute("href");
@@ -473,7 +522,7 @@
     gsap.set(path, { strokeDasharray: len, strokeDashoffset: len });
     gsap.to(path, { strokeDashoffset: 0, ease: "none", scrollTrigger: { trigger: path.closest("figure, div, footer"), start: "top 75%", end: "top 25%", scrub: true } });
   });
-  gsap.from(".pv-sign-photo img", { scale: 1.25, ease: "none", scrollTrigger: { trigger: ".pv-sign-photo", start: "top bottom", end: "bottom top", scrub: true } });
+  gsap.fromTo(".pv-sign-photo img", { yPercent: 18, scale: 0.9 }, { yPercent: -6, scale: 1, ease: "none", scrollTrigger: { trigger: ".pv-sign-photo", start: "top bottom", end: "bottom 30%", scrub: true } });
 
   /* ---------- collage: the page keeps scrolling while the strip drifts left (diagonal) ---------- */
   const shift = document.querySelector(".pv-shift");
@@ -538,12 +587,28 @@
 
   /* ---------- paths: image grows to full bleed ---------- */
   const mm = gsap.matchMedia();
+  // A phone drawn in line art; the photo then lights up inside its screen and opens to full bleed.
+  const phoneLines = gsap.utils.toArray(".pv-phone > *");
+  phoneLines.forEach((el) => el.setAttribute("pathLength", "1"));
+  const SCREEN = "inset(4% 22.6% 4% 22.6% round 24px)";
+  const drawPhone = (trigger) => gsap.timeline({ scrollTrigger: trigger })
+    .fromTo(phoneLines, { strokeDashoffset: 1 }, { strokeDashoffset: 0, ease: "none", stagger: 0.04, duration: 0.6 })
+    .to({}, { duration: 0.15 })
+    // cross-fade: the drawing goes away as the photo comes in, so the two phones never overlap
+    .fromTo(".pv-expand img", { opacity: 0, clipPath: SCREEN }, { opacity: 1, ease: "power1.inOut", duration: 0.3 })
+    .fromTo(".pv-phone", { opacity: 1 }, { opacity: 0, ease: "power2.out", duration: 0.12 }, "<");
   mm.add("(min-width: 801px)", () => {
-    const tl = gsap.timeline({ scrollTrigger: { trigger: ".pv-paths", start: "top top", end: "+=140%", scrub: 1, pin: ".pv-paths-pin" } });
-    tl.to(".pv-expand", { width: "100vw", height: "100svh", borderRadius: 0, ease: "power2.inOut" }, 0)
-      .to(".pv-path--l", { xPercent: -60, opacity: 0, ease: "power2.in" }, 0)
-      .to(".pv-path--r", { xPercent: 60, opacity: 0, ease: "power2.in" }, 0)
-      .fromTo(".pv-expand img", { scale: 1.3 }, { scale: 1, ease: "none" }, 0);
+    drawPhone({ trigger: ".pv-paths", start: "top 75%", end: "top top", scrub: 1 });
+    const tl = gsap.timeline({ scrollTrigger: { trigger: ".pv-paths", start: "top top", end: "+=170%", scrub: 1, pin: ".pv-paths-pin" } });
+    tl.fromTo(".pv-expand img", { clipPath: SCREEN }, { clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "power2.inOut", duration: 0.3, immediateRender: false }, 0.05)
+      .to(".pv-expand", { width: "100vw", height: "100svh", borderRadius: 0, ease: "power2.inOut", duration: 1 }, 0.25)
+      .to(".pv-path--l", { xPercent: -60, opacity: 0, ease: "power2.in", duration: 1 }, 0.25)
+      .to(".pv-path--r", { xPercent: 60, opacity: 0, ease: "power2.in", duration: 1 }, 0.25)
+      .fromTo(".pv-expand img", { scale: 1.3 }, { scale: 1, ease: "none", duration: 1.25 }, 0);
+  });
+  mm.add("(max-width: 800px)", () => {
+    drawPhone({ trigger: ".pv-expand", start: "top 90%", end: "center 55%", scrub: 1 })
+      .to(".pv-expand img", { clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "power2.inOut", duration: 0.3 });
   });
 
   /* ---------- hall cards ---------- */

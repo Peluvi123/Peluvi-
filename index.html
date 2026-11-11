@@ -52,33 +52,46 @@
 </head>
   <body class="pv">
     <div class="pv-curtain is-on" aria-hidden="true">
+      <video class="pv-curtain-video" muted playsinline webkit-playsinline preload="auto">
+        <source src="assets/loading-intro-mobile.mp4" type="video/mp4" media="(max-width: 640px)" />
+        <source src="assets/loading-intro.mp4" type="video/mp4" />
+      </video>
       <img src="assets/preloader-logo.png" alt="" />
       <span>Cargando Peluvi</span>
     </div>
 
     <header class="pv-header">
       <a class="pv-logo" href="/" aria-label="Peluvi inicio"><img src="assets/peluvi-logo-horizontal.png" alt="Peluvi" width="720" height="281" /></a>
-      <span aria-hidden="true"></span>
+      <nav class="pv-nav" aria-label="Secciones">
+        <a href="/servicios/">Servicios</a>
+        <a href="/comunidad/">Comunidad</a>
+        <a href="/pet-friendly/">Pet friendly</a>
+        <a href="/negocios/">Para negocios</a>
+      </nav>
       <div class="pv-header-right">
-        <a class="pv-chip" href="#descarga"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>App</a>
+        <a class="pv-chip" href="#descarga"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg><span class="pv-chip-long">Descargar app</span><span class="pv-chip-short">App</span></a>
         <button class="pv-burger" type="button" aria-expanded="false" aria-controls="pv-menu" aria-label="Abrir menú"><span></span><span></span></button>
       </div>
     </header>
 
     <nav class="pv-menu" id="pv-menu" aria-label="Principal" hidden>
       <div class="pv-menu-inner">
-        <ul>
-          <li><a href="/" aria-current="page">Inicio</a></li>
-          <li><a href="/servicios/">Servicios</a></li>
-          <li><a href="/comunidad/">Comunidad</a></li>
-          <li><a href="/pet-friendly/">Pet friendly</a></li>
-          <li><a href="/conoce/">Conoce Peluvi</a></li>
-          <li><a href="/negocios/">Para negocios</a></li>
+        <p class="pv-menu-label">Menú</p>
+        <ul class="pv-menu-links">
+          <li><a href="/" aria-current="page" data-img="assets/trio-gear-cutout.webp" data-cap="La casa de tu mascota"><small>01</small><span>Inicio</span></a></li>
+          <li><a href="/servicios/" data-img="assets/module-scenes/vet.jpg" data-cap="Veterinarias, peluquerías y más"><small>02</small><span>Servicios</span></a></li>
+          <li><a href="/comunidad/" data-img="assets/showcase/peluvi-pet-6.jpg" data-cap="Historias de la manada"><small>03</small><span>Comunidad</span></a></li>
+          <li><a href="/pet-friendly/" data-img="assets/showcase/peluvi-pet-8.jpg" data-cap="Lugares que los reciben"><small>04</small><span>Pet friendly</span></a></li>
+          <li><a href="/negocios/" data-img="assets/module-scenes/store.jpg" data-cap="Conecta tu negocio"><small>05</small><span>Para negocios</span></a></li>
         </ul>
-        <div class="pv-menu-side">
-          <a href="/directorio/citas.html">Iniciar sesión</a>
-          <a href="/portal/">Portal de negocios</a>
-          <a href="https://www.instagram.com/peluvi.pet/" target="_blank" rel="noreferrer">Instagram ↗</a>
+        <figure class="pv-menu-preview" aria-hidden="true">
+          <div class="pv-menu-frame"><img src="assets/trio-gear-cutout.webp" alt="" /></div>
+          <figcaption>La casa de tu mascota</figcaption>
+        </figure>
+        <div class="pv-menu-foot">
+          <div><p class="pv-menu-label">Cuenta</p><a href="/directorio/citas.html">Iniciar sesión</a><a href="/portal/">Portal de negocios</a><a href="/portal/?registro=1">Registrar negocio</a></div>
+          <div><p class="pv-menu-label">Síguenos</p><a href="https://www.instagram.com/peluvi.pet/" target="_blank" rel="noreferrer">Instagram ↗</a><a href="mailto:soporte@peluvi.com">Soporte</a></div>
+          <a class="pv-menu-app" href="/downloads/Peluvi-Android-debug.apk" download>Descargar la app <span aria-hidden="true">↓</span></a>
         </div>
       </div>
     </nav>
@@ -89,9 +102,8 @@
         <h1 class="sr-only">Peluvi: todo para el bienestar de tu mascota</h1>
         <canvas class="pv-reveal" aria-hidden="true"></canvas>
         <div class="pv-hero-stage">
-          <img class="pv-hero-base" src="assets/hero-pets-plain.webp" alt="Perro y gato de la familia Peluvi" width="1536" height="1024" fetchpriority="high" />
-          <img class="pv-hero-gear" src="assets/hero-pets-gear.webp" alt="" aria-hidden="true" width="1536" height="1024" />
-          <img class="pv-hero-ghost" src="assets/hero-pets-gear.webp" alt="" aria-hidden="true" width="1536" height="1024" />
+          <img class="pv-hero-base" src="assets/trio-plain-cutout.webp" alt="Un golden, un gato y un perro tricolor" width="1672" height="941" fetchpriority="high" />
+          <img class="pv-hero-gear" src="assets/trio-gear-cutout.webp" alt="" aria-hidden="true" width="1672" height="941" />
         </div>
         <p class="pv-hero-hint" aria-hidden="true">Mueve el cursor</p>
         <a class="pv-ticket" href="/downloads/Peluvi-Android-debug.apk" download>
@@ -114,7 +126,7 @@
             <div class="pv-marquee-row pv-marquee-row--b"><span>Siempre a su lado · <i>todo en Peluvi</i> · Siempre a su lado · <i>todo en Peluvi</i> · </span><span>Siempre a su lado · <i>todo en Peluvi</i> · Siempre a su lado · <i>todo en Peluvi</i> · </span></div>
           </div>
           <figure class="pv-sign-photo">
-            <img src="assets/hero-pets-plain.webp" alt="El perro y el gato de Peluvi" loading="lazy" />
+            <img src="assets/trio-gear-cutout.webp" alt="Las mascotas de Peluvi" loading="lazy" />
           </figure>
 
           <p class="pv-kicker pv-kicker--sm"><img src="assets/peluvi-symbol-64.png" alt="" />Peluvi · Bienestar para mascotas</p>
@@ -242,7 +254,23 @@
             <span class="pv-serif">Para</span><span class="pv-sans">Familias</span>
             <small>Servicios, favoritos y ayuda SOS para tu mascota.</small>
           </a>
-          <div class="pv-expand"><img src="assets/peluvi-app-banner-gear.webp" alt="Golden retriever y gato con gafas y audífonos morados junto a un celular con la app Peluvi" loading="lazy" /></div>
+          <div class="pv-expand">
+            <svg class="pv-phone" viewBox="0 0 300 400" fill="none" aria-hidden="true">
+              <rect x="60" y="8" width="180" height="384" rx="30" />
+              <rect x="68" y="16" width="164" height="368" rx="23" />
+              <rect x="128" y="25" width="44" height="12" rx="6" />
+              <path d="M240 96v34M240 140v22M60 112v26" />
+              <path d="M82 58h40M200 54a5 5 0 1 0 0.1 0M84 74h110" />
+              <rect x="80" y="88" width="140" height="18" rx="9" />
+              <rect x="80" y="116" width="140" height="62" rx="12" />
+              <path d="M92 138h48M92 150h34M176 166l14-16 14 16z" />
+              <rect x="80" y="190" width="40" height="34" rx="8" /><rect x="130" y="190" width="40" height="34" rx="8" /><rect x="180" y="190" width="40" height="34" rx="8" />
+              <rect x="80" y="232" width="40" height="34" rx="8" /><rect x="130" y="232" width="40" height="34" rx="8" /><rect x="180" y="232" width="40" height="34" rx="8" />
+              <rect x="80" y="278" width="140" height="28" rx="10" />
+              <path d="M80 318h60M80 332h140M80 344h100M86 366h22M192 366h22" />
+              <circle cx="150" cy="364" r="10" />
+            </svg>
+            <img src="assets/peluvi-app-banner-gear.webp" alt="Golden retriever y gato con gafas y audífonos morados junto a un celular con la app Peluvi" loading="lazy" /></div>
           <a class="pv-path pv-path--r" href="/negocios/" id="empresas">
             <span class="pv-serif">Para</span><span class="pv-sans">Negocios</span>
             <small>Conecta tu negocio con familias pet friendly.</small>
@@ -264,7 +292,7 @@
           <a class="pv-card caregivers-trigger" href="#cuidadores" aria-controls="caregivers-panel"><svg class="pv-card-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M3 0 H97 Q100 0 100 3 V83 Q100 86 97 86 H64 Q61 86 59.5 88.5 L54.5 97.5 Q53 100 50 100 H3 Q0 100 0 97 V3 Q0 0 3 0 Z"/></svg><img class="pv-card-photo" src="assets/module-scenes/caregivers.jpg" alt="" loading="lazy" /><img src="assets/icon-walkers-crop.png" alt="" loading="lazy" /><span class="pv-tab">Cuidadores <b>05</b></span></a>
           <a class="pv-card sos-trigger" href="#sos" aria-controls="sos-panel"><svg class="pv-card-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M3 0 H97 Q100 0 100 3 V83 Q100 86 97 86 H64 Q61 86 59.5 88.5 L54.5 97.5 Q53 100 50 100 H3 Q0 100 0 97 V3 Q0 0 3 0 Z"/></svg><img class="pv-card-photo" src="assets/module-scenes/sos.jpg" alt="" loading="lazy" /><img src="assets/icon-map-tight.png" alt="" loading="lazy" /><span class="pv-tab">SOS <b>06</b></span></a>
           <a class="pv-card" href="/comunidad/"><svg class="pv-card-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M3 0 H97 Q100 0 100 3 V83 Q100 86 97 86 H64 Q61 86 59.5 88.5 L54.5 97.5 Q53 100 50 100 H3 Q0 100 0 97 V3 Q0 0 3 0 Z"/></svg><img class="pv-card-photo" src="assets/showcase/peluvi-pet-6.jpg" alt="" loading="lazy" /><img src="assets/icon-heart.png" alt="" loading="lazy" /><span class="pv-tab">Comunidad <b>07</b></span></a>
-          <a class="pv-card" href="/pet-friendly/"><svg class="pv-card-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M3 0 H97 Q100 0 100 3 V83 Q100 86 97 86 H64 Q61 86 59.5 88.5 L54.5 97.5 Q53 100 50 100 H3 Q0 100 0 97 V3 Q0 0 3 0 Z"/></svg><img class="pv-card-photo" src="assets/showcase/peluvi-pet-8.jpg" alt="" loading="lazy" /><img src="assets/module-icons/community.png" alt="" loading="lazy" /><span class="pv-tab">Pet friendly <b>08</b></span></a>
+          <a class="pv-card" href="/pet-friendly/"><svg class="pv-card-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M3 0 H97 Q100 0 100 3 V83 Q100 86 97 86 H64 Q61 86 59.5 88.5 L54.5 97.5 Q53 100 50 100 H3 Q0 100 0 97 V3 Q0 0 3 0 Z"/></svg><img class="pv-card-photo" src="assets/showcase/peluvi-pet-8.jpg" alt="" loading="lazy" /><img src="assets/module-icons/community-3d.png" alt="" loading="lazy" /><span class="pv-tab">Pet friendly <b>08</b></span></a>
         </div>
         <div class="pv-hall-cta">
           <img src="assets/peluvi-symbol-64.png" alt="" />
@@ -315,7 +343,7 @@
       <div class="pv-footer-inner">
         <h2><span class="pv-sans">Siempre</span> <span class="pv-serif">a su</span><br /><span class="pv-serif">lado</span><span class="pv-sans">.</span></h2>
         <nav class="pv-foot-col pv-foot-col--l" aria-label="Páginas"><small>Páginas</small><a href="/">Inicio</a><a href="/servicios/">Servicios</a><a href="/comunidad/">Comunidad</a><a href="/negocios/">Negocios</a><a class="pv-foot-accent" href="/portal/?registro=1">Registrar negocio</a></nav>
-        <nav class="pv-foot-col pv-foot-col--r" aria-label="Contacto"><small>Síguenos</small><a href="https://www.instagram.com/peluvi.pet/" target="_blank" rel="noreferrer">Instagram</a><a href="mailto:soporte@peluvi.com">Soporte</a><a href="mailto:redes@peluvi.com">Redes</a><a href="/conoce/">Conoce Peluvi</a></nav>
+        <nav class="pv-foot-col pv-foot-col--r" aria-label="Contacto"><small>Síguenos</small><a href="https://www.instagram.com/peluvi.pet/" target="_blank" rel="noreferrer">Instagram</a><a href="mailto:soporte@peluvi.com">Soporte</a><a href="mailto:redes@peluvi.com">Redes</a></nav>
         <img class="pv-footer-pet" src="assets/hero-pets-gear.webp" alt="" loading="lazy" />
         <a class="pv-chip pv-footer-cta" href="mailto:soporte@peluvi.com">Negocios y contacto ↗</a>
       </div>
@@ -801,11 +829,11 @@
             </div>
           </div>
           <div class="sos-photo module-scene" aria-hidden="true">
-            <img class="module-scene-img" src="assets/module-scenes/sos-reunion-v2.png" alt="" />
+            <img class="module-scene-img" src="assets/module-scenes/sos-reunion-cutout.webp" alt="" />
             <span class="module-tile module-tile--0"><img src="assets/module-icons/bell.png" alt="" /><b>Alertas</b></span>
             <span class="module-tile module-tile--1"><img src="assets/icon-map-tight.png" alt="" /><b>Mapa</b></span>
             <span class="module-tile module-tile--2"><img src="assets/module-icons/megaphone.png" alt="" /><b>Difundir</b></span>
-            <span class="module-tile module-tile--3"><img src="assets/module-icons/community.png" alt="" /><b>Comunidad</b></span>
+            <span class="module-tile module-tile--3"><img src="assets/module-icons/community-3d.png" alt="" /><b>Comunidad</b></span>
           </div>
         </div>
 
@@ -889,6 +917,7 @@
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="script.js?v=20261003-header"></script>
     <script src="assets/home-motion.js?v=20261110"></script>
+    <script src="cat-walker.js?v=11"></script>
     <script type="module" src="/directorio/links.js"></script>
   </body>
 </html>

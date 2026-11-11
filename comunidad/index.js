@@ -31,7 +31,7 @@ function postCard(post, accountGeneration) {
   details.addEventListener('toggle', async()=>{
     if (!details.open || loaded || loading || accountGeneration !== generation) return;
     loading = true; content.textContent = 'Cargando comentarios…';
-    try { const rows = checked(await client.rpc('community_post_comments',{p_post:post.id})); if (accountGeneration !== generation) return;
+    try { const rows = checked(await client.rpc(user ? 'community_post_comments' : 'community_public_comments',{p_post:post.id})); if (accountGeneration !== generation) return;
       content.replaceChildren(); if (!rows.length) content.append(el('p','Aún no hay comentarios.'));
       rows.forEach(row=>{ const comment = el('div',null,'comment'); comment.append(el('strong',row.author_name || 'Usuario Peluvi'),el('p',row.body)); content.append(comment); }); loaded = true;
     } catch { if (accountGeneration === generation) content.textContent = 'No pudimos cargar los comentarios. Cierra y abre esta sección para reintentar.'; } finally { loading = false; }
@@ -39,27 +39,28 @@ function postCard(post, accountGeneration) {
   const actions = el('div', null, 'post-actions');
   const reactions = action('♥', `${post.reaction_count || 0} reacciones`, () => notify('Para reaccionar a esta publicación, entra a la app Peluvi.'));
   const comments = action('☏', `${post.comment_count || 0} comentarios`, () => { details.open = !details.open; });
-  const key = `peluvi-saved:${user.id}:${post.id}`;
+  const key = `peluvi-saved:${user?.id || 'guest'}:${post.id}`;
   const save = action('♧', 'Guardar', () => { try { const active = localStorage.getItem(key) !== '1'; if (active) localStorage.setItem(key, '1'); else localStorage.removeItem(key); save.setAttribute('aria-pressed', String(active)); notify(active ? 'Publicación guardada en este navegador.' : 'Publicación retirada de tus guardados.'); } catch { notify('No se pudo guardar en este navegador.'); } });
   try { save.setAttribute('aria-pressed', String(localStorage.getItem(key) === '1')); } catch { save.setAttribute('aria-pressed', 'false'); }
   const share = action('↗', 'Compartir', async () => { const url = new URL(location.href); url.hash = card.id; try { if (navigator.share) await navigator.share({title: 'Un momento en Peluvi', url: url.href}); else { await navigator.clipboard.writeText(url.href); notify('Enlace copiado.'); } } catch (error) { if (error.name !== 'AbortError') notify('No se pudo compartir el enlace.'); } });
   actions.append(reactions, comments, save, share); card.append(actions, details); observer.observe(card); return card;
 }
 async function loadFeed() {
-  if (!user || busy) return; busy = true; more.hidden = true; status.textContent = 'Cargando publicaciones…'; const current = generation;
-  try { const posts = checked(await client.rpc('community_feed',{p_before:before,p_limit:10,p_author:authorFilter || null})); if (current !== generation) return;
+  if (busy) return; busy = true; more.hidden = true; status.textContent = 'Cargando publicaciones…'; const current = generation;
+  try { const posts = checked(await client.rpc(user ? 'community_feed' : 'community_public_feed',{p_before:before,p_limit:10,p_author:authorFilter || null})); if (current !== generation) return;
     posts.forEach(post => { if (!seen.has(post.id)) { const card = postCard(post,current); feed.append(card); seen.add(post.id); if (location.hash === `#${card.id}`) requestAnimationFrame(() => card.scrollIntoView({block:'center'})); } });
     if (posts.length) before = posts.at(-1).created_at;
     status.textContent = seen.size ? 'Las últimas historias de la comunidad.' : 'Aún no hay publicaciones para mostrar. Las nuevas historias aparecerán aquí.';
     more.hidden = posts.length < 10;
-  } catch { if (current !== generation) return; status.textContent = 'No pudimos cargar la comunidad. Intenta de nuevo.'; more.textContent = 'Volver a intentar'; more.hidden = false; }
+  } catch { if (current !== generation) return; if (!user && !seen.size) { showLogin(true); status.textContent = 'Entra con tu cuenta Peluvi para ver la comunidad.'; busy = false; return; } status.textContent = 'No pudimos cargar la comunidad. Intenta de nuevo.'; more.textContent = 'Volver a intentar'; more.hidden = false; }
   finally { if (current === generation) busy = false; }
 }
 function setAccount(next) {
   if (user?.id === next?.id && next) return;
   generation++; user = next; busy = false; before = null; seen.clear(); observer.disconnect(); feed.querySelectorAll('video').forEach(video => video.pause()); feed.replaceChildren(); more.hidden = true;
-  $('#logout').hidden = !user; $('#access').hidden = !!user; $('#community-content').hidden = !user;
-  if (user) { more.textContent = 'Ver más publicaciones'; loadFeed(); } else status.textContent = '';
+  // Visitors see the public feed right away; signing in is optional and only needed to interact.
+  $('#logout').hidden = !user; $('#login-toggle').hidden = !!user; showLogin(false); $('#community-content').hidden = false;
+  more.textContent = 'Ver más publicaciones'; loadFeed();
 }
 $('#login').addEventListener('submit',async event=>{
   event.preventDefault(); const button = $('#login-button'); button.disabled = true; status.textContent = 'Iniciando sesión…';
@@ -67,6 +68,8 @@ $('#login').addEventListener('submit',async event=>{
   catch { status.textContent = 'No pudimos iniciar sesión. Revisa tu correo, contraseña y conexión.'; }
   finally { button.disabled = false; }
 });
+function showLogin(open) { $('#access').hidden = !open; $('#login-toggle').setAttribute('aria-expanded', String(open)); if (open) $('#access').scrollIntoView({block:'nearest'}); }
+$('#login-toggle').addEventListener('click', () => showLogin($('#access').hidden));
 $('#logout').addEventListener('click',async()=>{ $('#logout').disabled = true; try { checked(await client.auth.signOut({scope:'local'})); setAccount(null); } catch { status.textContent = 'No pudimos cerrar sesión. Intenta de nuevo.'; } finally { $('#logout').disabled = false; } });
 more.addEventListener('click',loadFeed);
 function movePost(direction) { const cards = [...feed.children]; if (!cards.length) return; let index = cards.reduce((best, card, i) => Math.abs(card.getBoundingClientRect().top - 20) < Math.abs(cards[best].getBoundingClientRect().top - 20) ? i : best, 0); const target = cards[index + direction]; if (target) target.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block:'start'}); else if (direction > 0 && !more.hidden) { more.scrollIntoView({block:'center'}); more.focus(); } }

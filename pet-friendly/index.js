@@ -1,6 +1,7 @@
 import config from '/directorio/config.js';
 import { el, safeUrl, picture, external, rpc } from '/comunidad/shared/ui.js';
 const categories = { restaurant:'Restaurantes',cafe:'Cafés',mall:'Centros comerciales',hotel:'Hoteles',bar:'Bares',park:'Parques',vet:'Veterinarias',grooming:'Peluquerías',pet_store:'Tiendas de mascotas',coworking:'Coworking',lodging:'Alojamientos',other:'Otros' };
+const categoryIcon = { restaurant:'/assets/icon-food-tight.png',cafe:'/assets/icon-food-tight.png',bar:'/assets/icon-food-tight.png',pet_store:'/assets/icon-food-tight.png',park:'/assets/icon-walkers-crop.png',vet:'/assets/icon-vet-crop.png',grooming:'/assets/icon-grooming-tight.png',hotel:'/assets/icon-heart-tight.png',lodging:'/assets/icon-heart-tight.png',mall:'/assets/icon-map-tight.png',coworking:'/assets/icon-map-tight.png',other:'/assets/icon-map-tight.png' };
 const cities = [[4.6533,-74.0836],[6.2442,-75.5812],[3.4516,-76.532],[10.9685,-74.7813],[10.391,-75.4794],[7.1193,-73.1227],[4.8133,-75.6961],[5.0703,-75.5138],[11.2408,-74.199]];
 const $ = selector => document.querySelector(selector);
 const form = $('#search-form'), grid = $('#places'), status = $('#status'), more = $('#more');
@@ -13,8 +14,10 @@ function photo(place) {
 }
 function card(place, distance) {
   const node = el('article',null,'card');
-  const cover = el('div','🐾','card-cover'); const url = photo(place);
-  if (url) { cover.textContent = ''; cover.append(picture(url,place.name)); }
+  const cover = el('div',null,'card-cover'); const url = photo(place);
+  // Fallback: the category's 3D icon on a violet card, also used when the photo fails to load.
+  const fallback = () => { cover.classList.add('no-photo'); const icon = el('img'); icon.src = categoryIcon[place.category] || '/assets/icon-map-tight.png'; icon.alt = ''; cover.replaceChildren(icon); };
+  if (url) { const img = picture(url,place.name); img.addEventListener('error', fallback, { once: true }); cover.append(img); } else fallback();
   node.append(cover,el('h3',place.name),el('span',categories[place.category] || 'Otros','eyebrow'));
   node.append(el('p',[place.address,place.city].filter(Boolean).join(' · ')));
   if (Number.isFinite(distance)) node.append(el('p',`${(distance/1000).toFixed(1)} km del centro de la ciudad`));
@@ -51,7 +54,7 @@ function card(place, distance) {
 }
 async function search(append = false) {
   const current = ++version; request?.abort(); request = new AbortController();
-  if (!append) { offset = 0; grid.replaceChildren(); const [lat,lng] = cities[Number(form.elements.city.value)] || cities[0]; lastParams = {p_lat:lat,p_lng:lng,p_radius_m:20000,p_categories:form.elements.category.value ? [form.elements.category.value] : null,p_query:form.elements.query.value.trim() || null,p_filters:{verified:$('#verified').checked,confirmed:$('#confirmed').checked,cats:$('#cats').checked,terrace:$('#terrace').checked,sort:'distance'},p_limit:30}; }
+  if (!append) { offset = 0; grid.replaceChildren(); const [lat,lng] = cities[Number(form.elements.city.value)] || cities[0]; lastParams = {p_lat:lat,p_lng:lng,p_radius_m:20000,p_categories:form.elements.category.value ? [form.elements.category.value] : null,p_query:form.elements.query.value.trim() || null,p_filters:{verified:$('#verified').checked,confirmed:true /* only places with confirmed pet admission are listed */,cats:$('#cats').checked,terrace:$('#terrace').checked,sort:'distance'},p_limit:30}; }
   more.hidden = true; status.textContent = 'Buscando lugares…';
   try {
     const rows = await rpc('pet_friendly_search',{...lastParams,p_offset:offset},AbortSignal.any([request.signal,AbortSignal.timeout(20000)]));

@@ -7,3 +7,12 @@
 .community-nav .brand-symbol-color{clip-path:inset(0 66% 0 0)}
 .community-nav .brand-wordmark-negative{filter:brightness(0) invert(1);clip-path:inset(0 0 20% 35%)}
 @media(min-width:481px) and (max-width:760px){.community-nav .brand{width:52px;height:58px}.community-nav .brand-wordmark-negative{display:none}}
+
+/* "Volver al inicio": a real, unmissable button */
+.nav-footer>a.home-back,.home-back{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 18px;padding:15px 18px;border-radius:999px;background:#7a45f3;color:#fff!important;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;line-height:1;box-shadow:0 12px 30px -10px #7a45f3cc;transition:background .25s,transform .25s,box-shadow .25s}
+.home-back span{font-size:17px;transition:transform .25s}
+.home-back:hover{background:#9a6bff;transform:translateY(-2px);box-shadow:0 16px 36px -10px #9a6bffdd}
+.home-back:hover span{transform:translateX(-4px)}
+.home-back--top{display:none;margin:0;padding:10px 16px;font-size:11px}
+@media(max-width:760px){.home-back--top{display:inline-flex}}
+.nav-footer>a.home-back{white-space:nowrap;font-size:12px;letter-spacing:.03em;padding:15px 12px}
