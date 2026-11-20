@@ -1,8 +1,9 @@
 /* Peluvi home motion: curtain transitions, smooth scroll, cursor reveal hero,
-   block text reveals, color-shifting collage, expanding image, card fan. */
+   block text reveals, talking pet portraits, expanding image, card fan. */
 (() => {
   const body = document.body;
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const reduce = motionPreference.matches;
   const hasGsap = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
   const curtain = document.querySelector(".pv-curtain");
   const header = document.querySelector(".pv-header");
@@ -54,11 +55,7 @@
   });
   addEventListener("keydown", (e) => { if (e.key === "Escape" && body.classList.contains("pv-menu-open")) setMenu(false); });
 
-  /* ---------- hero: a liquid blob follows the cursor. Inside it the background
-     turns violet with white contour lines and the pets wear their Peluvi gear.
-     A slower, larger echo blob paints a pale tint behind them. ---------- */
-  /* Live contour lines: a slowly evolving noise field traced with marching squares,
-     so the topographic texture flows on its own instead of being a still image. */
+  // Marching squares for the animated contours in the sections below the hero.
   const makeContours = () => {
     const P = new Uint8Array(512);
     const perm = Array.from({ length: 256 }, (_, i) => i).sort(() => Math.random() - 0.5);
@@ -115,201 +112,11 @@
     };
   };
 
-  const hero = document.querySelector(".pv-hero");
-  const stage = document.querySelector(".pv-hero-stage");
-  const gearImg = document.querySelector(".pv-hero-gear");
-  const canvas = document.querySelector(".pv-reveal");
-  if (hero && stage && gearImg && canvas) {
-    const echoCanvas = document.createElement("canvas");
-    echoCanvas.className = "pv-reveal pv-reveal--echo";
-    echoCanvas.setAttribute("aria-hidden", "true");
-    hero.insertBefore(echoCanvas, canvas);
-    const topoCanvas = document.createElement("canvas");
-    topoCanvas.className = "pv-topo-live";
-    topoCanvas.setAttribute("aria-hidden", "true");
-    hero.prepend(topoCanvas);
-    hero.classList.add("has-live-topo");
-    const tctx = topoCanvas.getContext("2d");
-    const gearLayer = document.createElement("canvas"); // gear drawn once per resize
-    const gctx = gearLayer.getContext("2d");
-    const contours = makeContours();
-    let lines = null, topoT = Math.random() * 50, lastTopo = 0;
-    const ctx = canvas.getContext("2d");
-    const ectx = echoCanvas.getContext("2d");
-    const layer = document.createElement("canvas"); // violet + white lines + gear
-    const lctx = layer.getContext("2d");
-    const echoLayer = document.createElement("canvas"); // pale tint + violet lines
-    const elctx = echoLayer.getContext("2d");
-    const SCALE = 3; // metaball field resolution divisor
-    let w = 0, h = 0, dpr = 1, fw = 0, fh = 0, visible = true;
-
-    const buildGear = () => {
-      gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      gctx.clearRect(0, 0, w, h);
-      if (!gearImg.complete || !gearImg.naturalWidth) return;
-      // measure against the canvas itself: both share the scroll parallax, so it cancels out
-      const hr = canvas.getBoundingClientRect(), sr = stage.getBoundingClientRect();
-      const iw = gearImg.naturalWidth, ih = gearImg.naturalHeight;
-      const s = Math.min(sr.width / iw, sr.height / ih);
-      const dw = iw * s, dh = ih * s;
-      gctx.drawImage(gearImg, sr.left - hr.left + (sr.width - dw) / 2, sr.top - hr.top + (sr.height - dh), dw, dh);
-    };
-    const strokeLines = (c, color, width) => {
-      if (!lines) return;
-      c.strokeStyle = color; c.lineWidth = width; c.lineCap = "round";
-      c.stroke(lines);
-    };
-    const buildLayers = () => {
-      lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      lctx.fillStyle = "#7a45f3"; lctx.fillRect(0, 0, w, h);
-      strokeLines(lctx, "rgba(255,255,255,.9)", 1.4);
-      lctx.setTransform(1, 0, 0, 1, 0, 0);
-      lctx.drawImage(gearLayer, 0, 0);
-      elctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      elctx.fillStyle = "#e3d8fa"; elctx.fillRect(0, 0, w, h);
-      strokeLines(elctx, "#b8a5e6", 1.2);
-    };
-    const drawTopo = (now) => {
-      if (now - lastTopo < 33) return false; // ~30 fps is plenty for slow drift
-      lastTopo = now;
-      if (!reduce) topoT += 0.0045;
-      lines = contours(w, h, topoT);
-      tctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      tctx.clearRect(0, 0, w, h);
-      strokeLines(tctx, "#cdc3df", 1.1);
-      return true;
-    };
-
-    // Each blob is a chain of nodes: the head chases the target, each node chases
-    // the one before it. Moving fast stretches the chain; resting gathers it.
-    const makeBlob = (nodes, follow, decay) => ({
-      nodes: Array.from({ length: nodes }, () => ({ x: 0, y: 0 })),
-      follow, decay, energy: 0,
-      field: document.createElement("canvas"),
-    });
-    const main = makeBlob(9, 0.3, 0.975);
-    const echo = makeBlob(7, 0.1, 0.985);
-
-    const resize = () => {
-      dpr = Math.min(devicePixelRatio || 1, 2);
-      w = hero.clientWidth; h = hero.clientHeight;
-      fw = Math.ceil(w / SCALE); fh = Math.ceil(h / SCALE);
-      [canvas, echoCanvas, layer, echoLayer, topoCanvas, gearLayer].forEach((c) => { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); });
-      [main, echo].forEach((b) => { b.field.width = fw; b.field.height = fh; });
-      buildGear();
-      lastTopo = 0; drawTopo(performance.now());
-      buildLayers();
-    };
-    resize();
-    addEventListener("resize", resize);
-    if (!gearImg.complete) gearImg.addEventListener("load", () => { buildGear(); buildLayers(); });
-    new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(hero);
-
-    let tx = w / 2, ty = h / 2, px = tx, py = ty, lastMove = -1e9, started = false;
-    hero.addEventListener("pointermove", (e) => {
-      const r = hero.getBoundingClientRect();
-      tx = e.clientX - r.left; ty = e.clientY - r.top;
-      if (!started) { [main, echo].forEach((b) => b.nodes.forEach((n) => { n.x = tx; n.y = ty; })); px = tx; py = ty; started = true; }
-      lastMove = performance.now();
-    }, { passive: true });
-
-    // Autopilot for touch screens / idle cursor so the effect is always discoverable.
-    let t0 = 0;
-    const autopilot = (now) => {
-      if (now - lastMove < 2200) return;
-      t0 += 0.012;
-      tx = w * (0.5 + 0.24 * Math.sin(t0 * 0.9) + 0.06 * Math.sin(t0 * 2.3));
-      // on narrow screens the pets sit in the lower half, so keep the blob over them
-      ty = h * (w < 700 ? 0.66 + 0.12 * Math.sin(t0 * 1.4 + 1) : 0.48 + 0.2 * Math.sin(t0 * 1.4 + 1));
-      if (!started) { [main, echo].forEach((b) => b.nodes.forEach((n) => { n.x = tx; n.y = ty; })); started = true; }
-    };
-
-    const step = (b, speed, gain) => {
-      b.energy = Math.min(1, b.energy * b.decay + speed * gain);
-      const head = b.nodes[0];
-      head.x += (tx - head.x) * b.follow;
-      head.y += (ty - head.y) * b.follow;
-      for (let i = 1; i < b.nodes.length; i++) {
-        const n = b.nodes[i], p = b.nodes[i - 1], f = b.follow * (1.15 - i / (b.nodes.length * 2.5));
-        n.x += (p.x - n.x) * f; n.y += (p.y - n.y) * f;
-      }
-    };
-
-    // Metaball field: additive radial falloff, then a hard threshold → liquid shape.
-    const renderField = (b, R) => {
-      const f = b.field.getContext("2d", { willReadFrequently: true });
-      f.setTransform(1, 0, 0, 1, 0, 0);
-      f.clearRect(0, 0, fw, fh);
-      if (b.energy < 0.01) return false;
-      f.globalCompositeOperation = "lighter";
-      b.nodes.forEach((n, i) => {
-        const r = (R * (0.35 + 0.65 * b.energy) * Math.min(1, b.energy * 4) * (1 - i / (b.nodes.length * 1.6))) / SCALE;
-        if (r < 1) return;
-        const x = n.x / SCALE, y = n.y / SCALE;
-        const g = f.createRadialGradient(x, y, 0, x, y, r * 2);
-        g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)");
-        f.fillStyle = g;
-        f.fillRect(x - r * 2, y - r * 2, r * 4, r * 4);
-      });
-      // Lumps orbiting the head keep the outline irregular, never a perfect circle.
-      const head = b.nodes[0], e = (0.35 + 0.65 * b.energy) * Math.min(1, b.energy * 4), t = performance.now() / 1000;
-      for (let k = 0; k < 5; k++) {
-        const ang = t * (0.5 + k * 0.17) + k * 1.7 + Math.sin(t * 0.9 + k * 2) * 0.8;
-        const dist = R * e * (0.8 + 0.3 * Math.sin(t * 1.1 + k));
-        const r = (R * e * (0.5 + 0.2 * Math.sin(t * 1.7 + k * 3))) / SCALE;
-        if (r < 1) continue;
-        const x = (head.x + Math.cos(ang) * dist) / SCALE, y = (head.y + Math.sin(ang) * dist * 0.85) / SCALE;
-        const g = f.createRadialGradient(x, y, 0, x, y, r * 2);
-        g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)");
-        f.fillStyle = g;
-        f.fillRect(x - r * 2, y - r * 2, r * 4, r * 4);
-      }
-      f.globalCompositeOperation = "source-over";
-      const img = f.getImageData(0, 0, fw, fh), d = img.data;
-      for (let i = 3; i < d.length; i += 4) {
-        const a = d[i];
-        d[i] = a < 118 ? 0 : a > 138 ? 255 : ((a - 118) / 20) * 255;
-      }
-      f.putImageData(img, 0, 0);
-      return true;
-    };
-    const composite = (c, cv, b, src) => {
-      c.setTransform(1, 0, 0, 1, 0, 0);
-      c.clearRect(0, 0, cv.width, cv.height);
-      c.imageSmoothingEnabled = true;
-      c.globalCompositeOperation = "source-over";
-      c.drawImage(b.field, 0, 0, cv.width, cv.height);
-      c.globalCompositeOperation = "source-in";
-      c.drawImage(src, 0, 0);
-      c.globalCompositeOperation = "source-over";
-    };
-
-    let empty = true;
-    const draw = (now) => {
-      requestAnimationFrame(draw);
-      if (!visible || !w) return;
-      const moved = drawTopo(now);
-      if (!reduce) autopilot(now);
-      if (!started) return;
-      const speed = Math.hypot(tx - px, ty - py) / Math.max(w, 1);
-      px = tx; py = ty;
-      step(main, speed, 7);
-      step(echo, speed, 4);
-      const base = Math.max(80, Math.min(w, 1700) * 0.1);
-      const a = renderField(echo, base * 1.9);
-      const b = renderField(main, base);
-      if (!a && !b && empty) return;
-      empty = !a && !b;
-      if (moved) buildLayers();
-      composite(ectx, echoCanvas, echo, echoLayer);
-      composite(ctx, canvas, main, layer);
-    };
-    requestAnimationFrame(draw);
-  }
+  const playHeroPreview = window.initPeluviHero?.() || (() => {});
 
   /* ---------- live contour lines for every textured section ---------- */
   const liveTargets = [
-    { sel: ".pv-shift", color: "auto", drift: true },
+    { sel: ".pv-shift", color: "auto" },
     { sel: ".pv-hall", color: "rgba(255,255,255,.13)" },
     { sel: ".pv-download", color: "#cdc3df" },
     { sel: ".pv-social", color: "#d6cde8" },
@@ -361,12 +168,7 @@
       if (!l.visible || !l.w) return;
       const hostRect = l.host.getBoundingClientRect(), cvRect = l.cv.getBoundingClientRect();
       const oy = cvRect.top - hostRect.top; // keep the field anchored to the page while scrolling
-      let ox = 0;
-      if (l.drift && window.gsap) {
-        const tr = document.querySelector(".pv-collage-track");
-        if (tr) ox = -(gsap.getProperty(tr, "x") || 0) * 0.85;
-      }
-      const path = l.gen(l.w + 24, l.h + 24, liveT, 12, ox, oy);
+      const path = l.gen(l.w + 24, l.h + 24, liveT, 12, 0, oy);
       l.c.setTransform(l.dpr, 0, 0, l.dpr, 0, 0);
       l.c.clearRect(0, 0, l.w, l.h);
       l.c.strokeStyle = l.color === "auto" ? lineColorFor(l.host) : l.color;
@@ -376,40 +178,173 @@
   };
   requestAnimationFrame(liveDraw);
 
-  /* ---------- talking pets in the collage ---------- */
-  const talkers = [...document.querySelectorAll(".pv-talk")];
-  const setTalking = (fig, on) => {
-    const video = fig.querySelector("video");
-    if (on) {
-      talkers.forEach((f) => f !== fig && setTalking(f, false));
-      if (video && !video.src) video.src = video.dataset.src;
-      video?.play().catch(() => {});
-      fig.classList.add("is-talking");
-    } else {
-      fig.classList.remove("is-talking");
-      video?.pause();
+  /* ---------- compact community carousel ---------- */
+  function initCommunityRotation(hasAudio, stopAudio) {
+    const section = document.querySelector("#comunidad-peluvi");
+    const track = section?.querySelector("#pv-community-pages");
+    const pages = [...(track?.querySelectorAll(":scope > [data-community-page]") || [])];
+    const controls = section?.querySelector("[data-community-controls]");
+    const previous = controls?.querySelector("[data-community-prev]");
+    const next = controls?.querySelector("[data-community-next]");
+    const toggle = controls?.querySelector("[data-community-toggle]");
+    const status = section?.querySelector("[data-community-status]");
+    if (pages.length < 2 || !previous || !next || !toggle) return () => {};
+
+    let index = Math.max(0, pages.findIndex(page => !page.hidden));
+    let visible = false;
+    let hovered = matchMedia("(any-hover: hover)").matches && track.matches(":hover");
+    let focused = track.contains(document.activeElement);
+    let requestedPlayback = null;
+    let timer;
+
+    const playbackEnabled = () => requestedPlayback ?? !motionPreference.matches;
+    const canRotate = () => playbackEnabled() && visible && !document.hidden && !hovered && !focused && !hasAudio();
+    const updateTimer = () => {
+      clearTimeout(timer);
+      if (canRotate()) {
+        timer = setTimeout(() => {
+          if (canRotate()) showPage(1);
+        }, 6000);
+      }
+    };
+    const updateToggle = () => { toggle.textContent = playbackEnabled() ? "Pausar" : "Reanudar"; };
+    function showPage(step, manual = false) {
+      stopAudio();
+      section.dataset.communityDirection = step < 0 ? "prev" : "next";
+      pages[index].hidden = true;
+      index = (index + step + pages.length) % pages.length;
+      pages[index].hidden = false;
+      if (status) status.textContent = manual ? `Grupo ${index + 1} de ${pages.length}` : "";
+      updateTimer();
     }
-  };
-  const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-  talkers.forEach((fig) => {
-    if (canHover) {
-      fig.addEventListener("pointerenter", () => setTalking(fig, true));
-      fig.addEventListener("pointerleave", () => setTalking(fig, false));
+
+    controls.hidden = false;
+    updateToggle();
+    previous.addEventListener("click", () => showPage(-1, true));
+    next.addEventListener("click", () => showPage(1, true));
+    toggle.addEventListener("click", () => {
+      requestedPlayback = !playbackEnabled();
+      updateToggle();
+      updateTimer();
+    });
+    for (const [type, value] of [["pointerenter", true], ["pointerleave", false]]) {
+      track.addEventListener(type, (event) => {
+        if (event.pointerType === "touch") return;
+        hovered = value;
+        updateTimer();
+      });
     }
-    fig.addEventListener("click", () => setTalking(fig, !fig.classList.contains("is-talking")));
-  });
-  if (!canHover && "IntersectionObserver" in window) {
-    // On touch screens the pet nearest the middle of the screen talks.
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) setTalking(e.target, true); else if (e.target.classList.contains("is-talking")) setTalking(e.target, false); });
-    }, { rootMargin: "0px -40% 0px -40%" });
-    talkers.forEach((f) => io.observe(f));
+    track.addEventListener("focusin", () => {
+      focused = true;
+      updateTimer();
+    });
+    track.addEventListener("focusout", (event) => {
+      focused = track.contains(event.relatedTarget);
+      updateTimer();
+    });
+    document.addEventListener("visibilitychange", updateTimer);
+    motionPreference.addEventListener("change", (event) => {
+      if (event.matches && requestedPlayback === true) requestedPlayback = null;
+      updateToggle();
+      updateTimer();
+    });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(([entry]) => {
+        visible = entry.intersectionRatio >= 0.35;
+        updateTimer();
+      }, { threshold: 0.35 }).observe(track);
+    }
+    return updateTimer;
   }
+
+  /* ---------- talking pets in the collage ---------- */
+  const talkers = [...document.querySelectorAll(".pv-talk")].map((figure) => ({
+    figure,
+    video: figure.querySelector("video[data-src]"),
+    button: figure.querySelector(".pv-talk-badge"),
+  })).filter((pet) => pet.video && pet.button);
+  const hoverPointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+  const canPreviewPet = () => hoverPointer.matches && !motionPreference.matches;
+  let activePet = null;
+  let playbackVersion = 0;
+
+  const setPetAudio = ({ video, button }, enabled) => {
+    video.muted = !enabled;
+    button.textContent = enabled ? "Silenciar" : "Escuchar";
+    button.setAttribute("aria-pressed", String(enabled));
+    updateCommunityTimer();
+  };
+  const stopPet = () => {
+    if (!activePet) return;
+    const pet = activePet;
+    activePet = null;
+    playbackVersion++;
+    pet.figure.classList.remove("is-talking");
+    pet.video.pause();
+    setPetAudio(pet, false);
+  };
+  const updateCommunityTimer = initCommunityRotation(() => Boolean(activePet && !activePet.video.muted), stopPet);
+  const playPet = (pet, audio) => {
+    if (activePet && activePet !== pet) stopPet();
+    activePet = pet;
+    const version = ++playbackVersion;
+    const { figure, video } = pet;
+    if (!video.hasAttribute("src")) video.src = video.dataset.src;
+    setPetAudio(pet, audio);
+    if (audio) video.currentTime = 0;
+    video.play().then(() => {
+      if (version === playbackVersion) figure.classList.add("is-talking");
+    }).catch(() => {
+      if (version === playbackVersion) stopPet();
+    });
+  };
+  talkers.forEach((pet) => {
+    pet.figure.addEventListener("pointerenter", (event) => {
+      if (event.pointerType !== "touch" && canPreviewPet() && (!activePet || activePet.video.muted)) {
+        playPet(pet, false);
+      }
+    });
+    pet.figure.addEventListener("pointerleave", () => {
+      if (activePet === pet && pet.video.muted) stopPet();
+    });
+    pet.button.addEventListener("click", () => {
+      if (activePet !== pet || pet.video.muted) {
+        playPet(pet, true);
+      } else if (canPreviewPet() && pet.figure.matches(":hover")) {
+        setPetAudio(pet, false);
+      } else {
+        stopPet();
+      }
+    });
+  });
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some(({ target, isIntersecting }) => target === activePet?.figure && !isIntersecting)) {
+        stopPet();
+      }
+    });
+    talkers.forEach(({ figure }) => observer.observe(figure));
+  }
+  motionPreference.addEventListener("change", () => {
+    if (motionPreference.matches && activePet?.video.muted) stopPet();
+  });
+
+  const darkSections = [...document.querySelectorAll(".pv-message-intro, .pv-hall, .pv-footer")];
+  function updateHeaderTheme() {
+    header.classList.toggle("on-dark", darkSections.some(section => {
+      const bounds = section.getBoundingClientRect();
+      return bounds.top <= 40 && bounds.bottom > 40;
+    }));
+  }
+  updateHeaderTheme();
 
   /* ---------- no-animation fallback ---------- */
   const finishCurtain = () => { curtain?.classList.remove("is-on"); };
   if (!hasGsap || reduce) {
     finishCurtain();
+    window.addEventListener("scroll", updateHeaderTheme, { passive: true });
+    window.addEventListener("resize", updateHeaderTheme);
+    playHeroPreview();
     return;
   }
 
@@ -441,25 +376,24 @@
   }
 
   /* ---------- header: hide on scroll down, invert on dark sections ---------- */
-  let lastY = 0;
   ScrollTrigger.create({
     start: 0, end: "max",
     onUpdate: (self) => {
-      const y = self.scroll();
-      header.classList.toggle("is-scrolled", y > 40);
-      lastY = y;
+      header.classList.toggle("is-scrolled", self.scroll() > 40);
+      updateHeaderTheme();
     },
-  });
-  [".pv-message", ".pv-hall", ".pv-footer"].forEach((sel) => {
-    ScrollTrigger.create({
-      trigger: sel, start: "top 40px", end: "bottom 40px",
-      onToggle: (self) => header.classList.toggle("on-dark", self.isActive),
-    });
+    onRefresh: updateHeaderTheme,
   });
 
   /* ---------- curtain: intro + page transitions ---------- */
   const intro = () => {
-    gsap.from(".pv-hero-stage", { yPercent: 12, opacity: 0, duration: 1.6, ease: "expo.out", onComplete: () => dispatchEvent(new Event("resize")) });
+    gsap.from(".pv-hero-scene", {
+      yPercent: 12, opacity: 0, duration: 1.6, ease: "expo.out",
+      onComplete: () => {
+        dispatchEvent(new Event("resize"));
+        playHeroPreview();
+      },
+    });
     gsap.from(".pv-header > *, .pv-ticket, .pv-hero-hint", { y: -20, opacity: 0, duration: 1, ease: "expo.out", stagger: 0.08, delay: 0.2 });
   };
   // the bubble turns into a hole and grows until the whole page shows through
@@ -476,9 +410,21 @@
 
   // the original Peluvi loading video (the white cat), then the bubble opens
   const introVideo = curtain.querySelector(".pv-curtain-video");
-  // The white-cat intro plays every time the home is opened (click or any key skips it).
-  if (introVideo && !reduce) {
-    curtain.classList.add("has-video");
+  // Remember the first visit across reloads and browser sessions.
+  let introSeen = false;
+  try {
+    introSeen = localStorage.getItem("peluviIntroSeen") === "1";
+    localStorage.setItem("peluviIntroSeen", "1");
+  } catch {
+    // Unavailable storage must never block access to the page.
+    introSeen = true;
+  }
+  if (introSeen) {
+    introVideo?.remove();
+    finishCurtain();
+    intro();
+  } else if (introVideo && !reduce) {
+    curtain.classList.add("is-on", "has-video");
     const logo = curtain.querySelector("img");
     let opened = false;
     const done = () => { if (opened) return; opened = true; openCurtain(); };
@@ -493,6 +439,7 @@
     addEventListener("keydown", done, { once: true });
   } else {
     introVideo?.remove();
+    curtain.classList.add("is-on");
     openCurtain(gsap.timeline()
       .from(".pv-curtain img", { scale: 0.5, opacity: 0, duration: 0.6, ease: "back.out(2)" })
       .to(".pv-curtain img", { rotate: -8, scale: 1.08, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 3 }));
@@ -514,7 +461,7 @@
   addEventListener("pageshow", (e) => { if (e.persisted) { curtain.classList.remove("is-on"); gsap.set(curtain, { clipPath: "inset(0 0 100% 0)" }); } });
 
   /* ---------- hero leaves ---------- */
-  gsap.to(".pv-hero-stage, .pv-reveal", { y: () => innerHeight * 0.12, ease: "none", scrollTrigger: { trigger: ".pv-hero", start: "top top", end: "bottom top", scrub: true } });
+  gsap.to(".pv-hero-scene", { y: () => innerHeight * 0.12, ease: "none", scrollTrigger: { trigger: ".pv-hero", start: "top top", end: "bottom top", scrub: true } });
 
   /* ---------- message marquee + signature ---------- */
   gsap.utils.toArray(".pv-marquee-row").forEach((row, i) => {
@@ -527,68 +474,12 @@
   });
   gsap.fromTo(".pv-sign-photo img", { yPercent: 18, scale: 0.9 }, { yPercent: -6, scale: 1, ease: "none", scrollTrigger: { trigger: ".pv-sign-photo", start: "top bottom", end: "bottom 30%", scrub: true } });
 
-  /* ---------- collage: the page keeps scrolling while the strip drifts left (diagonal) ---------- */
-  const shift = document.querySelector(".pv-shift");
-  const collage = document.querySelector(".pv-collage");
-  const track = document.querySelector(".pv-collage-track");
-  const distance = () => track.scrollWidth - innerWidth;
-  // Place each item so it crosses the middle of the screen at the moment the strip brings it into view.
-  const layoutCollage = () => {
-    const vh = innerHeight, ch = collage.offsetHeight, T = track.scrollWidth / innerWidth;
-    track.querySelectorAll(":scope > figure, :scope > .pv-note").forEach((el) => {
-      const left = el.offsetLeft / innerWidth;
-      const pm = Math.min(1, Math.max(0, (left - 0.5) / Math.max(T - 1, 0.01)));
-      const yl = (parseFloat(el.style.getPropertyValue("--y")) || 30) / 100 * vh * 0.85;
-      const top = pm * ch - vh + yl;
-      el.style.setProperty("--top", `${Math.max(vh * 0.14, Math.min(ch - el.offsetHeight - vh * 0.1, top))}px`);
-    });
-    // Push any photo (plus its speech bubble) that would sit on top of a text note below it.
-    track.querySelectorAll(":scope > .pv-note").forEach((note) => {
-      const nl = note.offsetLeft, nr = nl + note.offsetWidth, nt = parseFloat(note.style.getPropertyValue("--top")), nb = nt + note.offsetHeight;
-      track.querySelectorAll(":scope > figure").forEach((fig) => {
-        const fl = fig.offsetLeft, fr = fl + fig.offsetWidth + (fig.classList.contains("pv-talk") ? 220 : 40);
-        const ft = parseFloat(fig.style.getPropertyValue("--top")), fb = ft + fig.offsetHeight;
-        if (fr > nl - 40 && fl < nr + 40 && fb > nt - 40 && ft < nb + 40) fig.style.setProperty("--top", `${nb + 70}px`);
-      });
-    });
-  };
-  // On phones the strip becomes a simple two-column grid (see CSS), so skip the sideways drift.
-  const stripMode = !matchMedia("(max-width: 800px)").matches;
-  if (stripMode) {
-    layoutCollage();
-    ScrollTrigger.addEventListener("refreshInit", layoutCollage);
-  }
-  // One timeline with explicit values: the colour depends only on scroll position,
-  // whatever direction or position you arrive from.
-  gsap.timeline({ scrollTrigger: { trigger: ".pv-collage", start: "top 85%", end: "top -55%", scrub: true } })
-    .fromTo(shift, { backgroundColor: "#2d1463", color: "#f4f1f8" }, { backgroundColor: "#a594d6", color: "#2d1463", ease: "none", duration: 1, immediateRender: true })
-    .to(shift, { backgroundColor: "#f4f1f8", color: "#2d1463", ease: "none", duration: 1 });
-  ScrollTrigger.create({ trigger: ".pv-collage", start: "top 40px", end: "bottom 40px", onToggle: (s) => s.isActive && header.classList.remove("on-dark") });
-  const slide = stripMode && gsap.to(track, {
-    x: () => -distance(), ease: "none",
-    scrollTrigger: { trigger: ".pv-collage", start: "top bottom", end: "bottom bottom", scrub: 1, invalidateOnRefresh: true },
-  });
-  // The contour texture lags behind the photos a little, so it reads as a deeper layer.
-
-  // Each photo drifts at its own speed while the strip moves → depth.
-  if (slide) gsap.utils.toArray(".pv-collage figure").forEach((fig) => {
-    const speed = parseFloat(fig.dataset.speed || "1");
-    gsap.fromTo(fig, { x: (speed - 1) * 220, y: (speed - 1) * -90 }, { x: (1 - speed) * 220, y: (speed - 1) * 90, ease: "none", scrollTrigger: { trigger: fig, containerAnimation: slide, start: "left right", end: "right left", scrub: true } });
-  });
-  document.querySelectorAll(".pv-note").forEach((note) => {
-    const path = note.querySelector(".pv-mini-sign path");
-    if (!path) return;
-    const len = path.getTotalLength();
-    gsap.fromTo(path, { strokeDasharray: len, strokeDashoffset: len }, { strokeDashoffset: 0, ease: "none", scrollTrigger: slide ? { trigger: note, containerAnimation: slide, start: "left 75%", end: "left 35%", scrub: true } : { trigger: note, start: "top 80%", end: "top 45%", scrub: true } });
-  });
-
   /* ---------- text reveals: each line slides up softly ---------- */
   document.querySelectorAll("[data-blocks]").forEach((el) => {
     const lines = el.querySelectorAll(":scope > span");
-    const inStrip = slide && el.closest(".pv-collage-track");
     gsap.from(lines, {
       y: 40, opacity: 0, duration: 1, ease: "expo.out", stagger: 0.08,
-      scrollTrigger: inStrip ? { trigger: el, containerAnimation: slide, start: "left 82%" } : { trigger: el, start: "top 85%" },
+      scrollTrigger: { trigger: el, start: "top 85%" },
     });
   });
 

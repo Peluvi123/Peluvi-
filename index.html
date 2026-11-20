@@ -29,7 +29,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css?v=20261003-modscenes2" />
-    <link rel="stylesheet" href="assets/home-motion.css?v=20261110" />
+    <link rel="stylesheet" href="assets/home-motion.css?v=20261120-silk-reveal" />
     <script>
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -51,7 +51,7 @@
     /></noscript>
 </head>
   <body class="pv">
-    <div class="pv-curtain is-on" aria-hidden="true">
+    <div class="pv-curtain" aria-hidden="true">
       <video class="pv-curtain-video" muted playsinline webkit-playsinline preload="auto">
         <source src="assets/loading-intro-mobile.mp4" type="video/mp4" media="(max-width: 640px)" />
         <source src="assets/loading-intro.mp4" type="video/mp4" />
@@ -100,12 +100,19 @@
       <!-- 1. HERO: el cursor revela el equipo Peluvi -->
       <section class="pv-hero" aria-label="Peluvi">
         <h1 class="sr-only">Peluvi: todo para el bienestar de tu mascota</h1>
-        <canvas class="pv-reveal" aria-hidden="true"></canvas>
-        <div class="pv-hero-stage">
-          <img class="pv-hero-base" src="assets/trio-plain-cutout.webp" alt="Un golden, un gato y un perro tricolor" width="1672" height="941" fetchpriority="high" />
-          <img class="pv-hero-gear" src="assets/trio-gear-cutout.webp" alt="" aria-hidden="true" width="1672" height="941" />
+        <div class="pv-hero-scene">
+          <div class="pv-hero-base">
+            <div class="pv-hero-stage">
+              <img src="assets/trio-plain-cutout.webp" alt="Un golden, un gato y un perro tricolor" width="1672" height="941" fetchpriority="high" />
+            </div>
+          </div>
+          <div class="pv-hero-reveal" aria-hidden="true">
+            <div class="pv-hero-stage">
+              <img src="assets/trio-gear-cutout.webp" alt="" width="1672" height="941" />
+            </div>
+          </div>
         </div>
-        <p class="pv-hero-hint" aria-hidden="true">Mueve el cursor</p>
+        <p class="pv-hero-hint" aria-hidden="true"><span>Mueve el cursor o haz clic</span><span>Toca la imagen</span></p>
         <a class="pv-ticket" href="/downloads/Peluvi-Android-debug.apk" download>
           <small>Disponible</small>
           <svg viewBox="0 0 48 30" aria-hidden="true"><path d="M4 26c6-14 14-20 20-20s14 6 20 20" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="18" r="2"/><circle cx="32" cy="18" r="2"/></svg>
@@ -119,7 +126,7 @@
 
       <!-- 2. MENSAJE (fondo oscuro → claro) -->
       <div class="pv-shift">
-        <section class="pv-message" id="mensaje" aria-label="Mensaje de Peluvi">
+        <section class="pv-message pv-message-intro" id="mensaje" aria-label="Mensaje de Peluvi">
           <p class="pv-kicker"><img src="assets/peluvi-symbol-64.png" alt="" />Mensaje de Peluvi</p>
           <div class="pv-marquee" aria-hidden="true">
             <div class="pv-marquee-row"><span><i>Cada mascota</i> merece un hogar · <i>Cada mascota</i> merece un hogar · </span><span><i>Cada mascota</i> merece un hogar · <i>Cada mascota</i> merece un hogar · </span></div>
@@ -129,6 +136,8 @@
             <img src="assets/trio-gear-cutout.webp" alt="Las mascotas de Peluvi" loading="lazy" />
           </figure>
 
+        </section>
+        <section class="pv-message pv-message-statement" aria-label="Cuidarlos sin complicaciones">
           <p class="pv-kicker pv-kicker--sm"><img src="assets/peluvi-symbol-64.png" alt="" />Peluvi · Bienestar para mascotas</p>
           <p class="pv-statement" data-blocks>
             <span><i>Cuidarlos</i> sin</span>
@@ -139,110 +148,103 @@
           </p>
         </section>
 
-        <!-- 3. COLLAGE con parallax -->
-        <section class="pv-collage" aria-label="La comunidad Peluvi">
-          <div class="pv-collage-track" style="--track:378.2">
-            <figure class="pv-talk" data-speed="1.08" style="--x:4.0;--y:23.3;--w:15.5;--ar:0.752">
-              <i class="pv-dash" aria-hidden="true"></i><figcaption>Golden, <span>Busca por categoría</span></figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-golden.jpg" alt="Golden" loading="lazy" /><video data-src="assets/pets/talk/golden.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><i class="pv-talk-badge" aria-hidden="true">Habla</i></div>
-              <p class="pv-bubble">¡Mi humano escribe “veterinaria” y en segundos tenemos opciones!</p>
-            </figure>
-            <figure data-speed="1.16" style="--x:21.6;--y:49.0;--w:12.5;--ar:1.003">
-              <figcaption>Husky</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-husky.jpg" alt="Husky" loading="lazy" /></div>
-            </figure>
-            <figure class="pv-talk pv-m-alt" data-speed="1" style="--x:35.9;--y:10.8;--w:12.5;--ar:0.753">
-              <figcaption>Gato gris, <span>Cerca de ti</span></figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-grey-cat.jpg" alt="Gato gris" loading="lazy" /><video data-src="assets/pets/talk/grey-cat.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><i class="pv-talk-badge" aria-hidden="true">Habla</i></div>
-              <p class="pv-bubble">Yo no salgo lejos de casa. Peluvi me muestra primero lo cercano.</p>
-            </figure>
-            <div class="pv-note" style="--x:50.2;--y:10">
-              <p data-blocks><span>No importa dónde <b>empiezas,</b></span><span>importa a <b>quién</b> cuidas</span><span>y cómo lo acompañas.</span></p>
-              <svg class="pv-mini-sign" viewBox="0 0 120 40" aria-hidden="true"><path d="M5 30 C 20 5, 35 5, 40 25 S 60 38, 70 15 S 95 5, 115 20"/></svg>
+        <!-- 3. Mascotas de la comunidad -->
+        <section class="pv-collage" id="comunidad-peluvi" aria-labelledby="pv-community-heading">
+          <h2 id="pv-community-heading">La comunidad Peluvi</h2>
+          <div class="pv-collage-pages" id="pv-community-pages">
+            <div class="pv-collage-grid" data-community-page role="group" aria-label="Grupo 1 de 3">
+              <figure class="pv-talk">
+                <div class="pv-talk-media">
+                  <img src="assets/pets/pet-golden.jpg" alt="" loading="lazy" />
+                  <video data-src="assets/pets/talk/golden.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+                  <button class="pv-talk-badge" type="button" aria-pressed="false" aria-describedby="pv-pet-golden">Escuchar</button>
+                </div>
+                <figcaption id="pv-pet-golden">Golden <span>Busca por categoría</span></figcaption>
+                <p class="pv-bubble">¡Mi humano escribe “veterinaria” y en segundos tenemos opciones!</p>
+              </figure>
+              <figure class="pv-talk">
+                <div class="pv-talk-media">
+                  <img src="assets/pets/pet-grey-cat.jpg" alt="" loading="lazy" />
+                  <video data-src="assets/pets/talk/grey-cat.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+                  <button class="pv-talk-badge" type="button" aria-pressed="false" aria-describedby="pv-pet-grey-cat">Escuchar</button>
+                </div>
+                <figcaption id="pv-pet-grey-cat">Gato gris <span>Cerca de ti</span></figcaption>
+                <p class="pv-bubble">Yo no salgo lejos de casa. Peluvi me muestra primero lo cercano.</p>
+              </figure>
+              <figure class="pv-talk">
+                <div class="pv-talk-media">
+                  <img src="assets/pets/pet-frenchie.jpg" alt="" loading="lazy" />
+                  <video data-src="assets/pets/talk/frenchie.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+                  <button class="pv-talk-badge" type="button" aria-pressed="false" aria-describedby="pv-pet-frenchie">Escuchar</button>
+                </div>
+                <figcaption id="pv-pet-frenchie">Bulldog francés <span>Favoritos</span></figcaption>
+                <p class="pv-bubble">Guiño, guiño: guardé mi peluquería favorita con un toque.</p>
+              </figure>
             </div>
-            <figure class="pv-color" data-speed="1.16" style="--x:88.2;--y:49.2;--w:19;--ar:1.007">
-              <i class="pv-dash" aria-hidden="true"></i><figcaption>Pomerania</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-pomeranian.jpg" alt="Pomerania" loading="lazy" /></div>
-            </figure>
-            <figure class="pv-talk pv-color" data-speed="0.92" style="--x:112.9;--y:18.8;--w:19;--ar:0.749">
-              <figcaption>Bulldog francés, <span>Favoritos</span></figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-frenchie.jpg" alt="Bulldog francés" loading="lazy" /><video data-src="assets/pets/talk/frenchie.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><i class="pv-talk-badge" aria-hidden="true">Habla</i></div>
-              <p class="pv-bubble">Guiño, guiño: guardé mi peluquería favorita con un toque.</p>
-            </figure>
-            <figure data-speed="0.92" style="--x:134.3;--y:47.1;--w:11;--ar:1.008">
-              <figcaption>Siamés</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-siamese.jpg" alt="Siamés" loading="lazy" /></div>
-            </figure>
-            <figure class="pv-talk pv-m-alt" data-speed="1.16" style="--x:149.2;--y:14.4;--w:15.5;--ar:0.759">
-              <i class="pv-dash" aria-hidden="true"></i><figcaption>Beagle, <span>Veterinarias</span></figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-beagle.jpg" alt="Beagle" loading="lazy" /><video data-src="assets/pets/talk/beagle.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><i class="pv-talk-badge" aria-hidden="true">Habla</i></div>
-              <p class="pv-bubble">Encontramos veterinaria cerca y pedimos la cita desde el celular.</p>
-            </figure>
-            <figure class="pv-color" data-speed="0.85" style="--x:167.5;--y:47.4;--w:19;--ar:1.005">
-              <figcaption>Labrador</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-lab-puppy.jpg" alt="Labrador" loading="lazy" /></div>
-            </figure>
-            <figure class="pv-talk" data-speed="1.16" style="--x:187.3;--y:16.3;--w:14;--ar:0.750">
-              <figcaption>Gato naranja, <span>Información clara</span></figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-orange-cat.jpg" alt="Gato naranja" loading="lazy" /><video data-src="assets/pets/talk/orange-cat.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><i class="pv-talk-badge" aria-hidden="true">Habla</i></div>
-              <p class="pv-bubble">Antes de ir revisamos horarios, ubicación y servicios.</p>
-            </figure>
-            <figure class="pv-color" data-speed="0.92" style="--x:206.8;--y:47.3;--w:19;--ar:1.009">
-              <i class="pv-dash" aria-hidden="true"></i><figcaption>Persa</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-persian.jpg" alt="Persa" loading="lazy" /></div>
-            </figure>
-            <figure class="pv-talk pv-color pv-m-alt" data-speed="1.08" style="--x:223.3;--y:20.8;--w:17;--ar:0.760">
-              <figcaption>Gatito crema, <span>Adopción</span></figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-cream-kitten.jpg" alt="Gatito crema" loading="lazy" /><video data-src="assets/pets/talk/cream-kitten.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><i class="pv-talk-badge" aria-hidden="true">Habla</i></div>
-              <p class="pv-bubble">Estoy buscando hogar. ¿Me conoces en Peluvi?</p>
-            </figure>
-            <figure data-speed="0.85" style="--x:236.8;--y:64.2;--w:11;--ar:1.013">
-              <figcaption>Border collie</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-border-collie.jpg" alt="Border collie" loading="lazy" /></div>
-            </figure>
-            <figure class="pv-talk" data-speed="1.08" style="--x:250.5;--y:18.7;--w:11;--ar:0.751">
-              <i class="pv-dash" aria-hidden="true"></i><figcaption>Corgi, <span>Conecta directo</span></figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-corgi.jpg" alt="Corgi" loading="lazy" /><video data-src="assets/pets/talk/corgi.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><i class="pv-talk-badge" aria-hidden="true">Habla</i></div>
-              <p class="pv-bubble">Le escribimos al negocio desde la app. ¡Sin dar vueltas!</p>
-            </figure>
-            <figure data-speed="1" style="--x:263.2;--y:58.7;--w:12.5;--ar:1.011">
-              <figcaption>Gato negro</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-black-cat.jpg" alt="Gato negro" loading="lazy" /></div>
-            </figure>
-            <figure class="pv-talk pv-m-alt" data-speed="0.85" style="--x:275.3;--y:29.1;--w:11;--ar:0.756">
-              <figcaption>Maltés, <span>Peluquerías</span></figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-maltese.jpg" alt="Maltés" loading="lazy" /><video data-src="assets/pets/talk/maltese.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><i class="pv-talk-badge" aria-hidden="true">Habla</i></div>
-              <p class="pv-bubble">Baño, corte y moño. Mi peluquería está a un toque.</p>
-            </figure>
-            <figure data-speed="1.08" style="--x:287.5;--y:47.1;--w:11;--ar:1.008">
-              <i class="pv-dash" aria-hidden="true"></i><figcaption>Ragdoll</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-ragdoll.jpg" alt="Ragdoll" loading="lazy" /></div>
-            </figure>
-            <figure data-speed="0.92" style="--x:299.1;--y:19.3;--w:15.5;--ar:1.000">
-              <figcaption>Salchicha</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-dachshund.jpg" alt="Salchicha" loading="lazy" /></div>
-            </figure>
-            <figure class="pv-talk pv-m-center" data-speed="0.92" style="--x:314.1;--y:46.7;--w:15.5;--ar:0.747">
-              <figcaption>Gato blanco y negro, <span>Alertas SOS</span></figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-tuxedo-cat.jpg" alt="Gato blanco y negro" loading="lazy" /><video data-src="assets/pets/talk/tuxedo-cat.mp4" muted loop playsinline preload="none" aria-hidden="true"></video><i class="pv-talk-badge" aria-hidden="true">Habla</i></div>
-              <p class="pv-bubble">¿Me perdí? La alerta SOS avisa a la comunidad cercana.</p>
-            </figure>
-            <figure class="pv-color" data-speed="0.85" style="--x:329.0;--y:14.8;--w:17;--ar:1.005">
-              <i class="pv-dash" aria-hidden="true"></i><figcaption>Gatito gris</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-grey-kitten.jpg" alt="Gatito gris" loading="lazy" /></div>
-            </figure>
-            <figure class="pv-color" data-speed="0.85" style="--x:343.8;--y:51.3;--w:17;--ar:1.001">
-              <figcaption>Chihuahua</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-chihuahua.jpg" alt="Chihuahua" loading="lazy" /></div>
-            </figure>
-            <figure data-speed="1.16" style="--x:356.1;--y:14.2;--w:15.5;--ar:1.003">
-              <figcaption>Shih tzu</figcaption>
-              <div class="pv-talk-media"><img src="assets/pets/pet-shihtzu.jpg" alt="Shih tzu" loading="lazy" /></div>
-            </figure>
-            <div class="pv-note pv-note--wide" style="--x:234.5;--y:6">
-              <p data-blocks><span>Peluvi nació para que cuidar a tu mascota</span><span>sea más fácil: encontrar ayuda, guardar lo</span><span>que te gusta y nunca sentirte solo.</span></p>
-              <svg class="pv-mini-sign" viewBox="0 0 120 40" aria-hidden="true"><path d="M5 30 C 20 5, 35 5, 40 25 S 60 38, 70 15 S 95 5, 115 20"/></svg>
+            <div class="pv-collage-grid" data-community-page role="group" aria-label="Grupo 2 de 3" hidden>
+              <figure class="pv-talk">
+                <div class="pv-talk-media">
+                  <img src="assets/pets/pet-beagle.jpg" alt="" loading="lazy" />
+                  <video data-src="assets/pets/talk/beagle.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+                  <button class="pv-talk-badge" type="button" aria-pressed="false" aria-describedby="pv-pet-beagle">Escuchar</button>
+                </div>
+                <figcaption id="pv-pet-beagle">Beagle <span>Veterinarias</span></figcaption>
+                <p class="pv-bubble">Encontramos veterinaria cerca y pedimos la cita desde el celular.</p>
+              </figure>
+              <figure class="pv-talk">
+                <div class="pv-talk-media">
+                  <img src="assets/pets/pet-orange-cat.jpg" alt="" loading="lazy" />
+                  <video data-src="assets/pets/talk/orange-cat.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+                  <button class="pv-talk-badge" type="button" aria-pressed="false" aria-describedby="pv-pet-orange-cat">Escuchar</button>
+                </div>
+                <figcaption id="pv-pet-orange-cat">Gato naranja <span>Información clara</span></figcaption>
+                <p class="pv-bubble">Antes de ir revisamos horarios, ubicación y servicios.</p>
+              </figure>
+              <figure class="pv-talk">
+                <div class="pv-talk-media">
+                  <img src="assets/pets/pet-cream-kitten.jpg" alt="" loading="lazy" />
+                  <video data-src="assets/pets/talk/cream-kitten.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+                  <button class="pv-talk-badge" type="button" aria-pressed="false" aria-describedby="pv-pet-cream-kitten">Escuchar</button>
+                </div>
+                <figcaption id="pv-pet-cream-kitten">Gatito crema <span>Adopción</span></figcaption>
+                <p class="pv-bubble">Estoy buscando hogar. ¿Me conoces en Peluvi?</p>
+              </figure>
             </div>
+            <div class="pv-collage-grid" data-community-page role="group" aria-label="Grupo 3 de 3" hidden>
+              <figure class="pv-talk">
+                <div class="pv-talk-media">
+                  <img src="assets/pets/pet-corgi.jpg" alt="" loading="lazy" />
+                  <video data-src="assets/pets/talk/corgi.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+                  <button class="pv-talk-badge" type="button" aria-pressed="false" aria-describedby="pv-pet-corgi">Escuchar</button>
+                </div>
+                <figcaption id="pv-pet-corgi">Corgi <span>Conecta directo</span></figcaption>
+                <p class="pv-bubble">Le escribimos al negocio desde la app. ¡Sin dar vueltas!</p>
+              </figure>
+              <figure class="pv-talk">
+                <div class="pv-talk-media">
+                  <img src="assets/pets/pet-maltese.jpg" alt="" loading="lazy" />
+                  <video data-src="assets/pets/talk/maltese.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+                  <button class="pv-talk-badge" type="button" aria-pressed="false" aria-describedby="pv-pet-maltese">Escuchar</button>
+                </div>
+                <figcaption id="pv-pet-maltese">Maltés <span>Peluquerías</span></figcaption>
+                <p class="pv-bubble">Baño, corte y moño. Mi peluquería está a un toque.</p>
+              </figure>
+              <figure class="pv-talk">
+                <div class="pv-talk-media">
+                  <img src="assets/pets/pet-tuxedo-cat.jpg" alt="" loading="lazy" />
+                  <video data-src="assets/pets/talk/tuxedo-cat.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+                  <button class="pv-talk-badge" type="button" aria-pressed="false" aria-describedby="pv-pet-tuxedo-cat">Escuchar</button>
+                </div>
+                <figcaption id="pv-pet-tuxedo-cat">Gato blanco y negro <span>Alertas SOS</span></figcaption>
+                <p class="pv-bubble">¿Me perdí? La alerta SOS avisa a la comunidad cercana.</p>
+              </figure>
+            </div>
+          </div>
+          <div class="pv-collage-controls" data-community-controls hidden>
+            <button type="button" data-community-prev aria-controls="pv-community-pages">Anterior</button>
+            <button type="button" data-community-toggle aria-controls="pv-community-pages">Pausar</button>
+            <button type="button" data-community-next aria-controls="pv-community-pages">Siguiente</button>
+            <span class="sr-only" aria-live="polite" data-community-status></span>
           </div>
         </section>
       </div>
@@ -916,7 +918,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="script.js?v=20261003-header"></script>
-    <script src="assets/home-motion.js?v=20261110"></script>
+    <script src="assets/hero-dissolve.js?v=20261120-silk-reveal"></script>
+    <script src="assets/home-motion.js?v=20261120-community-carousel"></script>
     <script src="cat-walker.js?v=11"></script>
     <script type="module" src="/directorio/links.js"></script>
   </body>
