@@ -28,7 +28,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20261003-modscenes2" />
+    <link rel="stylesheet" href="styles.css?v=20261124-hero-original-gradient" />
     <link rel="stylesheet" href="assets/home-motion.css?v=20261120-silk-reveal" />
     <script>
       !function(f,b,e,v,n,t,s)
@@ -97,22 +97,17 @@
     </nav>
 
     <main id="inicio">
-      <!-- 1. HERO: el cursor revela el equipo Peluvi -->
       <section class="pv-hero" aria-label="Peluvi">
-        <h1 class="sr-only">Peluvi: todo para el bienestar de tu mascota</h1>
         <div class="pv-hero-scene">
-          <div class="pv-hero-base">
-            <div class="pv-hero-stage">
-              <img src="assets/trio-plain-cutout.webp" alt="Un golden, un gato y un perro tricolor" width="1672" height="941" fetchpriority="high" />
-            </div>
-          </div>
-          <div class="pv-hero-reveal" aria-hidden="true">
-            <div class="pv-hero-stage">
-              <img src="assets/trio-gear-cutout.webp" alt="" width="1672" height="941" />
-            </div>
-          </div>
+          <video class="pv-hero-video" muted loop playsinline preload="metadata"
+            poster="assets/trio-gear-cutout.webp" aria-hidden="true">
+            <source src="assets/peluvi-hero.mp4" type="video/mp4" />
+          </video>
         </div>
-        <p class="pv-hero-hint" aria-hidden="true"><span>Mueve el cursor o haz clic</span><span>Toca la imagen</span></p>
+        <div class="pv-hero-copy">
+          <h1 class="pv-sans">Todo para tu mascota</h1>
+          <p>Encuentra veterinarias, peluquerías y cuidadores cerca de ti. Conoce mascotas en adopción.</p>
+        </div>
         <a class="pv-ticket" href="/downloads/Peluvi-Android-debug.apk" download>
           <small>Disponible</small>
           <svg viewBox="0 0 48 30" aria-hidden="true"><path d="M4 26c6-14 14-20 20-20s14 6 20 20" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="18" r="2"/><circle cx="32" cy="18" r="2"/></svg>
@@ -917,8 +912,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
-    <script src="script.js?v=20261003-header"></script>
-    <script src="assets/hero-dissolve.js?v=20261120-silk-reveal"></script>
+    <script src="script.js?v=20261124-hero-legibility"></script>
     <script src="assets/home-motion.js?v=20261120-community-carousel"></script>
     <script src="cat-walker.js?v=11"></script>
     <script type="module" src="/directorio/links.js"></script>

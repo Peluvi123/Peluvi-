@@ -1101,3 +1101,32 @@ if (floatingHeader && headerShell && "ResizeObserver" in window) {
   new ResizeObserver(syncHeaderSpace).observe(floatingHeader);
   syncHeaderSpace();
 }
+
+const homepageVideo = document.querySelector(".pv-hero-video");
+if (homepageVideo) {
+  const homepageHero = homepageVideo.closest(".pv-hero");
+  const copyRevealTime = 4;
+  const syncHomepageCopy = () => {
+    homepageHero.classList.toggle(
+      "is-before-closeup",
+      !reduceMotion.matches && !homepageVideo.paused && homepageVideo.currentTime < copyRevealTime
+    );
+  };
+
+  for (const event of ["playing", "timeupdate", "pause", "error"]) {
+    homepageVideo.addEventListener(event, syncHomepageCopy);
+  }
+
+  const syncHomepagePlayback = () => {
+    if (reduceMotion.matches) {
+      homepageVideo.pause();
+      syncHomepageCopy();
+      return;
+    }
+
+    homepageVideo.play().catch(() => {});
+  };
+
+  syncHomepagePlayback();
+  reduceMotion.addEventListener("change", syncHomepagePlayback);
+}
